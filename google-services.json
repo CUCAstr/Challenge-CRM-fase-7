@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "722315801425",
+    "project_id": "challenge-crm",
+    "storage_bucket": "challenge-crm.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722315801425:android:c3d7486b1afff573255970",
+        "android_client_info": {
+          "package_name": "com.savedra.challengecrm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8fni9-UvzSEOK-pgfrFC9WWBslt4P6jk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
