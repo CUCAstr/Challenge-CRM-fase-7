@@ -3,8 +3,8 @@ package br.com.savedra.challengecrm.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /* Cores primárias */
-val bgIndigo500 = Color(0xFF6366F1)
-val bgIndigo600 = Color(0xFF4F46E5)
+val indigo500 = Color(0xFF6366F1)
+val indigo600 = Color(0xFF4F46E5)
 
 /* Cores neutras (escala de cinza - slate) */
 val slate50 = Color(0xFFF8FAFC)
