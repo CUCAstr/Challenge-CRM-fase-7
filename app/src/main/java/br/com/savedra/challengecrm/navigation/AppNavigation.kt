@@ -4,12 +4,16 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import br.com.savedra.challengecrm.ui.view.ClientHomeScreen
 import br.com.savedra.challengecrm.ui.view.LoginScreen
+import br.com.savedra.challengecrm.ui.view.OperatorHomeScreen
 import br.com.savedra.challengecrm.ui.view.RegisterScreen
 
 object AppRoutes {
     const val LOGIN = "login"
     const val REGISTER = "register"
+    const val CLIENT_HOME = "clientHome"
+    const val OPERATOR_HOME = "operatorHome"
 }
 
 @Composable
@@ -21,6 +25,12 @@ fun AppNavigation() {
         }
         composable(AppRoutes.REGISTER) {
             RegisterScreen(navController = navController)
+        }
+        composable(AppRoutes.CLIENT_HOME) {
+            ClientHomeScreen()
+        }
+        composable(AppRoutes.OPERATOR_HOME) {
+            OperatorHomeScreen()
         }
     }
 }

@@ -1,9 +1,6 @@
 package br.com.savedra.challengecrm.ui.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.HoverInteraction
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,6 +20,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import br.com.savedra.challengecrm.navigation.AppRoutes
@@ -32,14 +30,23 @@ import br.com.savedra.challengecrm.ui.theme.interFamily
 import br.com.savedra.challengecrm.ui.theme.slate100
 import br.com.savedra.challengecrm.ui.theme.slate200
 import br.com.savedra.challengecrm.ui.theme.slate600
-import br.com.savedra.challengecrm.ui.theme.slate800
+import br.com.savedra.challengecrm.viewmodel.AuthUIState
+import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(navController: NavController, modifier: Modifier = Modifier) {
-  var completeName by rememberSaveable { mutableStateOf("") }
-  var document by rememberSaveable { mutableStateOf("") }
-  var email by rememberSaveable { mutableStateOf("") }
-  var password by rememberSaveable { mutableStateOf("") }
+fun RegisterScreen(
+  modifier: Modifier = Modifier,
+  navController: NavController,
+  viewModel: AuthViewModel = viewModel()
+) {
+  val name by viewModel.name.collectAsState()
+  val email by viewModel.email.collectAsState()
+  val password by viewModel.password.collectAsState()
+  val authState by viewModel.authUiState.collectAsState()
+
+  var isError by remember { mutableStateOf(false) }
+  var expanded by remember { mutableStateOf(false) }
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
   Box(
@@ -75,8 +82,8 @@ fun RegisterScreen(navController: NavController, modifier: Modifier = Modifier) 
       )
 
       OutlinedTextField(
-        value = completeName,
-        onValueChange = { completeName = it },
+        value = name,
+        onValueChange = { viewModel.onNameChange(it) },
         label = { Text("Nome Completo") },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -91,24 +98,11 @@ fun RegisterScreen(navController: NavController, modifier: Modifier = Modifier) 
       Spacer(modifier = Modifier.height(16.dp))
 
       OutlinedTextField(
-        value = document,
-        onValueChange = { document = it },
-        label = { Text("CPF") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = Modifier
-          .fillMaxWidth(),
-        colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
-        ),
-      )
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-      OutlinedTextField(
         value = email,
-        onValueChange = { email = it },
+        onValueChange = {
+          viewModel.onEmailChange(it)
+          isError = !isValidEmail(it)
+        },
         label = { Text("Email") },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -122,9 +116,49 @@ fun RegisterScreen(navController: NavController, modifier: Modifier = Modifier) 
 
       Spacer(modifier = Modifier.height(16.dp))
 
+      val roles = listOf("Cliente", "Operador")
+
+      ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        OutlinedTextField(
+          value = viewModel.role.collectAsState().value,
+          onValueChange = { },
+          label = { Text("Tipo de usuário") },
+          readOnly = true,
+          trailingIcon = {
+            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+          },
+          modifier = Modifier.menuAnchor().fillMaxWidth(),
+          colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = indigo500,
+            unfocusedBorderColor = slate200
+          ),
+        )
+        ExposedDropdownMenu(
+          expanded = expanded,
+          onDismissRequest = { expanded = false },
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          roles.forEach { role ->
+            DropdownMenuItem(
+              text = { Text(role) },
+              onClick = {
+                viewModel.onRoleChange(role)
+                expanded = false
+              }
+            )
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+
       OutlinedTextField(
         value = password,
-        onValueChange = { password = it },
+        onValueChange = { viewModel.onPasswordChange(it) },
         label = { Text("Password") },
         singleLine = true,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -150,7 +184,7 @@ fun RegisterScreen(navController: NavController, modifier: Modifier = Modifier) 
       Spacer(modifier = Modifier.height(24.dp))
 
       Button(
-        onClick = { navController.navigate(AppRoutes.LOGIN) },
+        onClick = { viewModel.register() },
         modifier = Modifier
           .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
@@ -159,7 +193,7 @@ fun RegisterScreen(navController: NavController, modifier: Modifier = Modifier) 
         shape = RoundedCornerShape(8.dp)
       ) {
         Text(
-          text ="Cadastrar como cliente",
+          text ="Realizar cadastro",
           style = TextStyle(
             fontFamily = interFamily,
             fontSize = 14.sp,
@@ -167,8 +201,39 @@ fun RegisterScreen(navController: NavController, modifier: Modifier = Modifier) 
           )
         )
       }
+
+      Spacer(modifier = Modifier.height(24.dp))
+
+      when (val state = authState) {
+        is AuthUIState.Loading -> {
+          CircularProgressIndicator()
+        }
+
+        is AuthUIState.Error -> {
+          Text("Erro: ${state.message}", color = MaterialTheme.colorScheme.error)
+        }
+
+        is AuthUIState.Success -> {
+          LaunchedEffect(state.role) {
+            when (state.role) {
+              "Cliente" -> navController.navigate(AppRoutes.CLIENT_HOME) {
+                popUpTo(AppRoutes.REGISTER) { inclusive = true }
+              }
+              "Operador" -> navController.navigate(AppRoutes.OPERATOR_HOME) {
+                popUpTo(AppRoutes.REGISTER) { inclusive = true }
+              }
+            }
+          }
+        }
+
+        is AuthUIState.Idle -> { }
+      }
     }
   }
+}
+
+private fun isValidEmail(email: String): Boolean {
+  return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
 @Preview(showBackground = true)
