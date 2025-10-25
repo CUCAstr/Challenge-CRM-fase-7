@@ -30,7 +30,16 @@ fun AppNavigation() {
             ClientHomeScreen()
         }
         composable(AppRoutes.OPERATOR_HOME) {
-            OperatorHomeScreen()
+            OperatorHomeScreen(
+                onCampaignsClick = {
+                    // TODO: Navigate to campaigns screen
+                },
+                onLogoutClick = {
+                    navController.navigate(AppRoutes.LOGIN) {
+                        popUpTo(AppRoutes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
