@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import br.com.savedra.challengecrm.ui.view.ChatScreen
 import br.com.savedra.challengecrm.ui.view.ClientHomeScreen
 import br.com.savedra.challengecrm.ui.view.LoginScreen
 import br.com.savedra.challengecrm.ui.view.OperatorHomeScreen
@@ -14,6 +15,7 @@ object AppRoutes {
     const val REGISTER = "register"
     const val CLIENT_HOME = "clientHome"
     const val OPERATOR_HOME = "operatorHome"
+    const val CHAT = "chat"
 }
 
 @Composable
@@ -27,7 +29,18 @@ fun AppNavigation() {
             RegisterScreen(navController = navController)
         }
         composable(AppRoutes.CLIENT_HOME) {
-            ClientHomeScreen()
+            ClientHomeScreen(
+                onMessageClick = { message ->
+                    if (message.type == br.com.savedra.challengecrm.model.MessageType.MESSAGE) {
+                        navController.navigate(AppRoutes.CHAT)
+                    }
+                },
+                onLogoutClick = {
+                    navController.navigate(AppRoutes.LOGIN) {
+                        popUpTo(AppRoutes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
         }
         composable(AppRoutes.OPERATOR_HOME) {
             OperatorHomeScreen(
@@ -38,6 +51,13 @@ fun AppNavigation() {
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.LOGIN) { inclusive = true }
                     }
+                }
+            )
+        }
+        composable(AppRoutes.CHAT) {
+            ChatScreen(
+                onBackClick = {
+                    navController.popBackStack()
                 }
             )
         }
