@@ -64,6 +64,7 @@ class CustomerViewModel : ViewModel() {
 
         val filtered = _allCustomers.value.filter { customer ->
             val nameMatches = customer.name.lowercase().contains(query)
+            val statusMatches = customer.status.lowercase().contains(query)
 
             val segmentoMatches = when (segmentoFilter) {
                 "Todos" -> true
@@ -74,7 +75,8 @@ class CustomerViewModel : ViewModel() {
                 "Todos" -> true
                 else -> customer.estado.equals(stateFilter, ignoreCase = true)
             }
-            nameMatches && segmentoMatches && stateMatches
+
+            nameMatches && segmentoMatches && stateMatches && statusMatches
         }
 
         _filteredCustomers.value = filtered
