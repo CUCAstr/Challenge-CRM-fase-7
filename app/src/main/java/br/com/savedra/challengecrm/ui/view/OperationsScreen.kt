@@ -248,6 +248,7 @@ fun CampaignForm(viewModel: OperationsViewModel) {
 fun MessageForm(viewModel: OperationsViewModel) {
     var title by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -271,7 +272,10 @@ fun MessageForm(viewModel: OperationsViewModel) {
             SegmentFilters(viewModel = viewModel)
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { /* Handle save */ },
+                onClick = {
+                    viewModel.sendMessage(title, message)
+                    Toast.makeText(context, "Mensagem enviada com sucesso!", Toast.LENGTH_SHORT).show()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Enviar Mensagem")
