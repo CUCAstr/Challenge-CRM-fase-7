@@ -17,73 +17,37 @@ Divisão de tarefas pensada para que o time trabalhe em paralelo, minimizando bl
 ### Função 1: Juan - Arquiteto de Software e Autenticação
 Juan será o responsável por criar a fundação do projeto. O trabalho dele é o ponto de partida para todos os outros.
 
-**Tarefas Detalhadas:**
-1.  **Configuração do Ambiente (Dia 1):**
-    - Criar o projeto no Firebase Console.
-    - Habilitar os serviços: Authentication (com o método E-mail/Senha), Cloud Firestore e Cloud Messaging.
-    - Baixar o arquivo `google-services.json` e adicioná-lo ao projeto Android.
-    - Criar um repositório no GitHub (ou similar) e configurar o projeto base com as dependências do Firebase e outras bibliotecas essenciais (Jetpack Compose, ViewModel, Navigation, etc.).
-2.  **Definição da Arquitetura (Dia 1-2):**
-    - Criar a estrutura de pastas do projeto seguindo o padrão MVVM (Model-View-ViewModel). Ex: pacotes para `ui` (telas), `data` (modelos e repositórios), `viewmodel`, `di` (injeção de dependência, se aplicável).
-    - Definir as classes de modelo de dados principais (`data class User`, `data class Message`) para que todos usem a mesma estrutura.
-3.  **Implementação do Fluxo de Autenticação (Dia 2-4):**
-    - Desenvolver as telas de Login e Cadastro usando Jetpack Compose.
-    - Criar um `AuthRepository` que se comunicará diretamente com o `FirebaseAuth.getInstance()`.
-    - Criar um `AuthViewModel` para conter a lógica das telas de login/cadastro (validar campos, chamar o repositório, gerenciar estados de loading e erro).
-    - Implementar a lógica para diferenciar o login de Operador vs. Cliente. Isso pode ser feito com um campo `role: "operador"` ou `role: "cliente"` salvo no documento do usuário no Firestore durante o cadastro.
-4.  **Configuração da Navegação Principal (Dia 4-5):**
-    - Usar o Navigation Component para criar o fluxo principal: um usuário não logado vê a tela de Login. Após o login, se for "cliente", vai para a `TelaCliente`; se for "operador", vai para a `TelaOperador`.
+1. **Extras:**
+    - Padronizar a tela de registro (Localidade por extenso).
+    - Excluir cliente VIP da tela de registro (deixar o operador selecionar quem é VIP)
+    - Todos clientes começarem sendo "Não VIPs"
 
 ### Função 2: Thaysa - Visão do Operador (Módulo CRM)
 Thaysa focará na principal ferramenta do operador: a lista de clientes. Ela começará a trabalhar assim que Juan tiver a estrutura base do projeto pronta.
 
-**Tarefas Detalhadas:**
-1.  **Estrutura da Tela do Operador (Dia 2-3):**
-    - Criar a tela principal do operador (`OperatorHomeScreen`) com Jetpack Compose.
-    - Esta tela conterá a lista de clientes.
-2.  **Desenvolvimento do Repositório de Clientes (Dia 3-4):**
-    - Criar um `CustomerRepository` que buscará os dados da coleção de usuários no Cloud Firestore.
-    - Implementar a função `getCustomers()` que retorna um `Flow<List<User>>` para que a lista se atualize em tempo real.
-3.  **Implementação da Lista e ViewModel (Dia 4-6):**
-    - Criar um `CustomerViewModel` que usa o `CustomerRepository` para obter a lista de clientes.
-    - Na `OperatorHomeScreen`, usar um `LazyColumn` para exibir os clientes. Cada item da lista deve ser um "card" com as informações principais (nome, e-mail, talvez uma tag).
-4.  **Busca e Filtros (Dia 6-8):**
-    - Adicionar um `TextField` de busca no topo da tela. A lógica de busca no ViewModel pode filtrar a lista já carregada ou, de forma mais avançada, fazer uma nova query no Firestore.
-    - Adicionar botões ou um menu de filtro para segmentar por tags/status (ex: `status == "ativo"`), que também acionarão novas queries no Firestore.
-5.  **Anotações Rápidas (Dia 8-10):**
-    - Ao clicar em um cliente, abrir um modal (ou uma nova tela) onde o operador pode ver e adicionar anotações. As anotações serão salvas em uma subcoleção dentro do documento do cliente no Firestore (ex: `/users/{userId}/notes`).
+1. **Extras:**
+    - Selecionar quem é cliente VIP.
+    - Enviar os convites e campanhas por segmentação.
+    - Excluir o formulário de "mensagens" (deixar pra enviar direto do chat).
+    - Arrumar bug do filtro (ao mudar de página a filtragem permanece, deveria voltar ao estado normal aparecendo todos clientes).
 
 ### Função 3: Luca - Visão do Cliente (Campanhas e Mensagens)
 Luca cuidará da experiência do cliente, garantindo que ele receba e visualize as comunicações enviadas pelo operador.
 
-**Tarefas Detalhadas:**
-1.  **Estrutura da Tela do Cliente (Dia 2-3):**
-    - Criar a tela principal do cliente (`ClientHomeScreen`) que funcionará como uma "caixa de entrada".
-2.  **Desenvolvimento do Repositório de Mensagens (Dia 3-5):**
-    - Criar um `MessageRepository` que escuta em tempo real uma subcoleção no documento do usuário logado no Firestore (ex: `/users/{clientId}/messages`).
-    - Qualquer nova mensagem ou campanha enviada para este cliente (e salva neste caminho) aparecerá instantaneamente.
-3.  **Implementação da Lista de Mensagens e ViewModel (Dia 5-7):**
-    - Criar um `MessageViewModel` para gerenciar a lógica de busca das mensagens.
-    - Na `ClientHomeScreen`, usar um `LazyColumn` para exibir as mensagens/campanhas recebidas. Cada item deve ter um design claro, diferenciando uma mensagem de chat de uma campanha promocional (pode ser por um ícone ou cor).
-4.  **Interação com Links e Botões (Dia 7-9):**
-    - Garantir que os cards de campanha sejam interativos. Se uma mensagem contiver um link, ele deve ser clicável e abrir o navegador. Se tiver um "botão" (que pode ser simulado com um texto estilizado), ele deve registrar uma ação (ex: atualizar um campo no Firestore para indicar que o cliente clicou).
+1. **Extras:**
+    - Criar os filtros da caixa de entrada ("Campanha", "Convites" e "Mensagens").
+    - Criar um dropdown para filtrar mensagens "Lidas" e "Não lidas".
+    - As mensagens lidas devem ficar com uma cor cinza, ao invés de totalmente branca.
+    - Redirecionar ao chat com o operador ao clicar na mensagem.
+    - Se der tempo, permitir troca de mensagens entre operador e cliente.
 
 ### Função 4: Pedro - Chat Integrado e Notificações Push
 Pedro tem a missão crítica de fazer a comunicação em tempo real funcionar, incluindo o "alerta" de novas mensagens.
 
 **Tarefas Detalhadas:**
-1.  **Estrutura da Tela de Chat (Dia 3-5):**
-    - Criar a tela de `ChatScreen` que pode ser aberta tanto pelo operador (ao selecionar um cliente) quanto pelo cliente (ao responder uma mensagem).
-    - A tela deve ter a lista de mensagens no centro e um campo de texto com botão de enviar na parte inferior.
-2.  **Lógica de Chat com Firestore (Dia 5-8):**
-    - Definir uma estrutura no Firestore para conversas 1:1. Uma boa abordagem é ter uma coleção `chats` onde cada documento representa uma conversa e contém uma subcoleção `messages`.
-    - Criar um `ChatViewModel` que recebe um `chatId` e escuta a subcoleção `messages` daquele chat em tempo real, exibindo-as na tela.
-    - Implementar a função de envio que cria um novo documento na subcoleção `messages` com o texto, o remetente (`senderId`) e um `timestamp`.
-3.  **Configuração do Firebase Cloud Messaging (FCM) (Dia 8-10):**
-    - Integrar o SDK do FCM no app.
-    - Criar uma classe que herda de `FirebaseMessagingService` para receber as notificações quando o app estiver em segundo plano ou fechado.
-    - Implementar a lógica para, ao receber uma notificação, criar e exibir um popup in-app (se o app estiver aberto) ou uma notificação padrão do sistema (se estiver em segundo plano).
-    - **Nota:** O envio da notificação em si (a parte do back-end) será feito na Sprint 2. Para a Sprint 1, Pedro pode usar o painel do FCM no console do Firebase para enviar mensagens de teste e validar que o app as recebe corretamente.
+1. **Extras:**
+    - Notificações de mensagens, convites ou campanhas novas ao abrir o app (push e pop-up).
+    - Chat integrado com cada operador e cliente, servindo como histórico de mensagens.
 
 ### Função 5: Alessandro - Usabilidade Avançada e Campanhas Express
 Alessandro ficará com as funcionalidades que dão o "toque especial" ao app, focando na experiência do usuário e na funcionalidade de envio rápido.
@@ -98,6 +62,3 @@ Alessandro ficará com as funcionalidades que dão o "toque especial" ao app, fo
 3.  **Deeplinks Internos (Dia 7-9):**
     - Configurar deeplinks usando o Navigation Component.
     - O objetivo é que uma notificação push (enviada por Pedro para teste) possa conter um link que, ao ser clicado, não apenas abra o app, mas navegue diretamente para uma tela específica, como o perfil de um cliente ou uma conversa.
-4.  **Tela de Campanhas Express (Visão Operador) (Dia 8-10):**
-    - Criar uma tela simples para o operador, com um campo de texto grande e um seletor de segmento (para a Sprint 1, pode ser um simples dropdown com "Todos os Clientes").
-    - Ao clicar em "Enviar", a função irá percorrer todos os usuários do tipo "cliente" no Firestore e adicionar a mensagem da campanha em suas respectivas subcoleções de mensagens.
