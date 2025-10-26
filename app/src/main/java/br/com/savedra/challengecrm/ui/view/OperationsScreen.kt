@@ -17,7 +17,11 @@ import br.com.savedra.challengecrm.ui.theme.white
 import br.com.savedra.challengecrm.viewmodel.OperationsViewModel
 import androidx.compose.foundation.lazy.LazyColumn
 import android.widget.Toast
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import java.time.Instant
 import java.time.ZoneId
 
@@ -124,13 +128,15 @@ fun InviteForm(viewModel: OperationsViewModel) {
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Nome") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text("Descrição") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             DatePickerField(
                 label = "Data de Início",
@@ -146,7 +152,8 @@ fun InviteForm(viewModel: OperationsViewModel) {
                 value = location,
                 onValueChange = { location = it },
                 label = { Text("Local") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             Spacer(modifier = Modifier.height(16.dp))
             SegmentFilters(viewModel = viewModel)
@@ -196,13 +203,15 @@ fun CampaignForm(viewModel: OperationsViewModel) {
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Nome da Campanha") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
                 label = { Text("Descrição") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             DatePickerField(
                 label = "Data de Início",
@@ -260,13 +269,15 @@ fun MessageForm(viewModel: OperationsViewModel) {
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Título") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             OutlinedTextField(
                 value = message,
                 onValueChange = { message = it },
                 label = { Text("Mensagem") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             Spacer(modifier = Modifier.height(16.dp))
             SegmentFilters(viewModel = viewModel)
@@ -290,9 +301,6 @@ fun SegmentFilters(
     viewModel: OperationsViewModel,
     modifier: Modifier = Modifier
 ) {
-    val vipFilter by viewModel.vipFilter.collectAsState()
-    val stateFilter by viewModel.stateFilter.collectAsState()
-
     Column(modifier = modifier) {
         Text(
             text = "Segmentação",
