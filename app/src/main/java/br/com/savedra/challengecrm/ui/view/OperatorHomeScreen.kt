@@ -236,7 +236,10 @@ fun OperatorHomeScreen(
                 showCustomerDetails = false
                 selectedCustomer = null
             },
-            onSendMessage = { onCustomerClick(selectedCustomer!!) }
+            onSendMessage = {
+                showCustomerDetails = false
+                onCustomerClick(selectedCustomer!!)
+            }
         )
     }
 }

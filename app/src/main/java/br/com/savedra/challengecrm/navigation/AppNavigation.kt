@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import br.com.savedra.challengecrm.ui.view.ChatScreen
 import br.com.savedra.challengecrm.ui.view.ClientHomeScreen
 import br.com.savedra.challengecrm.ui.view.LoginScreen
 import br.com.savedra.challengecrm.ui.view.OperatorHomeScreen
@@ -81,13 +82,13 @@ fun AppNavigation() {
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: ""
             val userName = backStackEntry.arguments?.getString("userName") ?: ""
-//            ChatScreen(
-//                userId = userId,
-//                userName = userName,
-//                onBackClick = {
-//                    navController.popBackStack()
-//                }
-//            )
+            ChatScreen(
+                userId = userId,
+                userName = userName,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
