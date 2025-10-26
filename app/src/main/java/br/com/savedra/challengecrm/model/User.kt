@@ -1,9 +1,13 @@
 package br.com.savedra.challengecrm.model
 
+import java.util.Date
+
 data class User(
   val id: String,
   val name: String,
   val email: String,
   val password: String,
-  val role: String
+  val role: String,
+  val memberSince: Date? = null,
+  val notes: List<String> = emptyList()
 )
