@@ -7,15 +7,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import br.com.savedra.challengecrm.ui.view.CampaignsScreen
 import br.com.savedra.challengecrm.ui.view.ChatScreen
 import br.com.savedra.challengecrm.ui.view.ClientHomeScreen
+import br.com.savedra.challengecrm.ui.view.InvitesScreen
 import br.com.savedra.challengecrm.ui.view.LoginScreen
 import br.com.savedra.challengecrm.ui.view.OperatorHomeScreen
+import br.com.savedra.challengecrm.ui.view.PromotionsScreen
 import br.com.savedra.challengecrm.ui.view.RegisterScreen
-import br.com.savedra.challengecrm.ui.view.OperationsScreen
 import br.com.savedra.challengecrm.viewmodel.CustomerViewModel
-import br.com.savedra.challengecrm.viewmodel.OperationsViewModel
-import br.com.savedra.challengecrm.viewmodel.OperationsViewModelFactory
 
 object AppRoutes {
     const val LOGIN = "login"
@@ -23,14 +23,15 @@ object AppRoutes {
     const val CLIENT_HOME = "clientHome"
     const val OPERATOR_HOME = "operatorHome"
     const val CHAT = "chat"
-    const val OPERATIONS = "operations"
+    const val INVITES = "invites"
+    const val PROMOTIONS = "promotions"
+    const val CAMPAIGNS = "campaigns"
 }
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val customerViewModel: CustomerViewModel = viewModel()
-    val operationsViewModel: OperationsViewModel = viewModel(factory = OperationsViewModelFactory(customerViewModel))
 
     NavHost(navController = navController, startDestination = AppRoutes.LOGIN) {
         composable(AppRoutes.LOGIN) {
@@ -57,8 +58,14 @@ fun AppNavigation() {
                 onCustomerClick = { customer ->
                     navController.navigate("${AppRoutes.CHAT}/${customer.id}/${customer.name}")
                 },
+                onInvitesClick = {
+                    navController.navigate(AppRoutes.INVITES)
+                },
+                onPromotionsClick = {
+                    navController.navigate(AppRoutes.PROMOTIONS)
+                },
                 onCampaignsClick = {
-                    navController.navigate(AppRoutes.OPERATIONS)
+                    navController.navigate(AppRoutes.CAMPAIGNS)
                 },
                 onLogoutClick = {
                     navController.navigate(AppRoutes.LOGIN) {
@@ -67,20 +74,14 @@ fun AppNavigation() {
                 }
             )
         }
-        composable(AppRoutes.OPERATIONS) {
-            OperationsScreen(
-                viewModel = operationsViewModel,
-                onClientsClick = {
-                    navController.navigate(AppRoutes.OPERATOR_HOME) {
-                        popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
-                    }
-                },
-                onLogoutClick = {
-                    navController.navigate(AppRoutes.LOGIN) {
-                        popUpTo(AppRoutes.LOGIN) { inclusive = true }
-                    }
-                }
-            )
+        composable(AppRoutes.INVITES) {
+            InvitesScreen()
+        }
+        composable(AppRoutes.PROMOTIONS) {
+            PromotionsScreen()
+        }
+        composable(AppRoutes.CAMPAIGNS) {
+            CampaignsScreen()
         }
         composable(
             route = "${AppRoutes.CHAT}/{userId}/{userName}",

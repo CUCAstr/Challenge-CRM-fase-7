@@ -32,10 +32,16 @@ import br.com.savedra.challengecrm.viewmodel.CustomerViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Mail
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OperatorHomeScreen(
     onCustomerClick: (User) -> Unit = {},
+    onInvitesClick: () -> Unit = {},
+    onPromotionsClick: () -> Unit = {},
     onCampaignsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     viewModel: CustomerViewModel = viewModel()
@@ -248,8 +254,10 @@ fun OperatorHomeScreen(
         }
 
         // Bottom Navigation
-        BottomNavigation(
+        ScrollableBottomNavigation(
             onClientsClick = { /* Already on clients screen */ },
+            onInvitesClick = onInvitesClick,
+            onPromotionsClick = onPromotionsClick,
             onCampaignsClick = onCampaignsClick,
             onLogoutClick = onLogoutClick,
             isClientsActive = true,
@@ -345,11 +353,15 @@ fun CustomerCard(
 }
 
 @Composable
-fun BottomNavigation(
+fun ScrollableBottomNavigation(
     onClientsClick: () -> Unit,
+    onInvitesClick: () -> Unit,
+    onPromotionsClick: () -> Unit,
     onCampaignsClick: () -> Unit,
     onLogoutClick: () -> Unit,
     isClientsActive: Boolean = false,
+    isInvitesActive: Boolean = false,
+    isPromotionsActive: Boolean = false,
     isCampaignsActive: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -358,67 +370,106 @@ fun BottomNavigation(
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         colors = CardDefaults.cardColors(containerColor = slate800)
     ) {
-        Row(
+        LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            // Clients
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { onClientsClick() }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Clientes",
-                    tint = if (isClientsActive) purple500 else slate400,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Clientes",
-                    color = if (isClientsActive) purple500 else slate400,
-                    fontSize = 12.sp
-                )
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onClientsClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Clientes",
+                        tint = if (isClientsActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Clientes",
+                        color = if (isClientsActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
             }
-
-            // Campaigns
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { onCampaignsClick() }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Campaign,
-                    contentDescription = "Operações",
-                    tint = if (isCampaignsActive) purple500 else slate400,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Operações",
-                    color = if (isCampaignsActive) purple500 else slate400,
-                    fontSize = 12.sp
-                )
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onInvitesClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Mail,
+                        contentDescription = "Convites",
+                        tint = if (isInvitesActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Convites",
+                        color = if (isInvitesActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
             }
-
-            // Logout
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { onLogoutClick() }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ExitToApp,
-                    contentDescription = "Sair",
-                    tint = slate400,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Sair",
-                    color = slate400,
-                    fontSize = 12.sp
-                )
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onPromotionsClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CardGiftcard,
+                        contentDescription = "Promoções",
+                        tint = if (isPromotionsActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Promoções",
+                        color = if (isPromotionsActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onCampaignsClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Campaign,
+                        contentDescription = "Campanhas",
+                        tint = if (isCampaignsActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Campanhas",
+                        color = if (isCampaignsActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onLogoutClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = "Sair",
+                        tint = slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Sair",
+                        color = slate400,
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
     }
