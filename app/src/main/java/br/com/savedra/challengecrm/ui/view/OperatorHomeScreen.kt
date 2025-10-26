@@ -68,14 +68,13 @@ fun OperatorHomeScreen(
             }
 
             // Search Bar
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
             ) {
                 Card(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = white)
                 ) {
@@ -107,43 +106,92 @@ fun OperatorHomeScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                var expanded by remember { mutableStateOf(false) }
-                val items = listOf("Todos", "VIP", "Não VIP")
-                var selectedItem by remember { mutableStateOf(items[0]) }
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ){
+                    var expandedVip by remember { mutableStateOf(false) }
+                    val itemsVip = listOf("Todos", "VIP", "Não VIP")
+                    var selectedVip by remember { mutableStateOf(itemsVip[0]) }
 
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded },
-                ) {
-                    Card(
-                        modifier = Modifier.menuAnchor(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = white)
+                    ExposedDropdownMenuBox(
+                        expanded = expandedVip,
+                        onExpandedChange = { expandedVip = !expandedVip },
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Card(
+                            modifier = Modifier.menuAnchor(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = white)
                         ) {
-                            Text(text = selectedItem, modifier = Modifier.padding(horizontal = 8.dp))
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                            Row(
+                                modifier = Modifier.padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(text = selectedVip, modifier = Modifier.padding(horizontal = 8.dp))
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVip)
+                            }
+                        }
+
+                        ExposedDropdownMenu(
+                            expanded = expandedVip,
+                            onDismissRequest = { expandedVip = false })
+                        {
+                            itemsVip.forEach { item ->
+                                DropdownMenuItem(
+                                    text = { Text(text = item) },
+                                    onClick = {
+                                        selectedVip = item
+                                        expandedVip = false
+                                        viewModel.updateVipFilter(item)
+                                    }
+                                )
+                            }
                         }
                     }
 
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false })
-                     {
-                        items.forEach { item ->
-                            DropdownMenuItem(
-                                text = { Text(text = item) },
-                                onClick = {
-                                    selectedItem = item
-                                    expanded = false
-                                    viewModel.updateVipFilter(item)
-                                }
-                            )
+                    var expandedState by remember { mutableStateOf(false) }
+                    val itemsState = listOf(
+                        "Todos", "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA",
+                        "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+                    )
+                    var selectedState by remember { mutableStateOf(itemsState[0]) }
+
+                    ExposedDropdownMenuBox(
+                        expanded = expandedState,
+                        onExpandedChange = { expandedState = !expandedState },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Card(
+                            modifier = Modifier.menuAnchor(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = white)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(text = selectedState, modifier = Modifier.padding(horizontal = 8.dp))
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                            }
+                        }
+
+                        ExposedDropdownMenu(
+                            expanded = expandedState,
+                            onDismissRequest = { expandedState = false })
+                        {
+                            itemsState.forEach { item ->
+                                DropdownMenuItem(
+                                    text = { Text(text = item) },
+                                    onClick = {
+                                        selectedState = item
+                                        expandedState = false
+                                        viewModel.updateStateFilter(item)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
