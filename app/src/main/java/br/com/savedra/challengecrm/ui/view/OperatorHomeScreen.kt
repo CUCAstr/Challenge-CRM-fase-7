@@ -113,17 +113,20 @@ fun OperatorHomeScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row (
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ){
-                    var expandedVip by remember { mutableStateOf(false) }
-                    val itemsVip = listOf("Todos", "VIP", "Não VIP")
-                    var selectedVip by remember { mutableStateOf(itemsVip[0]) }
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    var expandedSegmento by remember { mutableStateOf(false) }
+                    val itemsSegmento = listOf(
+                        "Todos", "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX"
+                    )
+                    var selectedSegmento by remember { mutableStateOf(itemsSegmento[0]) }
 
                     ExposedDropdownMenuBox(
-                        expanded = expandedVip,
-                        onExpandedChange = { expandedVip = !expandedVip },
+                        expanded = expandedSegmento,
+                        onExpandedChange = { expandedSegmento = !expandedSegmento },
                         modifier = Modifier.weight(1f)
                     ) {
                         Card(
@@ -135,32 +138,47 @@ fun OperatorHomeScreen(
                                 modifier = Modifier.padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = selectedVip, modifier = Modifier.padding(horizontal = 8.dp))
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVip)
+                                Text(text = selectedSegmento, modifier = Modifier.padding(horizontal = 8.dp))
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegmento)
                             }
                         }
 
                         ExposedDropdownMenu(
-                            expanded = expandedVip,
-                            onDismissRequest = { expandedVip = false })
+                            expanded = expandedSegmento,
+                            onDismissRequest = { expandedSegmento = false })
                         {
-                            itemsVip.forEach { item ->
+                            itemsSegmento.forEach { item ->
                                 DropdownMenuItem(
                                     text = { Text(text = item) },
                                     onClick = {
-                                        selectedVip = item
-                                        expandedVip = false
-                                        viewModel.updateVipFilter(item)
+                                        selectedSegmento = item
+                                        expandedSegmento = false
+                                        viewModel.updateSegmentoFilter(item)
                                     }
                                 )
                             }
                         }
                     }
 
+                    Text(
+                        text = "<-- Filtro por segmento",
+                        color = slate600,
+                        fontSize = 12.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row (
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ){
                     var expandedState by remember { mutableStateOf(false) }
                     val itemsState = listOf(
-                        "Todos", "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA",
-                        "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+                        "Todos", "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
+                        "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba",
+                        "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul",
+                        "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
                     )
                     var selectedState by remember { mutableStateOf(itemsState[0]) }
 
@@ -199,6 +217,12 @@ fun OperatorHomeScreen(
                             }
                         }
                     }
+
+                    Text(
+                        text = "<-- Filtro por estado",
+                        color = slate600,
+                        fontSize = 12.sp
+                    )
                 }
             }
 

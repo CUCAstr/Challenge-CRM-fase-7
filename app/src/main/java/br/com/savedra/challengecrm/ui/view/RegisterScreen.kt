@@ -67,7 +67,7 @@ fun RegisterScreen(
     ) {
         item {
             Text(
-                text = "Bem-vindo ao CRM",
+                text = "Bem-vindo a WTC",
                 style = TextStyle(
                     fontFamily = interFamily,
                     fontSize = 24.sp,
@@ -227,15 +227,45 @@ fun RegisterScreen(
         }
 
         item {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            val segmentos = listOf(
+                "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX"
+            )
+            var expandedSegmento by remember { mutableStateOf(false) }
+
+            ExposedDropdownMenuBox(
+                expanded = expandedSegmento,
+                onExpandedChange = { expandedSegmento = !expandedSegmento },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Checkbox(
-                    checked = viewModel.vip.collectAsState().value,
-                    onCheckedChange = { viewModel.onVipChange(it) }
+                OutlinedTextField(
+                    value = viewModel.segmento.collectAsState().value,
+                    onValueChange = { },
+                    label = { Text("Segmento") },
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegmento)
+                    },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = indigo500,
+                        unfocusedBorderColor = slate200
+                    ),
                 )
-                Text("Cliente VIP")
+                ExposedDropdownMenu(
+                    expanded = expandedSegmento,
+                    onDismissRequest = { expandedSegmento = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    segmentos.forEach { segmento ->
+                        DropdownMenuItem(
+                            text = { Text(segmento) },
+                            onClick = {
+                                viewModel.onSegmentoChange(segmento)
+                                expandedSegmento = false
+                            }
+                        )
+                    }
+                }
             }
         }
 

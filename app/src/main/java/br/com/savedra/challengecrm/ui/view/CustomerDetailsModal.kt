@@ -85,6 +85,7 @@ fun CustomerDetailsModal(
                     fontWeight = FontWeight.Bold,
                     color = slate800
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
@@ -92,6 +93,7 @@ fun CustomerDetailsModal(
                     fontSize = 14.sp,
                     color = slate700
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
@@ -99,6 +101,7 @@ fun CustomerDetailsModal(
                     fontSize = 14.sp,
                     color = slate700
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
@@ -118,7 +121,23 @@ fun CustomerDetailsModal(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "VIP: ${if (customer.vip) "Sim" else "Não"}",
+                    text = "Segmento: ${customer.segmento}",
+                    fontSize = 14.sp,
+                    color = slate700
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Score: ${customer.score}",
+                    fontSize = 14.sp,
+                    color = slate700
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Status: ${customer.status}",
                     fontSize = 14.sp,
                     color = slate700
                 )

@@ -17,7 +17,7 @@ class AuthRepository(
     auth.signInWithEmailAndPassword(email, password).await()
   }
 
-  suspend fun register(email: String, password: String, name: String, role: String, estado: String, vip: Boolean) {
+  suspend fun register(email: String, password: String, name: String, role: String, estado: String, segmento: String) {
     val authResult = auth.createUserWithEmailAndPassword(email, password).await()
     val firebaseUser = authResult.user
       ?: throw Exception("Usuário não encontrado após o cadasdtro.")
@@ -34,10 +34,15 @@ class AuthRepository(
       "name" to name,
       "role" to role,
       "estado" to estado,
-      "vip" to vip,
+      "segmento" to segmento,
       "memberSince" to FieldValue.serverTimestamp(),
       "notes" to ""
     )
+
+    if (role == "Cliente") {
+      userData["score"] = 0
+      userData["status"] = "Ativo"
+    }
 
     firestore.collection("users").document(firebaseUser.uid)
       .set(userData)
@@ -58,8 +63,9 @@ class AuthRepository(
         email = document.getString("email") ?: "",
         role = document.getString("role") ?: "",
         estado = document.getString("estado") ?: "",
-        vip = document.getBoolean("vip") ?: false,
-        memberSince = document.getDate("memberSince"),
+        segmento = document.getString("segmento") ?: "",
+        score = (document.getLong("score") ?: 0).toInt(),
+        status = document.getString("status") ?: "",
         notes = document.getString("notes") ?: ""
       )
     }

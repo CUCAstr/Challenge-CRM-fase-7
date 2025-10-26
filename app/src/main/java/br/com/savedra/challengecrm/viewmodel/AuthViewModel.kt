@@ -48,8 +48,8 @@ class AuthViewModel : ViewModel() {
   private val _state = MutableStateFlow("")
   val state = _state.asStateFlow()
 
-  private val _vip = MutableStateFlow(false)
-  val vip = _vip.asStateFlow()
+  private val _segmento = MutableStateFlow("")
+  val segmento = _segmento.asStateFlow()
 
   fun onEmailChange(newEmail: String) {
     _email.value = newEmail
@@ -71,8 +71,8 @@ class AuthViewModel : ViewModel() {
     _state.value = newState
   }
 
-  fun onVipChange(newVip: Boolean) {
-    _vip.value = newVip
+  fun onSegmentoChange(newSegmento: String) {
+    _segmento.value = newSegmento
   }
 
   fun login() {
@@ -103,7 +103,7 @@ class AuthViewModel : ViewModel() {
     val password = _password.value
     val role = _role.value
     val state = _state.value
-    val vip = _vip.value
+    val segmento = _segmento.value
 
     if (email.isBlank() || password.isBlank() || name.isBlank()) {
       _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
@@ -113,7 +113,7 @@ class AuthViewModel : ViewModel() {
     _authUiState.value = AuthUIState.Loading
     viewModelScope.launch {
       try {
-        authRepository.register(email, password, name, role, state, vip)
+        authRepository.register(email, password, name, role, state, segmento)
         _authUiState.value = AuthUIState.Success(role)
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")

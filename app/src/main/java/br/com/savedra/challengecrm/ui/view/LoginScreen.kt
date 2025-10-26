@@ -59,7 +59,7 @@ fun LoginScreen(
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
       Text(
-        text = "Bem-vindo ao CRM",
+        text = "Bem-vindo a WTC",
         style = TextStyle(
           fontFamily = interFamily,
           fontSize = 24.sp,

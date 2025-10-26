@@ -18,8 +18,8 @@ class CustomerViewModel : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _vipFilter = MutableStateFlow("Todos")
-    val vipFilter: StateFlow<String> = _vipFilter.asStateFlow()
+    private val _segmentoFilter = MutableStateFlow("Todos")
+    val segmentoFilter: StateFlow<String> = _segmentoFilter.asStateFlow()
 
     private val _stateFilter = MutableStateFlow("Todos")
     val stateFilter: StateFlow<String> = _stateFilter.asStateFlow()
@@ -47,8 +47,8 @@ class CustomerViewModel : ViewModel() {
         filterCustomers()
     }
 
-    fun updateVipFilter(filter: String) {
-        _vipFilter.value = filter
+    fun updateSegmentoFilter(filter: String) {
+        _segmentoFilter.value = filter
         filterCustomers()
     }
 
@@ -59,21 +59,22 @@ class CustomerViewModel : ViewModel() {
 
     private fun filterCustomers() {
         val query = _searchQuery.value.lowercase()
-        val vipFilter = _vipFilter.value
+        val segmentoFilter = _segmentoFilter.value
         val stateFilter = _stateFilter.value
 
         val filtered = _allCustomers.value.filter { customer ->
             val nameMatches = customer.name.lowercase().contains(query)
-            val vipMatches = when (vipFilter) {
-                "VIP" -> customer.vip
-                "Não VIP" -> !customer.vip
-                else -> true
+
+            val segmentoMatches = when (segmentoFilter) {
+                "Todos" -> true
+                else -> customer.segmento.equals(segmentoFilter, ignoreCase = true)
             }
+
             val stateMatches = when (stateFilter) {
                 "Todos" -> true
                 else -> customer.estado.equals(stateFilter, ignoreCase = true)
             }
-            nameMatches && vipMatches && stateMatches
+            nameMatches && segmentoMatches && stateMatches
         }
 
         _filteredCustomers.value = filtered

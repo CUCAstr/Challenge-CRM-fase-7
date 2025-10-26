@@ -61,7 +61,7 @@ class OperationsViewModel(private val customerViewModel: CustomerViewModel) : Vi
 
     fun updateVipFilter(filter: String) {
         _vipFilter.value = filter
-        customerViewModel.updateVipFilter(filter)
+        customerViewModel.updateSegmentoFilter(filter)
     }
 
     fun updateStateFilter(filter: String) {
