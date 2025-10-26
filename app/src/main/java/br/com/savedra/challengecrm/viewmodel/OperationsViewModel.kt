@@ -36,16 +36,10 @@ class OperationsViewModel(private val customerViewModel: CustomerViewModel) : Vi
     private val _stateFilter = MutableStateFlow("Todos")
     val stateFilter: StateFlow<String> = _stateFilter.asStateFlow()
 
-    private val _showConfirmationPopup = MutableStateFlow(false)
-    val showConfirmationPopup: StateFlow<Boolean> = _showConfirmationPopup.asStateFlow()
-
     fun onStartDateSelected(millis: Long) {
       _startDateMillis.value = millis
       _startDateString.value = convertMillisToDateString(millis)
 
-      // --- LÓGICA DE VALIDAÇÃO BÔNUS ---
-      // Se a nova data de INÍCIO for DEPOIS da data de FIM já selecionada,
-      // nós limpamos a data de FIM para forçar o usuário a escolher de novo.
       _endDateMillis.value?.let { endMillis ->
         if (millis > endMillis) {
           _endDateMillis.value = null
@@ -55,8 +49,6 @@ class OperationsViewModel(private val customerViewModel: CustomerViewModel) : Vi
     }
 
     fun onEndDateSelected(millis: Long) {
-      // A validação no DatePicker já garante que 'millis'
-      // será >= à data de início, então podemos apenas setar.
       _endDateMillis.value = millis
       _endDateString.value = convertMillisToDateString(millis)
     }
@@ -76,12 +68,7 @@ class OperationsViewModel(private val customerViewModel: CustomerViewModel) : Vi
             val campaign = Campaign(name, description, startDate, endDate)
             campaignRepository.addCampaign(campaign)
             val filteredCustomers = customerViewModel.filteredCustomers.first()
-            _showConfirmationPopup.value = true
         }
-    }
-
-    fun dismissConfirmationPopup() {
-        _showConfirmationPopup.value = false
     }
 
     fun convertMillisToDateString(millis: Long): String {

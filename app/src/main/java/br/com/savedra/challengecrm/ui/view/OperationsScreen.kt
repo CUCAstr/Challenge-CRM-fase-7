@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -17,10 +16,7 @@ import br.com.savedra.challengecrm.ui.theme.slate800
 import br.com.savedra.challengecrm.ui.theme.white
 import br.com.savedra.challengecrm.viewmodel.OperationsViewModel
 import androidx.compose.foundation.lazy.LazyColumn
-import java.util.Locale
 import android.widget.Toast
-import java.text.SimpleDateFormat
-import android.app.DatePickerDialog
 import androidx.compose.ui.platform.LocalContext
 import java.time.Instant
 import java.time.ZoneId
@@ -33,20 +29,6 @@ fun OperationsScreen(
     onLogoutClick: () -> Unit = {},
 ) {
     var selectedOperation by remember { mutableStateOf(OperationType.NONE) }
-    val showConfirmationPopup by viewModel.showConfirmationPopup.collectAsState()
-
-    if (showConfirmationPopup) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissConfirmationPopup() },
-            title = { Text("Sucesso") },
-            text = { Text("A campanha foi enviada com sucesso!") },
-            confirmButton = {
-                Button(onClick = { viewModel.dismissConfirmationPopup() }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
 
     Scaffold(
         topBar = {
@@ -155,7 +137,6 @@ fun InviteForm(viewModel: OperationsViewModel) {
                 onDateSelected = { millis ->
                     viewModel.onStartDateSelected(millis)
                 },
-                // Regra 1: Só permite selecionar de hoje em diante
                 dateValidator = { millis ->
                     millis >= todayInMillis
                 }
@@ -181,6 +162,14 @@ fun InviteForm(viewModel: OperationsViewModel) {
 
 @Composable
 fun CampaignForm(viewModel: OperationsViewModel) {
+    val textCampaignToast = "Sua campanha foi enviada com sucesso!"
+    val durationCampaignToast = Toast.LENGTH_SHORT
+    val toastCompaign = Toast.makeText(
+        LocalContext.current,
+        textCampaignToast,
+        durationCampaignToast
+    )
+
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var startDate by remember { mutableStateOf("") }
@@ -219,7 +208,6 @@ fun CampaignForm(viewModel: OperationsViewModel) {
                 onDateSelected = { millis ->
                     viewModel.onStartDateSelected(millis)
                 },
-                // Regra 1: Só permite selecionar de hoje em diante
                 dateValidator = { millis ->
                     millis >= todayInMillis
                 }
@@ -230,19 +218,14 @@ fun CampaignForm(viewModel: OperationsViewModel) {
                 onDateSelected = { millis ->
                     viewModel.onEndDateSelected(millis)
                 },
-                // Regra 2: Só permite selecionar datas que sejam:
-                // a) Maiores ou iguais a hoje
-                // b) Maiores ou iguais à data de início (se ela existir)
-                dateValidator = { millisParaValidar ->
+                dateValidator = { millisToValidate ->
 
-                    val isAfterToday = millisParaValidar >= todayInMillis
+                    val isAfterToday = millisToValidate >= todayInMillis
 
-                    // Pega a data de início do ViewModel
                     val isAfterStartDate = startDateMillis?.let { start ->
-                        millisParaValidar >= start // A data deve ser >= início
-                    } ?: true // Se a data de início for nula, não aplica esta regra
+                        millisToValidate >= start
+                    } ?: true
 
-                    // A data só é válida se passar nas DUAS regras
                     isAfterToday && isAfterStartDate
                 }
             )
@@ -250,7 +233,7 @@ fun CampaignForm(viewModel: OperationsViewModel) {
             SegmentFilters(viewModel = viewModel)
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { viewModel.sendCampaign(name, description, startDate, endDate) },
+                onClick = { viewModel.sendCampaign(name, description, startDate, endDate); toastCompaign.show() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Enviar Campanha")
