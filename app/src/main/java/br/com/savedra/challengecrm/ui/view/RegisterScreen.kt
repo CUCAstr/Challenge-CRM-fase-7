@@ -33,6 +33,8 @@ import br.com.savedra.challengecrm.ui.theme.slate600
 import br.com.savedra.challengecrm.viewmodel.AuthUIState
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
+import androidx.compose.foundation.lazy.LazyColumn
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
@@ -54,240 +56,273 @@ fun RegisterScreen(
       .fillMaxWidth()
       .background(color = slate100)
   ) {
-    Column(
+    LazyColumn(
       modifier = modifier
         .fillMaxSize()
         .padding(16.dp),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
-      Text(
-        text = "Bem-vindo ao CRM",
-        style = TextStyle(
-          fontFamily = interFamily,
-          fontSize = 24.sp,
-          fontWeight = FontWeight.Bold
-        ),
-        modifier = Modifier.padding(bottom = 6.dp)
-      )
-
-      Text(
-        text = "Crie sua conta para continuar",
-        style = TextStyle(
-          fontFamily = interFamily,
-          fontSize = 14.sp,
-          fontWeight = FontWeight.Normal
-        ),
-        modifier = Modifier.padding(bottom = 24.dp)
-      )
-
-      OutlinedTextField(
-        value = name,
-        onValueChange = { viewModel.onNameChange(it) },
-        label = { Text("Nome Completo") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-        modifier = Modifier
-          .fillMaxWidth(),
-        colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
-        ),
-      )
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-      OutlinedTextField(
-        value = email,
-        onValueChange = {
-          viewModel.onEmailChange(it)
-          isError = !isValidEmail(it)
-        },
-        label = { Text("Email") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        modifier = Modifier
-          .fillMaxWidth(),
-        colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
-        ),
-      )
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-      val roles = listOf("Cliente", "Operador")
-
-      ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth()
-      ) {
-        OutlinedTextField(
-          value = viewModel.role.collectAsState().value,
-          onValueChange = { },
-          label = { Text("Tipo de usuário") },
-          readOnly = true,
-          trailingIcon = {
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-          },
-          modifier = Modifier.menuAnchor().fillMaxWidth(),
-          colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500,
-            unfocusedBorderColor = slate200
-          ),
-        )
-        ExposedDropdownMenu(
-          expanded = expanded,
-          onDismissRequest = { expanded = false },
-          modifier = Modifier.fillMaxWidth()
-        ) {
-          roles.forEach { role ->
-            DropdownMenuItem(
-              text = { Text(role) },
-              onClick = {
-                viewModel.onRoleChange(role)
-                expanded = false
-              }
+        item {
+            Text(
+                text = "Bem-vindo ao CRM",
+                style = TextStyle(
+                    fontFamily = interFamily,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.padding(bottom = 6.dp)
             )
-          }
         }
-      }
 
-      Spacer(modifier = Modifier.height(16.dp))
-
-      val estados = listOf(
-        "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
-        "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba",
-        "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul",
-        "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
-      )
-      var expandedEstados by remember { mutableStateOf(false) }
-
-      ExposedDropdownMenuBox(
-        expanded = expandedEstados,
-        onExpandedChange = { expandedEstados = !expandedEstados },
-        modifier = Modifier.fillMaxWidth()
-      ) {
-        OutlinedTextField(
-          value = viewModel.state.collectAsState().value,
-          onValueChange = { },
-          label = { Text("Estado") },
-          readOnly = true,
-          trailingIcon = {
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEstados)
-          },
-          modifier = Modifier.menuAnchor().fillMaxWidth(),
-          colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500,
-            unfocusedBorderColor = slate200
-          ),
-        )
-        ExposedDropdownMenu(
-          expanded = expandedEstados,
-          onDismissRequest = { expandedEstados = false },
-          modifier = Modifier.fillMaxWidth()
-        ) {
-          estados.forEach { estado ->
-            DropdownMenuItem(
-              text = { Text(estado) },
-              onClick = {
-                viewModel.onEstadoChange(estado)
-                expandedEstados = false
-              }
+        item {
+            Text(
+                text = "Crie sua conta para continuar",
+                style = TextStyle(
+                    fontFamily = interFamily,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal
+                ),
+                modifier = Modifier.padding(bottom = 24.dp)
             )
-          }
-        }
-      }
-
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-      ) {
-        Checkbox(
-          checked = viewModel.vip.collectAsState().value,
-          onCheckedChange = { viewModel.onVipChange(it) }
-        )
-        Text("Cliente VIP")
-      }
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-      OutlinedTextField(
-        value = password,
-        onValueChange = { viewModel.onPasswordChange(it) },
-        label = { Text("Password") },
-        singleLine = true,
-        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        trailingIcon = {
-          val image = if (passwordVisible)
-            Icons.Filled.Visibility
-          else Icons.Filled.VisibilityOff
-
-          val description = if (passwordVisible) "Hide password" else "Show password"
-
-          IconButton(onClick = { passwordVisible = !passwordVisible }) {
-            Icon(imageVector = image, description)
-          }
-        },
-        colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
-        ),
-        modifier = Modifier.fillMaxWidth()
-      )
-
-      Spacer(modifier = Modifier.height(24.dp))
-
-      Button(
-        onClick = { viewModel.register() },
-        modifier = Modifier
-          .fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-          containerColor = slate600,
-        ),
-        shape = RoundedCornerShape(8.dp)
-      ) {
-        Text(
-          text ="Realizar cadastro",
-          style = TextStyle(
-            fontFamily = interFamily,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal
-          )
-        )
-      }
-
-      Spacer(modifier = Modifier.height(24.dp))
-
-      when (val state = authState) {
-        is AuthUIState.Loading -> {
-          CircularProgressIndicator()
         }
 
-        is AuthUIState.Error -> {
-          Text("Erro: ${state.message}", color = MaterialTheme.colorScheme.error)
+        item {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { viewModel.onNameChange(it) },
+                label = { Text("Nome Completo") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = indigo500,
+                    unfocusedBorderColor = slate200
+                ),
+            )
         }
 
-        is AuthUIState.Success -> {
-          LaunchedEffect(state.role) {
-            when (state.role) {
-              "Cliente" -> navController.navigate(AppRoutes.CLIENT_HOME) {
-                popUpTo(AppRoutes.REGISTER) { inclusive = true }
-              }
-              "Operador" -> navController.navigate(AppRoutes.OPERATOR_HOME) {
-                popUpTo(AppRoutes.REGISTER) { inclusive = true }
-              }
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            OutlinedTextField(
+                value = email,
+                onValueChange = {
+                    viewModel.onEmailChange(it)
+                    isError = !isValidEmail(it)
+                },
+                label = { Text("Email") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = indigo500,
+                    unfocusedBorderColor = slate200
+                ),
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            val roles = listOf("Cliente", "Operador")
+
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = viewModel.role.collectAsState().value,
+                    onValueChange = { },
+                    label = { Text("Tipo de usuário") },
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = indigo500,
+                        unfocusedBorderColor = slate200
+                    ),
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    roles.forEach { role ->
+                        DropdownMenuItem(
+                            text = { Text(role) },
+                            onClick = {
+                                viewModel.onRoleChange(role)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
             }
-          }
         }
 
-        is AuthUIState.Idle -> { }
-      }
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            val estados = listOf(
+                "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
+                "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba",
+                "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul",
+                "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
+            )
+            var expandedEstados by remember { mutableStateOf(false) }
+
+            ExposedDropdownMenuBox(
+                expanded = expandedEstados,
+                onExpandedChange = { expandedEstados = !expandedEstados },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = viewModel.state.collectAsState().value,
+                    onValueChange = { },
+                    label = { Text("Estado") },
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEstados)
+                    },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = indigo500,
+                        unfocusedBorderColor = slate200
+                    ),
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedEstados,
+                    onDismissRequest = { expandedEstados = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    estados.forEach { estado ->
+                        DropdownMenuItem(
+                            text = { Text(estado) },
+                            onClick = {
+                                viewModel.onEstadoChange(estado)
+                                expandedEstados = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = viewModel.vip.collectAsState().value,
+                    onCheckedChange = { viewModel.onVipChange(it) }
+                )
+                Text("Cliente VIP")
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            OutlinedTextField(
+                value = password,
+                onValueChange = { viewModel.onPasswordChange(it) },
+                label = { Text("Password") },
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    val image = if (passwordVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
+
+                    val description = if (passwordVisible) "Hide password" else "Show password"
+
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, description)
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = indigo500,
+                    unfocusedBorderColor = slate200
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        item {
+            Button(
+                onClick = { viewModel.register() },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = slate600,
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = "Realizar cadastro",
+                    style = TextStyle(
+                        fontFamily = interFamily,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                )
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        item {
+            when (val state = authState) {
+                is AuthUIState.Loading -> {
+                    CircularProgressIndicator()
+                }
+
+                is AuthUIState.Error -> {
+                    Text("Erro: ${state.message}", color = MaterialTheme.colorScheme.error)
+                }
+
+                is AuthUIState.Success -> {
+                    LaunchedEffect(state.role) {
+                        when (state.role) {
+                            "Cliente" -> navController.navigate(AppRoutes.CLIENT_HOME) {
+                                popUpTo(AppRoutes.REGISTER) { inclusive = true }
+                            }
+                            "Operador" -> navController.navigate(AppRoutes.OPERATOR_HOME) {
+                                popUpTo(AppRoutes.REGISTER) { inclusive = true }
+                            }
+                        }
+                    }
+                }
+
+                is AuthUIState.Idle -> {}
+            }
+        }
     }
   }
 }

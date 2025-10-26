@@ -313,6 +313,7 @@ fun BottomNavigation(
     onCampaignsClick: () -> Unit,
     onLogoutClick: () -> Unit,
     isClientsActive: Boolean = false,
+    isCampaignsActive: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -352,14 +353,14 @@ fun BottomNavigation(
             ) {
                 Icon(
                     imageVector = Icons.Default.Campaign,
-                    contentDescription = "Campanhas",
-                    tint = slate400,
+                    contentDescription = "Operações",
+                    tint = if (isCampaignsActive) purple500 else slate400,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Campanhas",
-                    color = slate400,
+                    text = "Operações",
+                    color = if (isCampaignsActive) purple500 else slate400,
                     fontSize = 12.sp
                 )
             }

@@ -23,10 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.model.Message
-import br.com.savedra.challengecrm.model.MessageType
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.ClientMessageViewModel
-import br.com.savedra.challengecrm.viewmodel.MessageFilter
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,9 +35,6 @@ fun ClientHomeScreen(
     onLogoutClick: () -> Unit = {},
     viewModel: ClientMessageViewModel = viewModel()
 ) {
-    val messages by viewModel.filteredMessages.collectAsState()
-    val selectedFilter by viewModel.selectedFilter.collectAsState()
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -73,39 +68,10 @@ fun ClientHomeScreen(
                     .padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilterTab(
-                    text = "Tudo",
-                    isSelected = selectedFilter == MessageFilter.ALL,
-                    onClick = { viewModel.setFilter(MessageFilter.ALL) }
-                )
-                FilterTab(
-                    text = "Mensagens",
-                    isSelected = selectedFilter == MessageFilter.MESSAGES,
-                    onClick = { viewModel.setFilter(MessageFilter.MESSAGES) }
-                )
-                FilterTab(
-                    text = "Campanhas",
-                    isSelected = selectedFilter == MessageFilter.CAMPAIGNS,
-                    onClick = { viewModel.setFilter(MessageFilter.CAMPAIGNS) }
-                )
+
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Messages List
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(messages) { message ->
-                    MessageCard(
-                        message = message,
-                        onClick = { onMessageClick(message) }
-                    )
-                }
-            }
         }
 
         // Bottom Navigation
@@ -138,82 +104,6 @@ fun FilterTab(
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
-    }
-}
-
-@Composable
-fun MessageCard(
-    message: Message,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = white),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        when (message.type) {
-                            MessageType.MESSAGE -> blue100
-                            MessageType.CAMPAIGN -> purple100
-                        },
-                        CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = when (message.type) {
-                        MessageType.MESSAGE -> Icons.Default.Chat
-                        MessageType.CAMPAIGN -> Icons.Default.LocationOn
-                    },
-                    contentDescription = message.type.name,
-                    tint = when (message.type) {
-                        MessageType.MESSAGE -> indigo500
-                        MessageType.CAMPAIGN -> purple500
-                    },
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Message Info
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = message.sender,
-                    fontSize = 14.sp,
-                    color = slate600
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = message.subject,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate800
-                )
-            }
-
-            // Timestamp
-            Text(
-                text = formatTimestamp(message.timestamp),
-                fontSize = 12.sp,
-                color = slate500
-            )
-        }
     }
 }
 

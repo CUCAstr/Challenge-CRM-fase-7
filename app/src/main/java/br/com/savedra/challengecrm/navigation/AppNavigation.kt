@@ -6,11 +6,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import br.com.savedra.challengecrm.ui.view.ChatScreen
 import br.com.savedra.challengecrm.ui.view.ClientHomeScreen
 import br.com.savedra.challengecrm.ui.view.LoginScreen
 import br.com.savedra.challengecrm.ui.view.OperatorHomeScreen
 import br.com.savedra.challengecrm.ui.view.RegisterScreen
+import br.com.savedra.challengecrm.ui.view.OperationsScreen
 
 object AppRoutes {
     const val LOGIN = "login"
@@ -18,6 +18,7 @@ object AppRoutes {
     const val CLIENT_HOME = "clientHome"
     const val OPERATOR_HOME = "operatorHome"
     const val CHAT = "chat"
+    const val OPERATIONS = "operations"
 }
 
 @Composable
@@ -48,7 +49,21 @@ fun AppNavigation() {
                     navController.navigate("${AppRoutes.CHAT}/${customer.id}/${customer.name}")
                 },
                 onCampaignsClick = {
-                    // TODO: Navigate to campaigns screen
+                    navController.navigate(AppRoutes.OPERATIONS)
+                },
+                onLogoutClick = {
+                    navController.navigate(AppRoutes.LOGIN) {
+                        popUpTo(AppRoutes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable(AppRoutes.OPERATIONS) {
+            OperationsScreen(
+                onClientsClick = {
+                    navController.navigate(AppRoutes.OPERATOR_HOME) {
+                        popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
+                    }
                 },
                 onLogoutClick = {
                     navController.navigate(AppRoutes.LOGIN) {
@@ -66,13 +81,13 @@ fun AppNavigation() {
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: ""
             val userName = backStackEntry.arguments?.getString("userName") ?: ""
-            ChatScreen(
-                userId = userId,
-                userName = userName,
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+//            ChatScreen(
+//                userId = userId,
+//                userName = userName,
+//                onBackClick = {
+//                    navController.popBackStack()
+//                }
+//            )
         }
     }
 }
