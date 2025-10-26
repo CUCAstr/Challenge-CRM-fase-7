@@ -26,10 +26,8 @@ import java.util.*
 fun CustomerDetailsModal(
     customer: User,
     onDismiss: () -> Unit,
-    onSendMessage: () -> Unit,
-    onAddNote: (String) -> Unit
+    onSendMessage: () -> Unit
 ) {
-    var newNote by remember { mutableStateOf("") }
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     Dialog(onDismissRequest = onDismiss) {
@@ -100,96 +98,6 @@ fun CustomerDetailsModal(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Anotações Section
-                Text(
-                    text = "Anotações",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Existing Notes
-                if (customer.notes.isEmpty()) {
-                    Text(
-                        text = "Nenhuma anotação ainda.",
-                        fontSize = 14.sp,
-                        color = slate500,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                slate100,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .padding(12.dp)
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 120.dp)
-                    ) {
-                        items(customer.notes) { note ->
-                            Text(
-                                text = note,
-                                fontSize = 14.sp,
-                                color = slate700,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        slate100,
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(12.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // New Note Input
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextField(
-                        value = newNote,
-                        onValueChange = { newNote = it },
-                        placeholder = { Text("Nova anotação...", color = slate400) },
-                        modifier = Modifier.weight(1f),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = slate100,
-                            unfocusedContainerColor = slate100,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
-                        onClick = {
-                            if (newNote.isNotBlank()) {
-                                onAddNote(newNote)
-                                newNote = ""
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = slate600
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "Salvar",
-                            color = white,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
                 // Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -204,7 +112,7 @@ fun CustomerDetailsModal(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = "Enviar Mensagem",
+                            text = "Chat",
                             color = white,
                             fontSize = 14.sp
                         )

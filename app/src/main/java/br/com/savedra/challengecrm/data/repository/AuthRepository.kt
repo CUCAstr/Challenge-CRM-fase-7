@@ -1,7 +1,9 @@
 package br.com.savedra.challengecrm.data.repository
 
+import br.com.savedra.challengecrm.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -30,7 +32,8 @@ class AuthRepository(
       "uid" to firebaseUser.uid,
       "email" to email,
       "name" to name,
-      "role" to role
+      "role" to role,
+      "memberSince" to FieldValue.serverTimestamp()
     )
 
     firestore.collection("users").document(firebaseUser.uid)
@@ -41,6 +44,19 @@ class AuthRepository(
   suspend fun getUserRole(uid: String): String? {
     val document = firestore.collection("users").document(uid).get().await()
     return document.getString("role")
+  }
+
+  suspend fun getUsers(): List<User> {
+    val snapshot = firestore.collection("users").get().await()
+    return snapshot.documents.map { document ->
+      User(
+        id = document.id,
+        name = document.getString("name") ?: "",
+        email = document.getString("email") ?: "",
+        role = document.getString("role") ?: "",
+        memberSince = document.getDate("memberSince")
+      )
+    }
   }
 
   fun logout() {

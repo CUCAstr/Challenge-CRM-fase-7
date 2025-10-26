@@ -1,9 +1,11 @@
 package br.com.savedra.challengecrm.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import br.com.savedra.challengecrm.ui.view.ChatScreen
 import br.com.savedra.challengecrm.ui.view.ClientHomeScreen
 import br.com.savedra.challengecrm.ui.view.LoginScreen
@@ -30,10 +32,8 @@ fun AppNavigation() {
         }
         composable(AppRoutes.CLIENT_HOME) {
             ClientHomeScreen(
-                onMessageClick = { message ->
-                    if (message.type == br.com.savedra.challengecrm.model.MessageType.MESSAGE) {
-                        navController.navigate(AppRoutes.CHAT)
-                    }
+                onMessageClick = { 
+                    navController.navigate("${AppRoutes.CHAT}/operadorId/Operador")
                 },
                 onLogoutClick = {
                     navController.navigate(AppRoutes.LOGIN) {
@@ -44,6 +44,9 @@ fun AppNavigation() {
         }
         composable(AppRoutes.OPERATOR_HOME) {
             OperatorHomeScreen(
+                onCustomerClick = { customer ->
+                    navController.navigate("${AppRoutes.CHAT}/${customer.id}/${customer.name}")
+                },
                 onCampaignsClick = {
                     // TODO: Navigate to campaigns screen
                 },
@@ -54,8 +57,18 @@ fun AppNavigation() {
                 }
             )
         }
-        composable(AppRoutes.CHAT) {
+        composable(
+            route = "${AppRoutes.CHAT}/{userId}/{userName}",
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType },
+                navArgument("userName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            val userName = backStackEntry.arguments?.getString("userName") ?: ""
             ChatScreen(
+                userId = userId,
+                userName = userName,
                 onBackClick = {
                     navController.popBackStack()
                 }

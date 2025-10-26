@@ -30,23 +30,13 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    operatorName: String = "Operador Silva",
+    userId: String,
+    userName: String,
     onBackClick: () -> Unit = {},
     viewModel: ClientMessageViewModel = viewModel()
 ) {
     var messageText by remember { mutableStateOf("") }
-    val messages by viewModel.messages.collectAsState()
     val listState = rememberLazyListState()
-    
-    // Filter only MESSAGE type for chat
-    val chatMessages = messages.filter { it.type == MessageType.MESSAGE }
-    
-    // Auto scroll to bottom when new messages arrive
-    LaunchedEffect(chatMessages.size) {
-        if (chatMessages.isNotEmpty()) {
-            listState.animateScrollToItem(chatMessages.size - 1)
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -73,9 +63,9 @@ fun ChatScreen(
                         .clickable { onBackClick() },
                     tint = slate600
                 )
-                
+
                 Spacer(modifier = Modifier.width(16.dp))
-                
+
                 // Avatar
                 Box(
                     modifier = Modifier
@@ -84,18 +74,18 @@ fun ChatScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = operatorName.first().toString().uppercase(),
+                        text = userName.first().toString().uppercase(),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = slate600
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.width(12.dp))
-                
+
                 Column {
                     Text(
-                        text = operatorName,
+                        text = userName,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = slate800
@@ -119,12 +109,7 @@ fun ChatScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
-            items(chatMessages) { message ->
-                ChatBubble(
-                    message = message,
-                    isFromUser = message.sender == "Cliente"
-                )
-            }
+
         }
 
         // Message Input
@@ -152,9 +137,9 @@ fun ChatScreen(
                     ),
                     shape = RoundedCornerShape(20.dp)
                 )
-                
+
                 Spacer(modifier = Modifier.width(8.dp))
-                
+
                 FloatingActionButton(
                     onClick = {
                         if (messageText.isNotBlank()) {

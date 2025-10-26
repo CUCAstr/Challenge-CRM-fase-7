@@ -78,7 +78,7 @@ fun OperatorHomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal  = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -142,10 +142,7 @@ fun OperatorHomeScreen(
                 showCustomerDetails = false
                 selectedCustomer = null
             },
-            onSendMessage = { /* TODO: Implement send message */ },
-            onAddNote = { note ->
-                viewModel.addNoteToCustomer(selectedCustomer!!.id, note)
-            }
+            onSendMessage = { onCustomerClick(selectedCustomer!!) }
         )
     }
 }
