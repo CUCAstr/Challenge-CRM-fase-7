@@ -121,7 +121,7 @@ fun CustomerDetailsModal(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Segmento: ${customer.segmento}",
+                    text = "Segmento: ${customer.segment}",
                     fontSize = 14.sp,
                     color = slate700
                 )

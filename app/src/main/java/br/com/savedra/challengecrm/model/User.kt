@@ -8,7 +8,7 @@ data class User(
     val email: String = "",
     val role: String = "",
     val estado: String = "",
-    val segmento: String = "",
+    val segment: String = "",
     val score: Int = 0,
     val status: String = "",
     val memberSince: Date? = null,

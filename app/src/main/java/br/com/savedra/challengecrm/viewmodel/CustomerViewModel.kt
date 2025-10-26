@@ -18,8 +18,8 @@ class CustomerViewModel : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _segmentoFilter = MutableStateFlow("Todos")
-    val segmentoFilter: StateFlow<String> = _segmentoFilter.asStateFlow()
+    private val _segmentFilter = MutableStateFlow("Todos")
+    val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
 
     private val _stateFilter = MutableStateFlow("Todos")
     val stateFilter: StateFlow<String> = _stateFilter.asStateFlow()
@@ -47,8 +47,8 @@ class CustomerViewModel : ViewModel() {
         filterCustomers()
     }
 
-    fun updateSegmentoFilter(filter: String) {
-        _segmentoFilter.value = filter
+    fun updateSegmentFilter(filter: String) {
+        _segmentFilter.value = filter
         filterCustomers()
     }
 
@@ -59,16 +59,16 @@ class CustomerViewModel : ViewModel() {
 
     private fun filterCustomers() {
         val query = _searchQuery.value.lowercase()
-        val segmentoFilter = _segmentoFilter.value
+        val segmentFilter = _segmentFilter.value
         val stateFilter = _stateFilter.value
 
         val filtered = _allCustomers.value.filter { customer ->
             val nameMatches = customer.name.lowercase().contains(query)
             val statusMatches = customer.status.lowercase().contains(query)
 
-            val segmentoMatches = when (segmentoFilter) {
+            val segmentMatches = when (segmentFilter) {
                 "Todos" -> true
-                else -> customer.segmento.equals(segmentoFilter, ignoreCase = true)
+                else -> customer.segment.equals(segmentFilter, ignoreCase = true)
             }
 
             val stateMatches = when (stateFilter) {
@@ -76,7 +76,7 @@ class CustomerViewModel : ViewModel() {
                 else -> customer.estado.equals(stateFilter, ignoreCase = true)
             }
 
-            nameMatches && segmentoMatches && stateMatches && statusMatches
+            nameMatches && segmentMatches && stateMatches && statusMatches
         }
 
         _filteredCustomers.value = filtered

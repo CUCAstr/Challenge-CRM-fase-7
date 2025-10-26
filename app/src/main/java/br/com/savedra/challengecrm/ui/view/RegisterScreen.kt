@@ -232,23 +232,23 @@ fun RegisterScreen(
         }
 
         item {
-            val segmentos = listOf(
+            val segments = listOf(
                 "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX"
             )
-            var expandedSegmento by remember { mutableStateOf(false) }
+            var expandedSegment by remember { mutableStateOf(false) }
 
             ExposedDropdownMenuBox(
-                expanded = expandedSegmento,
-                onExpandedChange = { expandedSegmento = !expandedSegmento },
+                expanded = expandedSegment,
+                onExpandedChange = { expandedSegment = !expandedSegment },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
-                    value = viewModel.segmento.collectAsState().value,
+                    value = viewModel.segment.collectAsState().value,
                     onValueChange = { },
                     label = { Text("Segmento") },
                     readOnly = true,
                     trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegmento)
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment)
                     },
                     modifier = Modifier.menuAnchor().fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -257,16 +257,16 @@ fun RegisterScreen(
                     ),
                 )
                 ExposedDropdownMenu(
-                    expanded = expandedSegmento,
-                    onDismissRequest = { expandedSegmento = false },
+                    expanded = expandedSegment,
+                    onDismissRequest = { expandedSegment = false },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    segmentos.forEach { segmento ->
+                    segments.forEach { segment ->
                         DropdownMenuItem(
-                            text = { Text(segmento) },
+                            text = { Text(segment) },
                             onClick = {
-                                viewModel.onSegmentoChange(segmento)
-                                expandedSegmento = false
+                                viewModel.onSegmentChange(segment)
+                                expandedSegment = false
                             }
                         )
                     }

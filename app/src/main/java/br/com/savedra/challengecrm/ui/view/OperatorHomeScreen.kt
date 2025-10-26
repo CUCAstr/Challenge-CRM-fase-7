@@ -118,15 +118,15 @@ fun OperatorHomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    var expandedSegmento by remember { mutableStateOf(false) }
-                    val itemsSegmento = listOf(
+                    var expandedSegment by remember { mutableStateOf(false) }
+                    val itemsSegment = listOf(
                         "Todos", "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX"
                     )
-                    var selectedSegmento by remember { mutableStateOf(itemsSegmento[0]) }
+                    var selectedSegment by remember { mutableStateOf(itemsSegment[0]) }
 
                     ExposedDropdownMenuBox(
-                        expanded = expandedSegmento,
-                        onExpandedChange = { expandedSegmento = !expandedSegmento },
+                        expanded = expandedSegment,
+                        onExpandedChange = { expandedSegment = !expandedSegment },
                         modifier = Modifier.weight(1f)
                     ) {
                         Card(
@@ -138,22 +138,22 @@ fun OperatorHomeScreen(
                                 modifier = Modifier.padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = selectedSegmento, modifier = Modifier.padding(horizontal = 8.dp))
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegmento)
+                                Text(text = selectedSegment, modifier = Modifier.padding(horizontal = 8.dp))
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment)
                             }
                         }
 
                         ExposedDropdownMenu(
-                            expanded = expandedSegmento,
-                            onDismissRequest = { expandedSegmento = false })
+                            expanded = expandedSegment,
+                            onDismissRequest = { expandedSegment = false })
                         {
-                            itemsSegmento.forEach { item ->
+                            itemsSegment.forEach { item ->
                                 DropdownMenuItem(
                                     text = { Text(text = item) },
                                     onClick = {
-                                        selectedSegmento = item
-                                        expandedSegmento = false
-                                        viewModel.updateSegmentoFilter(item)
+                                        selectedSegment = item
+                                        expandedSegment = false
+                                        viewModel.updateSegmentFilter(item)
                                     }
                                 )
                             }

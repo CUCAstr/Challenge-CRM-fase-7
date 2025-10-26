@@ -71,9 +71,6 @@ fun OperationsScreen(
                     Button(onClick = { selectedOperation = OperationType.CAMPAIGN }) {
                         Text("Campanha")
                     }
-                    Button(onClick = { selectedOperation = OperationType.MESSAGE }) {
-                        Text("Mensagem")
-                    }
                 }
             }
 
@@ -85,7 +82,6 @@ fun OperationsScreen(
                 when (selectedOperation) {
                     OperationType.INVITE -> InviteForm(viewModel)
                     OperationType.CAMPAIGN -> CampaignForm(viewModel)
-                    OperationType.MESSAGE -> MessageForm(viewModel)
                     OperationType.NONE -> {
                         Box(
                             modifier = Modifier.fillParentMaxSize(),
@@ -106,9 +102,9 @@ fun OperationsScreen(
 
 @Composable
 fun InviteForm(viewModel: OperationsViewModel) {
-    var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
+    var inviteTitle by remember { mutableStateOf("") }
+    var inviteContent by remember { mutableStateOf("") }
+    var inviteLocation by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val startDateString by viewModel.startDateString.collectAsState()
@@ -125,21 +121,21 @@ fun InviteForm(viewModel: OperationsViewModel) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Nome") },
+                value = inviteTitle,
+                onValueChange = { inviteTitle = it },
+                label = { Text("Titulo do convite") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Descrição") },
+                value = inviteContent,
+                onValueChange = { inviteContent = it },
+                label = { Text("Descrição do convite") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             DatePickerField(
-                label = "Data de Início",
+                label = "Data",
                 dateString = startDateString,
                 onDateSelected = { millis ->
                     viewModel.onStartDateSelected(millis)
@@ -149,9 +145,9 @@ fun InviteForm(viewModel: OperationsViewModel) {
                 }
             )
             OutlinedTextField(
-                value = location,
-                onValueChange = { location = it },
-                label = { Text("Local") },
+                value = inviteLocation,
+                onValueChange = { inviteLocation = it },
+                label = { Text("Local de encontro") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
@@ -160,7 +156,7 @@ fun InviteForm(viewModel: OperationsViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    viewModel.sendInvite(name, description, startDateString, location)
+                    viewModel.sendInvite(inviteTitle, inviteContent, startDateString, inviteLocation)
                     Toast.makeText(context, "Convite enviado com sucesso!", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -173,16 +169,10 @@ fun InviteForm(viewModel: OperationsViewModel) {
 
 @Composable
 fun CampaignForm(viewModel: OperationsViewModel) {
-    val textCampaignToast = "Sua campanha foi enviada com sucesso!"
-    val durationCampaignToast = Toast.LENGTH_SHORT
-    val toastCompaign = Toast.makeText(
-        LocalContext.current,
-        textCampaignToast,
-        durationCampaignToast
-    )
+    var campaignName by remember { mutableStateOf("") }
+    var campaignDescription by remember { mutableStateOf("") }
 
-    var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     val startDateString by viewModel.startDateString.collectAsState()
     val startDateMillis by viewModel.startDateMillis.collectAsState()
@@ -200,16 +190,16 @@ fun CampaignForm(viewModel: OperationsViewModel) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Nome da Campanha") },
+                value = campaignName,
+                onValueChange = { campaignName = it },
+                label = { Text("Título da campanha") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
             OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Descrição") },
+                value = campaignDescription,
+                onValueChange = { campaignDescription = it },
+                label = { Text("Descrição da camapnha") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
             )
@@ -244,52 +234,13 @@ fun CampaignForm(viewModel: OperationsViewModel) {
             SegmentFilters(viewModel = viewModel)
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { viewModel.sendCampaign(name, description, startDateString, endDateString); toastCompaign.show() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Enviar Campanha")
-            }
-        }
-    }
-}
-
-@Composable
-fun MessageForm(viewModel: OperationsViewModel) {
-    var title by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf("") }
-    val context = LocalContext.current
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = white)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Título") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
-            )
-            OutlinedTextField(
-                value = message,
-                onValueChange = { message = it },
-                label = { Text("Mensagem") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            SegmentFilters(viewModel = viewModel)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
                 onClick = {
-                    viewModel.sendMessage(title, message)
-                    Toast.makeText(context, "Mensagem enviada com sucesso!", Toast.LENGTH_SHORT).show()
+                    viewModel.sendCampaign(campaignName, campaignDescription, startDateString, endDateString);
+                    Toast.makeText(context, "Convite enviado com sucesso!", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Enviar Mensagem")
+                Text("Enviar Campanha")
             }
         }
     }
@@ -303,7 +254,7 @@ fun SegmentFilters(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "Segmentação",
+            text = "Filtros de envio",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = slate800
@@ -402,6 +353,5 @@ fun SegmentFilters(
 enum class OperationType {
     NONE,
     INVITE,
-    CAMPAIGN,
-    MESSAGE
+    CAMPAIGN
 }
