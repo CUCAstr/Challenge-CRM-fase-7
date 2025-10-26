@@ -239,6 +239,11 @@ fun OperatorHomeScreen(
             onSendMessage = {
                 showCustomerDetails = false
                 onCustomerClick(selectedCustomer!!)
+            },
+            onSaveNotes = { notes ->
+                viewModel.saveNotes(selectedCustomer!!.id, notes)
+                showCustomerDetails = false
+                selectedCustomer = null
             }
         )
     }

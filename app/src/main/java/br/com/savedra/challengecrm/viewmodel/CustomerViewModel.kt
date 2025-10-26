@@ -79,4 +79,11 @@ class CustomerViewModel : ViewModel() {
         _filteredCustomers.value = filtered
     }
 
+    fun saveNotes(userId: String, notes: String) {
+        viewModelScope.launch {
+            authRepository.updateUserNotes(userId, notes)
+            loadCustomers()
+        }
+    }
+
 }

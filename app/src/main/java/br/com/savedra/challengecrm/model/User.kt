@@ -9,5 +9,6 @@ data class User(
     val role: String = "",
     val estado: String = "",
     val vip: Boolean = false,
-    val memberSince: Date? = null
+    val memberSince: Date? = null,
+    val notes: String = ""
 )

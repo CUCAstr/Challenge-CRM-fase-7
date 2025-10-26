@@ -35,7 +35,8 @@ class AuthRepository(
       "role" to role,
       "estado" to estado,
       "vip" to vip,
-      "memberSince" to FieldValue.serverTimestamp()
+      "memberSince" to FieldValue.serverTimestamp(),
+      "notes" to ""
     )
 
     firestore.collection("users").document(firebaseUser.uid)
@@ -58,9 +59,16 @@ class AuthRepository(
         role = document.getString("role") ?: "",
         estado = document.getString("estado") ?: "",
         vip = document.getBoolean("vip") ?: false,
-        memberSince = document.getDate("memberSince")
+        memberSince = document.getDate("memberSince"),
+        notes = document.getString("notes") ?: ""
       )
     }
+  }
+
+  suspend fun updateUserNotes(userId: String, notes: String) {
+    firestore.collection("users").document(userId)
+      .update("notes", notes)
+      .await()
   }
 
   fun logout() {
