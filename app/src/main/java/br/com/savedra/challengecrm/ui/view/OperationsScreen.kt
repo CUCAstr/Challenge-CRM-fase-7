@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -15,8 +16,14 @@ import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.theme.slate800
 import br.com.savedra.challengecrm.ui.theme.white
 import br.com.savedra.challengecrm.viewmodel.OperationsViewModel
-
 import androidx.compose.foundation.lazy.LazyColumn
+import java.util.Locale
+import android.widget.Toast
+import java.text.SimpleDateFormat
+import android.app.DatePickerDialog
+import androidx.compose.ui.platform.LocalContext
+import java.time.Instant
+import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +33,20 @@ fun OperationsScreen(
     onLogoutClick: () -> Unit = {},
 ) {
     var selectedOperation by remember { mutableStateOf(OperationType.NONE) }
+    val showConfirmationPopup by viewModel.showConfirmationPopup.collectAsState()
+
+    if (showConfirmationPopup) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissConfirmationPopup() },
+            title = { Text("Sucesso") },
+            text = { Text("A campanha foi enviada com sucesso!") },
+            confirmButton = {
+                Button(onClick = { viewModel.dismissConfirmationPopup() }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -101,8 +122,14 @@ fun OperationsScreen(
 fun InviteForm(viewModel: OperationsViewModel) {
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var eventDate by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
+
+    val startDateString by viewModel.startDateString.collectAsState()
+    val todayInMillis = remember {
+        Instant.now().atZone(ZoneId.of("UTC")).toLocalDate().atStartOfDay()
+            .toInstant(ZoneId.of("UTC").rules.getOffset(Instant.now()))
+            .toEpochMilli()
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -122,11 +149,16 @@ fun InviteForm(viewModel: OperationsViewModel) {
                 label = { Text("Descrição") },
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = eventDate,
-                onValueChange = { eventDate = it },
-                label = { Text("Data do Evento") },
-                modifier = Modifier.fillMaxWidth()
+            DatePickerField(
+                label = "Data de Início",
+                dateString = startDateString,
+                onDateSelected = { millis ->
+                    viewModel.onStartDateSelected(millis)
+                },
+                // Regra 1: Só permite selecionar de hoje em diante
+                dateValidator = { millis ->
+                    millis >= todayInMillis
+                }
             )
             OutlinedTextField(
                 value = location,
@@ -154,6 +186,15 @@ fun CampaignForm(viewModel: OperationsViewModel) {
     var startDate by remember { mutableStateOf("") }
     var endDate by remember { mutableStateOf("") }
 
+    val startDateString by viewModel.startDateString.collectAsState()
+    val startDateMillis by viewModel.startDateMillis.collectAsState()
+    val endDateString by viewModel.endDateString.collectAsState()
+    val todayInMillis = remember {
+        Instant.now().atZone(ZoneId.of("UTC")).toLocalDate().atStartOfDay()
+            .toInstant(ZoneId.of("UTC").rules.getOffset(Instant.now()))
+            .toEpochMilli()
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -172,23 +213,44 @@ fun CampaignForm(viewModel: OperationsViewModel) {
                 label = { Text("Descrição") },
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(
-                value = startDate,
-                onValueChange = { startDate = it },
-                label = { Text("Data de Início") },
-                modifier = Modifier.fillMaxWidth()
+            DatePickerField(
+                label = "Data de Início",
+                dateString = startDateString,
+                onDateSelected = { millis ->
+                    viewModel.onStartDateSelected(millis)
+                },
+                // Regra 1: Só permite selecionar de hoje em diante
+                dateValidator = { millis ->
+                    millis >= todayInMillis
+                }
             )
-            OutlinedTextField(
-                value = endDate,
-                onValueChange = { endDate = it },
-                label = { Text("Data de Fim") },
-                modifier = Modifier.fillMaxWidth()
+            DatePickerField(
+                label = "Data de Fim",
+                dateString = endDateString,
+                onDateSelected = { millis ->
+                    viewModel.onEndDateSelected(millis)
+                },
+                // Regra 2: Só permite selecionar datas que sejam:
+                // a) Maiores ou iguais a hoje
+                // b) Maiores ou iguais à data de início (se ela existir)
+                dateValidator = { millisParaValidar ->
+
+                    val isAfterToday = millisParaValidar >= todayInMillis
+
+                    // Pega a data de início do ViewModel
+                    val isAfterStartDate = startDateMillis?.let { start ->
+                        millisParaValidar >= start // A data deve ser >= início
+                    } ?: true // Se a data de início for nula, não aplica esta regra
+
+                    // A data só é válida se passar nas DUAS regras
+                    isAfterToday && isAfterStartDate
+                }
             )
             Spacer(modifier = Modifier.height(16.dp))
             SegmentFilters(viewModel = viewModel)
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { /* Handle save */ },
+                onClick = { viewModel.sendCampaign(name, description, startDate, endDate) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Enviar Campanha")

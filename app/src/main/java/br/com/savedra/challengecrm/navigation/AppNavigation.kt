@@ -1,6 +1,7 @@
 package br.com.savedra.challengecrm.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +13,9 @@ import br.com.savedra.challengecrm.ui.view.LoginScreen
 import br.com.savedra.challengecrm.ui.view.OperatorHomeScreen
 import br.com.savedra.challengecrm.ui.view.RegisterScreen
 import br.com.savedra.challengecrm.ui.view.OperationsScreen
+import br.com.savedra.challengecrm.viewmodel.CustomerViewModel
+import br.com.savedra.challengecrm.viewmodel.OperationsViewModel
+import br.com.savedra.challengecrm.viewmodel.OperationsViewModelFactory
 
 object AppRoutes {
     const val LOGIN = "login"
@@ -25,6 +29,9 @@ object AppRoutes {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val customerViewModel: CustomerViewModel = viewModel()
+    val operationsViewModel: OperationsViewModel = viewModel(factory = OperationsViewModelFactory(customerViewModel))
+
     NavHost(navController = navController, startDestination = AppRoutes.LOGIN) {
         composable(AppRoutes.LOGIN) {
             LoginScreen(navController = navController)
@@ -46,6 +53,7 @@ fun AppNavigation() {
         }
         composable(AppRoutes.OPERATOR_HOME) {
             OperatorHomeScreen(
+                viewModel = customerViewModel,
                 onCustomerClick = { customer ->
                     navController.navigate("${AppRoutes.CHAT}/${customer.id}/${customer.name}")
                 },
@@ -61,6 +69,7 @@ fun AppNavigation() {
         }
         composable(AppRoutes.OPERATIONS) {
             OperationsScreen(
+                viewModel = operationsViewModel,
                 onClientsClick = {
                     navController.navigate(AppRoutes.OPERATOR_HOME) {
                         popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
