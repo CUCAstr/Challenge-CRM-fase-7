@@ -106,6 +106,7 @@ fun InviteForm(viewModel: OperationsViewModel) {
     var description by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
     val startDateString by viewModel.startDateString.collectAsState()
     val todayInMillis = remember {
         Instant.now().atZone(ZoneId.of("UTC")).toLocalDate().atStartOfDay()
@@ -151,7 +152,10 @@ fun InviteForm(viewModel: OperationsViewModel) {
             SegmentFilters(viewModel = viewModel)
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { /* Handle save */ },
+                onClick = {
+                    viewModel.sendInvite(name, description, startDateString, location)
+                    Toast.makeText(context, "Convite enviado com sucesso!", Toast.LENGTH_SHORT).show()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Enviar Convite")
@@ -172,8 +176,6 @@ fun CampaignForm(viewModel: OperationsViewModel) {
 
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var startDate by remember { mutableStateOf("") }
-    var endDate by remember { mutableStateOf("") }
 
     val startDateString by viewModel.startDateString.collectAsState()
     val startDateMillis by viewModel.startDateMillis.collectAsState()
@@ -233,7 +235,7 @@ fun CampaignForm(viewModel: OperationsViewModel) {
             SegmentFilters(viewModel = viewModel)
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { viewModel.sendCampaign(name, description, startDate, endDate); toastCompaign.show() },
+                onClick = { viewModel.sendCampaign(name, description, startDateString, endDateString); toastCompaign.show() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Enviar Campanha")

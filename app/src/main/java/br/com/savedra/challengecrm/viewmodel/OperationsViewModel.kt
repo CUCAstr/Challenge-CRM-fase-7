@@ -3,7 +3,9 @@ package br.com.savedra.challengecrm.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.savedra.challengecrm.data.repository.CampaignRepository
+import br.com.savedra.challengecrm.data.repository.InviteRepository
 import br.com.savedra.challengecrm.model.Campaign
+import br.com.savedra.challengecrm.model.Invite
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +19,7 @@ import java.time.format.DateTimeFormatter
 class OperationsViewModel(private val customerViewModel: CustomerViewModel) : ViewModel() {
 
     private val campaignRepository = CampaignRepository(FirebaseFirestore.getInstance())
+    private val inviteRepository = InviteRepository()
 
     private val _startDateString = MutableStateFlow("")
     val startDateString = _startDateString.asStateFlow()
@@ -66,9 +69,14 @@ class OperationsViewModel(private val customerViewModel: CustomerViewModel) : Vi
     fun sendCampaign(name: String, description: String, startDate: String, endDate: String) {
         viewModelScope.launch {
             val campaign = Campaign(name, description, startDate, endDate)
-            campaignRepository.addCampaign(campaign)
+            campaignRepository.sendCampaign(campaign, onSuccess = {}, onFailure = {})
             val filteredCustomers = customerViewModel.filteredCustomers.first()
         }
+    }
+
+    fun sendInvite(name: String, description: String, date: String, location: String) {
+        val invite = Invite(name, description, date, location)
+        inviteRepository.sendInvite(invite, onSuccess = {}, onFailure = {})
     }
 
     fun convertMillisToDateString(millis: Long): String {
