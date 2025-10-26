@@ -33,6 +33,9 @@ import br.com.savedra.challengecrm.ui.theme.slate600
 import br.com.savedra.challengecrm.viewmodel.AuthUIState
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 @Composable
 fun LoginScreen(
   modifier: Modifier = Modifier,
@@ -45,6 +48,8 @@ fun LoginScreen(
 
   var isError by remember { mutableStateOf(false) }
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
+  val context = LocalContext.current
 
   Box(
     modifier = Modifier
@@ -162,7 +167,7 @@ fun LoginScreen(
 
       when (val state = authState) {
         is AuthUIState.Loading -> {
-          CircularProgressIndicator()
+          Toast.makeText(context, "Realizando seu login...", Toast.LENGTH_SHORT).show()
         }
 
         is AuthUIState.Error -> {

@@ -37,6 +37,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
@@ -52,6 +55,8 @@ fun RegisterScreen(
   var isError by remember { mutableStateOf(false) }
   var expanded by remember { mutableStateOf(false) }
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
+  val context = LocalContext.current
 
   Box(
     modifier = Modifier
@@ -332,7 +337,7 @@ fun RegisterScreen(
         item {
             when (val state = authState) {
                 is AuthUIState.Loading -> {
-                    CircularProgressIndicator()
+                    Toast.makeText(context, "Realizando seu cadastro...", Toast.LENGTH_SHORT).show()
                 }
 
                 is AuthUIState.Error -> {
