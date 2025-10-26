@@ -96,6 +96,22 @@ fun CustomerDetailsModal(
                     color = slate700
                 )
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Estado: ${customer.estado}",
+                    fontSize = 14.sp,
+                    color = slate700
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "VIP: ${if (customer.vip) "Sim" else "Não"}",
+                    fontSize = 14.sp,
+                    color = slate700
+                )
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Action Buttons

@@ -156,6 +156,66 @@ fun RegisterScreen(
 
       Spacer(modifier = Modifier.height(16.dp))
 
+      val estados = listOf(
+        "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
+        "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba",
+        "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul",
+        "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
+      )
+      var expandedEstados by remember { mutableStateOf(false) }
+
+      ExposedDropdownMenuBox(
+        expanded = expandedEstados,
+        onExpandedChange = { expandedEstados = !expandedEstados },
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        OutlinedTextField(
+          value = viewModel.state.collectAsState().value,
+          onValueChange = { },
+          label = { Text("Estado") },
+          readOnly = true,
+          trailingIcon = {
+            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEstados)
+          },
+          modifier = Modifier.menuAnchor().fillMaxWidth(),
+          colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = indigo500,
+            unfocusedBorderColor = slate200
+          ),
+        )
+        ExposedDropdownMenu(
+          expanded = expandedEstados,
+          onDismissRequest = { expandedEstados = false },
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          estados.forEach { estado ->
+            DropdownMenuItem(
+              text = { Text(estado) },
+              onClick = {
+                viewModel.onEstadoChange(estado)
+                expandedEstados = false
+              }
+            )
+          }
+        }
+      }
+
+
+      Spacer(modifier = Modifier.height(16.dp))
+
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        Checkbox(
+          checked = viewModel.vip.collectAsState().value,
+          onCheckedChange = { viewModel.onVipChange(it) }
+        )
+        Text("Cliente VIP")
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+
       OutlinedTextField(
         value = password,
         onValueChange = { viewModel.onPasswordChange(it) },

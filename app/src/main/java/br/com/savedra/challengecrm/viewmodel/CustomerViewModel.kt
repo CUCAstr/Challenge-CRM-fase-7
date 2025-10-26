@@ -18,6 +18,9 @@ class CustomerViewModel : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _vipFilter = MutableStateFlow("Todos")
+    val vipFilter: StateFlow<String> = _vipFilter.asStateFlow()
+
     private val _allCustomers = MutableStateFlow<List<User>>(emptyList())
 
     private val _filteredCustomers = MutableStateFlow<List<User>>(emptyList())
@@ -41,16 +44,25 @@ class CustomerViewModel : ViewModel() {
         filterCustomers()
     }
 
+    fun updateVipFilter(filter: String) {
+        _vipFilter.value = filter
+        filterCustomers()
+    }
+
     private fun filterCustomers() {
         val query = _searchQuery.value.lowercase()
-        val filtered = if (query.isEmpty()) {
-            _allCustomers.value
-        } else {
-            _allCustomers.value.filter { customer ->
-                customer.name.lowercase().contains(query) ||
-                customer.email.lowercase().contains(query)
+        val vipFilter = _vipFilter.value
+
+        val filtered = _allCustomers.value.filter { customer ->
+            val nameMatches = customer.name.lowercase().contains(query)
+            val vipMatches = when (vipFilter) {
+                "VIP" -> customer.vip
+                "Não VIP" -> !customer.vip
+                else -> true
             }
+            nameMatches && vipMatches
         }
+
         _filteredCustomers.value = filtered
     }
 
