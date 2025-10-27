@@ -110,7 +110,7 @@ fun CreateInviteModal(
           OutlinedTextField(
             value = title,
             onValueChange = { viewModel.onNewInviteTitleChange(it) },
-            label = { Text("Título") },
+            label = { Text("Título do convite") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -125,7 +125,7 @@ fun CreateInviteModal(
           OutlinedTextField(
             value = description,
             onValueChange = { viewModel.onNewInviteDescriptionChange(it) },
-            label = { Text("Descrição") },
+            label = { Text("Descrição do convite") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -140,7 +140,7 @@ fun CreateInviteModal(
           OutlinedTextField(
             value = date,
             onValueChange = { viewModel.onNewInviteDateChange(it) },
-            label = { Text("Data") },
+            label = { Text("Data do convite") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -155,7 +155,7 @@ fun CreateInviteModal(
           OutlinedTextField(
             value = location,
             onValueChange = { viewModel.onNewInviteLocationChange(it) },
-            label = { Text("Local") },
+            label = { Text("Local do convite") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,

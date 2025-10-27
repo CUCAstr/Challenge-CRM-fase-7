@@ -452,144 +452,144 @@ fun CustomerCard(
 
 @Composable
 fun ScrollableBottomNavigation(
-  onClientsClick: () -> Unit,
-  onInvitesClick: () -> Unit,
-  onPromotionsClick: () -> Unit,
-  onCampaignsClick: () -> Unit,
-  onBannersClick: () -> Unit,
-  onLogoutClick: () -> Unit,
-  isClientsActive: Boolean = false,
-  isInvitesActive: Boolean = false,
-  isPromotionsActive: Boolean = false,
-  isCampaignsActive: Boolean = false,
-  isBannersActive: Boolean = false,
-  modifier: Modifier = Modifier
+    onClientsClick: () -> Unit,
+    onInvitesClick: () -> Unit,
+    onPromotionsClick: () -> Unit,
+    onCampaignsClick: () -> Unit,
+    onBannersClick: () -> Unit,
+    onLogoutClick: () -> Unit,
+    isClientsActive: Boolean = false,
+    isInvitesActive: Boolean = false,
+    isPromotionsActive: Boolean = false,
+    isCampaignsActive: Boolean = false,
+    isBannersActive: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
-  Card(
-    modifier = modifier.fillMaxWidth(),
-    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-    colors = CardDefaults.cardColors(containerColor = slate800)
-  ) {
-    LazyRow(
-      modifier = Modifier
-          .fillMaxWidth()
-          .padding(16.dp),
-      horizontalArrangement = Arrangement.SpaceEvenly
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = slate800)
     ) {
-      item {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.clickable { onClientsClick() }
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Start
         ) {
-          Icon(
-            imageVector = Icons.Default.Person,
-            contentDescription = "Clientes",
-            tint = if (isClientsActive) purple500 else slate400,
-            modifier = Modifier.size(24.dp)
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = "Clientes",
-            color = if (isClientsActive) purple500 else slate400,
-            fontSize = 12.sp
-          )
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onClientsClick() }.width(80.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Clientes",
+                        tint = if (isClientsActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Clientes",
+                        color = if (isClientsActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onInvitesClick() }.width(80.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Mail,
+                        contentDescription = "Convites",
+                        tint = if (isInvitesActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Convites",
+                        color = if (isInvitesActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onPromotionsClick() }.width(80.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CardGiftcard,
+                        contentDescription = "Promoções",
+                        tint = if (isPromotionsActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Promoções",
+                        color = if (isPromotionsActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onCampaignsClick() }.width(80.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Campaign,
+                        contentDescription = "Campanhas",
+                        tint = if (isCampaignsActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Campanhas",
+                        color = if (isCampaignsActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onBannersClick() }.width(80.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PhotoCameraBack,
+                        contentDescription = "Banners",
+                        tint = if (isBannersActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Banners",
+                        color = if (isBannersActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onLogoutClick() }.width(80.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = "Sair",
+                        tint = slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Sair",
+                        color = slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
         }
-      }
-      item {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.clickable { onInvitesClick() }
-        ) {
-          Icon(
-            imageVector = Icons.Default.Mail,
-            contentDescription = "Convites",
-            tint = if (isInvitesActive) purple500 else slate400,
-            modifier = Modifier.size(24.dp)
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = "Convites",
-            color = if (isInvitesActive) purple500 else slate400,
-            fontSize = 12.sp
-          )
-        }
-      }
-      item {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.clickable { onPromotionsClick() }
-        ) {
-          Icon(
-            imageVector = Icons.Default.CardGiftcard,
-            contentDescription = "Promoções",
-            tint = if (isPromotionsActive) purple500 else slate400,
-            modifier = Modifier.size(24.dp)
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = "Promoções",
-            color = if (isPromotionsActive) purple500 else slate400,
-            fontSize = 12.sp
-          )
-        }
-      }
-      item {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.clickable { onCampaignsClick() }
-        ) {
-          Icon(
-            imageVector = Icons.Default.Campaign,
-            contentDescription = "Campanhas",
-            tint = if (isCampaignsActive) purple500 else slate400,
-            modifier = Modifier.size(24.dp)
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = "Campanhas",
-            color = if (isCampaignsActive) purple500 else slate400,
-            fontSize = 12.sp
-          )
-        }
-      }
-      item {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.clickable { onBannersClick() }
-        ) {
-          Icon(
-            imageVector = Icons.Default.PhotoCameraBack,
-            contentDescription = "Banners",
-            tint = if (isBannersActive) purple500 else slate400,
-            modifier = Modifier.size(24.dp)
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = "Banners",
-            color = if (isBannersActive) purple500 else slate400,
-            fontSize = 12.sp
-          )
-        }
-      }
-      item {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.clickable { onLogoutClick() }
-        ) {
-          Icon(
-            imageVector = Icons.Default.ExitToApp,
-            contentDescription = "Sair",
-            tint = slate400,
-            modifier = Modifier.size(24.dp)
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = "Sair",
-            color = slate400,
-            fontSize = 12.sp
-          )
-        }
-      }
     }
-  }
 }
