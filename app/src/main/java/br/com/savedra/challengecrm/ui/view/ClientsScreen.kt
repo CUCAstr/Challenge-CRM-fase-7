@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.PhotoCameraBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +41,7 @@ fun OperatorHomeScreen(
     onInvitesClick: () -> Unit = {},
     onPromotionsClick: () -> Unit = {},
     onCampaignsClick: () -> Unit = {},
+    onBannersClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     viewModel: CustomerViewModel = viewModel()
 ) {
@@ -306,6 +308,7 @@ fun OperatorHomeScreen(
             onInvitesClick = onInvitesClick,
             onPromotionsClick = onPromotionsClick,
             onCampaignsClick = onCampaignsClick,
+            onBannersClick = onBannersClick,
             onLogoutClick = onLogoutClick,
             isClientsActive = true,
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -400,11 +403,13 @@ fun ScrollableBottomNavigation(
     onInvitesClick: () -> Unit,
     onPromotionsClick: () -> Unit,
     onCampaignsClick: () -> Unit,
+    onBannersClick: () -> Unit,
     onLogoutClick: () -> Unit,
     isClientsActive: Boolean = false,
     isInvitesActive: Boolean = false,
     isPromotionsActive: Boolean = false,
     isCampaignsActive: Boolean = false,
+    isBannersActive: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -490,6 +495,25 @@ fun ScrollableBottomNavigation(
                     Text(
                         text = "Campanhas",
                         color = if (isCampaignsActive) purple500 else slate400,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable { onBannersClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PhotoCameraBack,
+                        contentDescription = "Banners",
+                        tint = if (isBannersActive) purple500 else slate400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Banners",
+                        color = if (isBannersActive) purple500 else slate400,
                         fontSize = 12.sp
                     )
                 }

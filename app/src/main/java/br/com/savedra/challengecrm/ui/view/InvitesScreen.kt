@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.InsertInvitation
+import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -37,6 +38,7 @@ fun InvitesScreen(
     onClientsClick: () -> Unit = {},
     onPromotionsClick: () -> Unit = {},
     onCampaignsClick: () -> Unit = {},
+    onBannersClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     viewModel: InviteViewModel = viewModel()
 ) {
@@ -150,6 +152,7 @@ fun InvitesScreen(
                 onInvitesClick = { /* Already on invites screen */ },
                 onPromotionsClick = onPromotionsClick,
                 onCampaignsClick = onCampaignsClick,
+                onBannersClick = onBannersClick,
                 onLogoutClick = onLogoutClick,
                 isInvitesActive = true,
                 modifier = Modifier.align(Alignment.BottomCenter)
@@ -202,7 +205,7 @@ fun InviteCard(
                     .background(slate200),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.InsertInvitation, contentDescription = "Criar Convite")
+                Icon(Icons.Default.Mail, contentDescription = "Criar Convite")
             }
 
             Spacer(modifier = Modifier.width(16.dp))

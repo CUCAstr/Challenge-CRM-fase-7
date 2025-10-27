@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import br.com.savedra.challengecrm.ui.view.BannersScreen
 import br.com.savedra.challengecrm.ui.view.CampaignsScreen
 import br.com.savedra.challengecrm.ui.view.ChatScreen
 import br.com.savedra.challengecrm.ui.view.ClientHomeScreen
@@ -26,6 +27,7 @@ object AppRoutes {
     const val INVITES = "invites"
     const val PROMOTIONS = "promotions"
     const val CAMPAIGNS = "campaigns"
+    const val BANNERS = "banners"
 }
 
 @Composable
@@ -67,6 +69,9 @@ fun AppNavigation() {
                 onCampaignsClick = {
                     navController.navigate(AppRoutes.CAMPAIGNS)
                 },
+                onBannersClick = {
+                    navController.navigate(AppRoutes.BANNERS)
+                },
                 onLogoutClick = {
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.LOGIN) { inclusive = true }
@@ -87,6 +92,9 @@ fun AppNavigation() {
                 onCampaignsClick = {
                     navController.navigate(AppRoutes.CAMPAIGNS)
                 },
+                onBannersClick = {
+                    navController.navigate(AppRoutes.BANNERS)
+                },
                 onLogoutClick = {
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.LOGIN) { inclusive = true }
@@ -99,6 +107,9 @@ fun AppNavigation() {
         }
         composable(AppRoutes.CAMPAIGNS) {
             CampaignsScreen()
+        }
+        composable(AppRoutes.BANNERS) {
+            BannersScreen()
         }
         composable(
             route = "${AppRoutes.CHAT}/{userId}/{userName}",
