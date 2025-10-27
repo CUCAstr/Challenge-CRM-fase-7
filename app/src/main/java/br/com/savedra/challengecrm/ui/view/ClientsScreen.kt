@@ -37,506 +37,559 @@ import androidx.compose.material.icons.filled.PhotoCameraBack
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OperatorHomeScreen(
-    onCustomerClick: (User) -> Unit = {},
-    onInvitesClick: () -> Unit = {},
-    onPromotionsClick: () -> Unit = {},
-    onCampaignsClick: () -> Unit = {},
-    onBannersClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {},
-    viewModel: CustomerViewModel = viewModel()
+  onCustomerClick: (User) -> Unit = {},
+  onInvitesClick: () -> Unit = {},
+  onPromotionsClick: () -> Unit = {},
+  onCampaignsClick: () -> Unit = {},
+  onBannersClick: () -> Unit = {},
+  onLogoutClick: () -> Unit = {},
+  viewModel: CustomerViewModel = viewModel()
 ) {
-    val customers by viewModel.filteredCustomers.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    var showCustomerDetails by remember { mutableStateOf(false) }
-    var selectedCustomer by remember { mutableStateOf<User?>(null) }
+  val customers by viewModel.filteredCustomers.collectAsState()
+  val searchQuery by viewModel.searchQuery.collectAsState()
+  var showCustomerDetails by remember { mutableStateOf(false) }
+  var selectedCustomer by remember { mutableStateOf<User?>(null) }
 
-    LaunchedEffect(Unit) {
-        viewModel.updateSegmentFilter("Todos")
-        viewModel.updateStateFilter("Todos")
-        viewModel.updateStatusFilter("Todos")
-    }
+  LaunchedEffect(Unit) {
+    viewModel.updateSegmentFilter("Todos")
+    viewModel.updateStateFilter("Todos")
+    viewModel.updateStatusFilter("Todos")
+  }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(slate50)
+  Box(modifier = Modifier.fillMaxSize()) {
+    Column(
+      modifier = Modifier
+          .fillMaxSize()
+          .background(slate50)
+    ) {
+      // Header
+      Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)
+      ) {
+        Text(
+          text = "Painel do Operador",
+          fontSize = 28.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = "Gestão de Clientes",
+          fontSize = 16.sp,
+          color = slate600
+        )
+      }
+
+      // Search Bar
+      Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+      ) {
+        Card(
+          modifier = Modifier.fillMaxWidth(),
+          shape = RoundedCornerShape(12.dp),
+          colors = CardDefaults.cardColors(containerColor = white)
         ) {
-            // Header
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = "Painel do Operador",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Gestão de Clientes",
-                    fontSize = 16.sp,
-                    color = slate600
-                )
-            }
-
-            // Search Bar
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = white)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = slate400,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = { viewModel.updateSearchQuery(it) },
-                            placeholder = { Text("Filtrar por nome...", color = slate400) },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Filtro por segmento",
-                            color = slate600,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        var expandedSegment by remember { mutableStateOf(false) }
-                        val itemsSegment = listOf(
-                            "Todos", "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX"
-                        )
-                        var selectedSegment by remember { mutableStateOf(itemsSegment[0]) }
-
-                        ExposedDropdownMenuBox(
-                            expanded = expandedSegment,
-                            onExpandedChange = { expandedSegment = !expandedSegment }
-                        ) {
-                            Card(
-                                modifier = Modifier.menuAnchor(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = white)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = selectedSegment, modifier = Modifier.padding(horizontal = 8.dp), maxLines = 1)
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment)
-                                }
-                            }
-
-                            ExposedDropdownMenu(
-                                expanded = expandedSegment,
-                                onDismissRequest = { expandedSegment = false })
-                            {
-                                itemsSegment.forEach { item ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = item) },
-                                        onClick = {
-                                            selectedSegment = item
-                                            expandedSegment = false
-                                            viewModel.updateSegmentFilter(item)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Filtro por estado",
-                            color = slate600,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        var expandedState by remember { mutableStateOf(false) }
-                        val itemsState = listOf(
-                            "Todos", "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
-                            "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba",
-                            "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul",
-                            "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
-                        )
-                        var selectedState by remember { mutableStateOf(itemsState[0]) }
-
-                        ExposedDropdownMenuBox(
-                            expanded = expandedState,
-                            onExpandedChange = { expandedState = !expandedState }
-                        ) {
-                            Card(
-                                modifier = Modifier.menuAnchor(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = white)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = selectedState, modifier = Modifier.padding(horizontal = 8.dp), maxLines = 1)
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
-                                }
-                            }
-
-                            ExposedDropdownMenu(
-                                expanded = expandedState,
-                                onDismissRequest = { expandedState = false })
-                            {
-                                itemsState.forEach { item ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = item) },
-                                        onClick = {
-                                            selectedState = item
-                                            expandedState = false
-                                            viewModel.updateStateFilter(item)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Filtro por status",
-                            color = slate600,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        var expandedStatus by remember { mutableStateOf(false) }
-                        val itemsStatus = listOf(
-                            "Todos", "Ativo", "Em negociação", "Inativo", "Aguardando resposta"
-                        )
-                        var selectedStatus by remember { mutableStateOf(itemsStatus[0]) }
-
-                        ExposedDropdownMenuBox(
-                            expanded = expandedStatus,
-                            onExpandedChange = { expandedStatus = !expandedStatus }
-                        ) {
-                            Card(
-                                modifier = Modifier.menuAnchor(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = white)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = selectedStatus, modifier = Modifier.padding(horizontal = 8.dp), maxLines = 1)
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus)
-                                }
-                            }
-
-                            ExposedDropdownMenu(
-                                expanded = expandedStatus,
-                                onDismissRequest = { expandedStatus = false })
-                            {
-                                itemsStatus.forEach { item ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = item) },
-                                        onClick = {
-                                            selectedStatus = item
-                                            expandedStatus = false
-                                            viewModel.updateStatusFilter(item)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Customers List
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(customers) { customer ->
-                    CustomerCard(
-                        customer = customer,
-                        onClick = {
-                            selectedCustomer = customer
-                            showCustomerDetails = true
-                        }
-                    )
-                }
-            }
+          Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Icon(
+              imageVector = Icons.Default.Search,
+              contentDescription = "Search",
+              tint = slate400,
+              modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            TextField(
+              value = searchQuery,
+              onValueChange = { viewModel.updateSearchQuery(it) },
+              placeholder = { Text("Filtrar por nome...", color = slate400) },
+              modifier = Modifier.fillMaxWidth(),
+              keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Unspecified,
+                autoCorrectEnabled = true,
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Unspecified
+              ),
+              colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+              )
+            )
+          }
         }
 
-        // Bottom Navigation
-        ScrollableBottomNavigation(
-            onClientsClick = { /* Already on clients screen */ },
-            onInvitesClick = onInvitesClick,
-            onPromotionsClick = onPromotionsClick,
-            onCampaignsClick = onCampaignsClick,
-            onBannersClick = onBannersClick,
-            onLogoutClick = onLogoutClick,
-            isClientsActive = true,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.Top
+        ) {
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              text = "Filtro por segmento",
+              color = slate600,
+              fontSize = 12.sp,
+              modifier = Modifier.padding(bottom = 4.dp)
+            )
+            var expandedSegment by remember { mutableStateOf(false) }
+            val itemsSegment = listOf(
+              "Todos",
+              "ED",
+              "IT",
+              "Retail & Financial",
+              "GRC",
+              "HR",
+              "Smart Spends",
+              "Health",
+              "CSC",
+              "Field Marketing",
+              "Finance",
+              "ESG",
+              "CX"
+            )
+            var selectedSegment by remember { mutableStateOf(itemsSegment[0]) }
+
+            ExposedDropdownMenuBox(
+              expanded = expandedSegment,
+              onExpandedChange = { expandedSegment = !expandedSegment }
+            ) {
+              Card(
+                modifier = Modifier.menuAnchor(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = white)
+              ) {
+                Row(
+                  modifier = Modifier.padding(8.dp),
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Text(
+                    text = selectedSegment,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    maxLines = 1
+                  )
+                  ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment)
+                }
+              }
+
+              ExposedDropdownMenu(
+                expanded = expandedSegment,
+                onDismissRequest = { expandedSegment = false })
+              {
+                itemsSegment.forEach { item ->
+                  DropdownMenuItem(
+                    text = { Text(text = item) },
+                    onClick = {
+                      selectedSegment = item
+                      expandedSegment = false
+                      viewModel.updateSegmentFilter(item)
+                    }
+                  )
+                }
+              }
+            }
+          }
+
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              text = "Filtro por estado",
+              color = slate600,
+              fontSize = 12.sp,
+              modifier = Modifier.padding(bottom = 4.dp)
+            )
+            var expandedState by remember { mutableStateOf(false) }
+            val itemsState = listOf(
+              "Todos",
+              "Acre",
+              "Alagoas",
+              "Amapá",
+              "Amazonas",
+              "Bahia",
+              "Ceará",
+              "Distrito Federal",
+              "Espírito Santo",
+              "Goiás",
+              "Maranhão",
+              "Mato Grosso",
+              "Mato Grosso do Sul",
+              "Minas Gerais",
+              "Pará",
+              "Paraíba",
+              "Paraná",
+              "Pernambuco",
+              "Piauí",
+              "Rio de Janeiro",
+              "Rio Grande do Norte",
+              "Rio Grande do Sul",
+              "Rondônia",
+              "Roraima",
+              "Santa Catarina",
+              "São Paulo",
+              "Sergipe",
+              "Tocantins"
+            )
+            var selectedState by remember { mutableStateOf(itemsState[0]) }
+
+            ExposedDropdownMenuBox(
+              expanded = expandedState,
+              onExpandedChange = { expandedState = !expandedState }
+            ) {
+              Card(
+                modifier = Modifier.menuAnchor(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = white)
+              ) {
+                Row(
+                  modifier = Modifier.padding(8.dp),
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Text(
+                    text = selectedState,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    maxLines = 1
+                  )
+                  ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                }
+              }
+
+              ExposedDropdownMenu(
+                expanded = expandedState,
+                onDismissRequest = { expandedState = false })
+              {
+                itemsState.forEach { item ->
+                  DropdownMenuItem(
+                    text = { Text(text = item) },
+                    onClick = {
+                      selectedState = item
+                      expandedState = false
+                      viewModel.updateStateFilter(item)
+                    }
+                  )
+                }
+              }
+            }
+          }
+
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              text = "Filtro por status",
+              color = slate600,
+              fontSize = 12.sp,
+              modifier = Modifier.padding(bottom = 4.dp)
+            )
+            var expandedStatus by remember { mutableStateOf(false) }
+            val itemsStatus = listOf(
+              "Todos", "Ativo", "Em negociação", "Inativo", "Aguardando resposta"
+            )
+            var selectedStatus by remember { mutableStateOf(itemsStatus[0]) }
+
+            ExposedDropdownMenuBox(
+              expanded = expandedStatus,
+              onExpandedChange = { expandedStatus = !expandedStatus }
+            ) {
+              Card(
+                modifier = Modifier.menuAnchor(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = white)
+              ) {
+                Row(
+                  modifier = Modifier.padding(8.dp),
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Text(
+                    text = selectedStatus,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    maxLines = 1
+                  )
+                  ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus)
+                }
+              }
+
+              ExposedDropdownMenu(
+                expanded = expandedStatus,
+                onDismissRequest = { expandedStatus = false })
+              {
+                itemsStatus.forEach { item ->
+                  DropdownMenuItem(
+                    text = { Text(text = item) },
+                    onClick = {
+                      selectedStatus = item
+                      expandedStatus = false
+                      viewModel.updateStatusFilter(item)
+                    }
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+
+      // Customers List
+      LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+      ) {
+        items(customers) { customer ->
+          CustomerCard(
+            customer = customer,
+            onClick = {
+              selectedCustomer = customer
+              showCustomerDetails = true
+            }
+          )
+        }
+      }
     }
 
-    // Customer Details Modal
-    if (showCustomerDetails && selectedCustomer != null) {
-        CustomerDetailsModal(
-            customer = selectedCustomer!!,
-            onDismiss = { 
-                showCustomerDetails = false
-                selectedCustomer = null
-            },
-            onSendMessage = {
-                showCustomerDetails = false
-                onCustomerClick(selectedCustomer!!)
-            },
-            onSaveNotes = { notes ->
-                viewModel.saveNotes(selectedCustomer!!.id, notes)
-                showCustomerDetails = false
-                selectedCustomer = null
-            }
-        )
-    }
+    // Bottom Navigation
+    ScrollableBottomNavigation(
+      onClientsClick = { /* Already on clients screen */ },
+      onInvitesClick = onInvitesClick,
+      onPromotionsClick = onPromotionsClick,
+      onCampaignsClick = onCampaignsClick,
+      onBannersClick = onBannersClick,
+      onLogoutClick = onLogoutClick,
+      isClientsActive = true,
+      modifier = Modifier.align(Alignment.BottomCenter)
+    )
+  }
+
+  // Customer Details Modal
+  if (showCustomerDetails && selectedCustomer != null) {
+    CustomerDetailsModal(
+      customer = selectedCustomer!!,
+      onDismiss = {
+        showCustomerDetails = false
+        selectedCustomer = null
+      },
+      onSendMessage = {
+        showCustomerDetails = false
+        onCustomerClick(selectedCustomer!!)
+      },
+      onSaveNotes = { notes ->
+        viewModel.saveNotes(selectedCustomer!!.id, notes)
+        showCustomerDetails = false
+        selectedCustomer = null
+      }
+    )
+  }
 }
 
 @Composable
 fun CustomerCard(
-    customer: User,
-    onClick: () -> Unit
+  customer: User,
+  onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = white),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  Card(
+    modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick() },
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+          .fillMaxWidth()
+          .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Avatar
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(slate200),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Person, contentDescription = "Criar Convite")
-            }
+      // Avatar
+      Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.Person, contentDescription = "Criar Convite")
+      }
 
-            Spacer(modifier = Modifier.width(16.dp))
+      Spacer(modifier = Modifier.width(16.dp))
 
-            // Customer Info
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = customer.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = customer.email,
-                    fontSize = 14.sp,
-                    color = slate600
-                )
-            }
+      // Customer Info
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = customer.name,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = customer.email,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
 
-            // Chevron
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "View Details",
-                tint = slate400,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+      // Chevron
+      Icon(
+        imageVector = Icons.Default.Person,
+        contentDescription = "View Details",
+        tint = slate400,
+        modifier = Modifier.size(20.dp)
+      )
     }
+  }
 }
 
 @Composable
 fun ScrollableBottomNavigation(
-    onClientsClick: () -> Unit,
-    onInvitesClick: () -> Unit,
-    onPromotionsClick: () -> Unit,
-    onCampaignsClick: () -> Unit,
-    onBannersClick: () -> Unit,
-    onLogoutClick: () -> Unit,
-    isClientsActive: Boolean = false,
-    isInvitesActive: Boolean = false,
-    isPromotionsActive: Boolean = false,
-    isCampaignsActive: Boolean = false,
-    isBannersActive: Boolean = false,
-    modifier: Modifier = Modifier
+  onClientsClick: () -> Unit,
+  onInvitesClick: () -> Unit,
+  onPromotionsClick: () -> Unit,
+  onCampaignsClick: () -> Unit,
+  onBannersClick: () -> Unit,
+  onLogoutClick: () -> Unit,
+  isClientsActive: Boolean = false,
+  isInvitesActive: Boolean = false,
+  isPromotionsActive: Boolean = false,
+  isCampaignsActive: Boolean = false,
+  isBannersActive: Boolean = false,
+  modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        colors = CardDefaults.cardColors(containerColor = slate800)
+  Card(
+    modifier = modifier.fillMaxWidth(),
+    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+    colors = CardDefaults.cardColors(containerColor = slate800)
+  ) {
+    LazyRow(
+      modifier = Modifier
+          .fillMaxWidth()
+          .padding(16.dp),
+      horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+      item {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier.clickable { onClientsClick() }
         ) {
-            item {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { onClientsClick() }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Clientes",
-                        tint = if (isClientsActive) purple500 else slate400,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Clientes",
-                        color = if (isClientsActive) purple500 else slate400,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-            item {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { onInvitesClick() }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Mail,
-                        contentDescription = "Convites",
-                        tint = if (isInvitesActive) purple500 else slate400,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Convites",
-                        color = if (isInvitesActive) purple500 else slate400,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-            item {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { onPromotionsClick() }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CardGiftcard,
-                        contentDescription = "Promoções",
-                        tint = if (isPromotionsActive) purple500 else slate400,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Promoções",
-                        color = if (isPromotionsActive) purple500 else slate400,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-            item {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { onCampaignsClick() }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Campaign,
-                        contentDescription = "Campanhas",
-                        tint = if (isCampaignsActive) purple500 else slate400,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Campanhas",
-                        color = if (isCampaignsActive) purple500 else slate400,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-            item {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { onBannersClick() }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PhotoCameraBack,
-                        contentDescription = "Banners",
-                        tint = if (isBannersActive) purple500 else slate400,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Banners",
-                        color = if (isBannersActive) purple500 else slate400,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-            item {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { onLogoutClick() }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ExitToApp,
-                        contentDescription = "Sair",
-                        tint = slate400,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Sair",
-                        color = slate400,
-                        fontSize = 12.sp
-                    )
-                }
-            }
+          Icon(
+            imageVector = Icons.Default.Person,
+            contentDescription = "Clientes",
+            tint = if (isClientsActive) purple500 else slate400,
+            modifier = Modifier.size(24.dp)
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = "Clientes",
+            color = if (isClientsActive) purple500 else slate400,
+            fontSize = 12.sp
+          )
         }
+      }
+      item {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier.clickable { onInvitesClick() }
+        ) {
+          Icon(
+            imageVector = Icons.Default.Mail,
+            contentDescription = "Convites",
+            tint = if (isInvitesActive) purple500 else slate400,
+            modifier = Modifier.size(24.dp)
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = "Convites",
+            color = if (isInvitesActive) purple500 else slate400,
+            fontSize = 12.sp
+          )
+        }
+      }
+      item {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier.clickable { onPromotionsClick() }
+        ) {
+          Icon(
+            imageVector = Icons.Default.CardGiftcard,
+            contentDescription = "Promoções",
+            tint = if (isPromotionsActive) purple500 else slate400,
+            modifier = Modifier.size(24.dp)
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = "Promoções",
+            color = if (isPromotionsActive) purple500 else slate400,
+            fontSize = 12.sp
+          )
+        }
+      }
+      item {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier.clickable { onCampaignsClick() }
+        ) {
+          Icon(
+            imageVector = Icons.Default.Campaign,
+            contentDescription = "Campanhas",
+            tint = if (isCampaignsActive) purple500 else slate400,
+            modifier = Modifier.size(24.dp)
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = "Campanhas",
+            color = if (isCampaignsActive) purple500 else slate400,
+            fontSize = 12.sp
+          )
+        }
+      }
+      item {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier.clickable { onBannersClick() }
+        ) {
+          Icon(
+            imageVector = Icons.Default.PhotoCameraBack,
+            contentDescription = "Banners",
+            tint = if (isBannersActive) purple500 else slate400,
+            modifier = Modifier.size(24.dp)
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = "Banners",
+            color = if (isBannersActive) purple500 else slate400,
+            fontSize = 12.sp
+          )
+        }
+      }
+      item {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier.clickable { onLogoutClick() }
+        ) {
+          Icon(
+            imageVector = Icons.Default.ExitToApp,
+            contentDescription = "Sair",
+            tint = slate400,
+            modifier = Modifier.size(24.dp)
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = "Sair",
+            color = slate400,
+            fontSize = 12.sp
+          )
+        }
+      }
     }
+  }
 }

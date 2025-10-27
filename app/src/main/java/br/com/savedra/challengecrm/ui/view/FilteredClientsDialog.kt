@@ -17,40 +17,40 @@ import br.com.savedra.challengecrm.model.User
 
 @Composable
 fun FilteredClientsDialog(
-    clients: List<User>,
-    onDismiss: () -> Unit
+  clients: List<User>,
+  onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+  Dialog(onDismissRequest = onDismiss) {
+    Card(
+      modifier = Modifier.fillMaxWidth(),
+      shape = RoundedCornerShape(12.dp),
+    ) {
+      Column(
+        modifier = Modifier.padding(16.dp)
+      ) {
+        Text(
+          text = "Clientes Filtrados",
+          fontWeight = FontWeight.Bold,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyColumn(
+          modifier = Modifier.fillMaxWidth(),
+          verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Clientes Filtrados",
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(clients) { client ->
-                        Text(client.name)
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Fechar")
-                    }
-                }
-            }
+          items(clients) { client ->
+            Text(client.name)
+          }
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.End
+        ) {
+          TextButton(onClick = onDismiss) {
+            Text("Fechar")
+          }
+        }
+      }
     }
+  }
 }

@@ -18,7 +18,14 @@ class AuthRepository(
     auth.signInWithEmailAndPassword(email, password).await()
   }
 
-  suspend fun register(email: String, password: String, name: String, role: String, estado: String, segment: String) {
+  suspend fun register(
+    email: String,
+    password: String,
+    name: String,
+    role: String,
+    estado: String,
+    segment: String
+  ) {
     val authResult = auth.createUserWithEmailAndPassword(email, password).await()
     val firebaseUser = authResult.user
       ?: throw Exception("Usuário não encontrado após o cadasdtro.")

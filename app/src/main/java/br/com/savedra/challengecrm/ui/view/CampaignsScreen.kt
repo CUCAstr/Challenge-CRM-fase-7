@@ -9,10 +9,10 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun CampaignsScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Campaigns Screen")
-    }
+  Box(
+    modifier = Modifier.fillMaxSize(),
+    contentAlignment = Alignment.Center
+  ) {
+    Text("Campaigns Screen")
+  }
 }

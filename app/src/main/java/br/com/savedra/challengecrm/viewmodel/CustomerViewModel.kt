@@ -13,93 +13,94 @@ import kotlinx.coroutines.launch
 
 class CustomerViewModel : ViewModel() {
 
-    private val authRepository = AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val authRepository =
+    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+  private val _searchQuery = MutableStateFlow("")
+  val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _segmentFilter = MutableStateFlow("Todos")
-    val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
+  private val _segmentFilter = MutableStateFlow("Todos")
+  val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
 
-    private val _stateFilter = MutableStateFlow("Todos")
-    val stateFilter: StateFlow<String> = _stateFilter.asStateFlow()
+  private val _stateFilter = MutableStateFlow("Todos")
+  val stateFilter: StateFlow<String> = _stateFilter.asStateFlow()
 
-    private val _statusFilter = MutableStateFlow("Todos")
-    val statusFilter: StateFlow<String> = _statusFilter.asStateFlow()
+  private val _statusFilter = MutableStateFlow("Todos")
+  val statusFilter: StateFlow<String> = _statusFilter.asStateFlow()
 
-    private val _allCustomers = MutableStateFlow<List<User>>(emptyList())
+  private val _allCustomers = MutableStateFlow<List<User>>(emptyList())
 
-    private val _filteredCustomers = MutableStateFlow<List<User>>(emptyList())
-    val filteredCustomers: StateFlow<List<User>> = _filteredCustomers.asStateFlow()
+  private val _filteredCustomers = MutableStateFlow<List<User>>(emptyList())
+  val filteredCustomers: StateFlow<List<User>> = _filteredCustomers.asStateFlow()
 
-    init {
-        loadCustomers()
+  init {
+    loadCustomers()
+  }
+
+  private fun loadCustomers() {
+    viewModelScope.launch {
+      val users = authRepository.getUsers()
+      val customers = users.filter { it.role == "Cliente" }
+      _allCustomers.value = customers
+      filterCustomers()
+    }
+  }
+
+  fun updateSearchQuery(query: String) {
+    _searchQuery.value = query
+    filterCustomers()
+  }
+
+  fun updateSegmentFilter(filter: String) {
+    _segmentFilter.value = filter
+    filterCustomers()
+  }
+
+  fun updateStateFilter(filter: String) {
+    _stateFilter.value = filter
+    filterCustomers()
+  }
+
+  fun updateStatusFilter(filter: String) {
+    _statusFilter.value = filter
+    filterCustomers()
+  }
+
+  private fun filterCustomers() {
+    val query = _searchQuery.value.lowercase()
+    val segmentFilter = _segmentFilter.value
+    val stateFilter = _stateFilter.value
+    val statusFilter = _statusFilter.value
+
+    val filtered = _allCustomers.value.filter { customer ->
+      val nameMatches = customer.name.lowercase().contains(query)
+
+      val segmentMatches = when (segmentFilter) {
+        "Todos" -> true
+        else -> customer.segment.equals(segmentFilter, ignoreCase = true)
+      }
+
+      val stateMatches = when (stateFilter) {
+        "Todos" -> true
+        else -> customer.estado.equals(stateFilter, ignoreCase = true)
+      }
+
+      val statusMatches = when (statusFilter) {
+        "Todos" -> true
+        else -> customer.status.equals(statusFilter, ignoreCase = true)
+      }
+
+      nameMatches && segmentMatches && stateMatches && statusMatches
     }
 
-    private fun loadCustomers() {
-        viewModelScope.launch {
-            val users = authRepository.getUsers()
-            val customers = users.filter { it.role == "Cliente" }
-            _allCustomers.value = customers
-            filterCustomers()
-        }
+    _filteredCustomers.value = filtered
+  }
+
+  fun saveNotes(userId: String, notes: String) {
+    viewModelScope.launch {
+      authRepository.updateUserNotes(userId, notes)
+      loadCustomers()
     }
-
-    fun updateSearchQuery(query: String) {
-        _searchQuery.value = query
-        filterCustomers()
-    }
-
-    fun updateSegmentFilter(filter: String) {
-        _segmentFilter.value = filter
-        filterCustomers()
-    }
-
-    fun updateStateFilter(filter: String) {
-        _stateFilter.value = filter
-        filterCustomers()
-    }
-
-    fun updateStatusFilter(filter: String) {
-        _statusFilter.value = filter
-        filterCustomers()
-    }
-
-    private fun filterCustomers() {
-        val query = _searchQuery.value.lowercase()
-        val segmentFilter = _segmentFilter.value
-        val stateFilter = _stateFilter.value
-        val statusFilter = _statusFilter.value
-
-        val filtered = _allCustomers.value.filter { customer ->
-            val nameMatches = customer.name.lowercase().contains(query)
-
-            val segmentMatches = when (segmentFilter) {
-                "Todos" -> true
-                else -> customer.segment.equals(segmentFilter, ignoreCase = true)
-            }
-
-            val stateMatches = when (stateFilter) {
-                "Todos" -> true
-                else -> customer.estado.equals(stateFilter, ignoreCase = true)
-            }
-
-            val statusMatches = when (statusFilter) {
-                "Todos" -> true
-                else -> customer.status.equals(statusFilter, ignoreCase = true)
-            }
-
-            nameMatches && segmentMatches && stateMatches && statusMatches
-        }
-
-        _filteredCustomers.value = filtered
-    }
-
-    fun saveNotes(userId: String, notes: String) {
-        viewModelScope.launch {
-            authRepository.updateUserNotes(userId, notes)
-            loadCustomers()
-        }
-    }
+  }
 
 }

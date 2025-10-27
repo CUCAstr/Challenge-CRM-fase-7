@@ -9,10 +9,10 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun PromotionsScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Promotions Screen")
-    }
+  Box(
+    modifier = Modifier.fillMaxSize(),
+    contentAlignment = Alignment.Center
+  ) {
+    Text("Promotions Screen")
+  }
 }

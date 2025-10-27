@@ -20,52 +20,52 @@ import br.com.savedra.challengecrm.ui.theme.white
 
 @Composable
 fun InviteDetailsModal(
-    invite: Invite,
-    onDismiss: () -> Unit
+  invite: Invite,
+  onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = white)
+  Dialog(onDismissRequest = onDismiss) {
+    Card(
+      modifier = Modifier.fillMaxWidth(),
+      shape = RoundedCornerShape(12.dp),
+      colors = CardDefaults.cardColors(containerColor = white)
+    ) {
+      Column(
+        modifier = Modifier.padding(16.dp)
+      ) {
+        Text(
+          text = invite.name,
+          fontSize = 20.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+          text = invite.description,
+          fontSize = 16.sp,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+          text = "Data: ${invite.date}",
+          fontSize = 14.sp,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+          text = "Local: ${invite.location}",
+          fontSize = 14.sp,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.End
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = invite.name,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = invite.description,
-                    fontSize = 16.sp,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Data: ${invite.date}",
-                    fontSize = 14.sp,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Local: ${invite.location}",
-                    fontSize = 14.sp,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Fechar")
-                    }
-                }
-            }
+          TextButton(onClick = onDismiss) {
+            Text("Fechar")
+          }
         }
+      }
     }
+  }
 }

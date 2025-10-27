@@ -161,20 +161,20 @@ fun InvitesScreen(
     )
 
     if (showInviteDetails && selectedInvite != null) {
-        InviteDetailsModal(
-            invite = selectedInvite!!,
-            onDismiss = {
-                showInviteDetails = false
-                selectedInvite = null
-            }
-        )
+      InviteDetailsModal(
+        invite = selectedInvite!!,
+        onDismiss = {
+          showInviteDetails = false
+          selectedInvite = null
+        }
+      )
     }
 
     if (showCreateInviteModal) {
-        CreateInviteModal(
-            onDismiss = { showCreateInviteModal = false },
-            viewModel = viewModel
-        )
+      CreateInviteModal(
+        onDismiss = { showCreateInviteModal = false },
+        viewModel = viewModel
+      )
     }
   }
 }
