@@ -29,8 +29,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.CustomerViewModel
-import java.text.SimpleDateFormat
-import java.util.*
 
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.filled.CardGiftcard

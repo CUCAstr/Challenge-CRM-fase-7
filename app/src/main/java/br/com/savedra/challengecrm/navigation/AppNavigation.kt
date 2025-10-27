@@ -75,7 +75,24 @@ fun AppNavigation() {
             )
         }
         composable(AppRoutes.INVITES) {
-            InvitesScreen()
+            InvitesScreen(
+                onClientsClick = {
+                    navController.navigate(AppRoutes.OPERATOR_HOME) {
+                        popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
+                    }
+                },
+                onPromotionsClick = {
+                    navController.navigate(AppRoutes.PROMOTIONS)
+                },
+                onCampaignsClick = {
+                    navController.navigate(AppRoutes.CAMPAIGNS)
+                },
+                onLogoutClick = {
+                    navController.navigate(AppRoutes.LOGIN) {
+                        popUpTo(AppRoutes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
         }
         composable(AppRoutes.PROMOTIONS) {
             PromotionsScreen()

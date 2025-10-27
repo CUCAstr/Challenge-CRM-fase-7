@@ -16,4 +16,18 @@ class InviteRepository {
                 onFailure(e)
             }
     }
+
+    fun getInvites(onSuccess: (List<Invite>) -> Unit, onFailure: (Exception) -> Unit) {
+        firestore.collection("invites")
+            .get()
+            .addOnSuccessListener { result ->
+                val invites = result.map { document ->
+                    document.toObject(Invite::class.java)
+                }
+                onSuccess(invites)
+            }
+            .addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
 }
