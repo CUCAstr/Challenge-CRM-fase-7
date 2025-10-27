@@ -52,6 +52,12 @@ fun InviteDetailsModal(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
+          text = "Hora: ${invite.time}",
+          fontSize = 14.sp,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
           text = "Local: ${invite.location}",
           fontSize = 14.sp,
           color = slate800

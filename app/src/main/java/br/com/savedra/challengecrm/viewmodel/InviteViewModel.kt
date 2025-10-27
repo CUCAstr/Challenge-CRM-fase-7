@@ -39,6 +39,9 @@ class InviteViewModel : ViewModel() {
   private val _newInviteLocation = MutableStateFlow("")
   val newInviteLocation: StateFlow<String> = _newInviteLocation.asStateFlow()
 
+  private val _newInviteTime = MutableStateFlow("")
+  val newInviteTime: StateFlow<String> = _newInviteTime.asStateFlow()
+
   private val _segmentFilter = MutableStateFlow("Todos")
   val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
 
@@ -107,6 +110,10 @@ class InviteViewModel : ViewModel() {
     _newInviteLocation.value = location
   }
 
+  fun onNewInviteTimeChange(time: String) {
+    _newInviteTime.value = time
+  }
+
   fun onSegmentFilterChange(segment: String) {
     _segmentFilter.value = segment
   }
@@ -132,6 +139,7 @@ class InviteViewModel : ViewModel() {
       name = _newInviteTitle.value,
       description = _newInviteDescription.value,
       date = _newInviteDate.value,
+      time = _newInviteTime.value,
       location = _newInviteLocation.value
     )
     inviteRepository.sendInvite(invite, onSuccess = { loadInvites() }, onFailure = {})

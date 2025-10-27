@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import br.com.savedra.challengecrm.ui.view.FilteredClientsDialog
+import br.com.savedra.challengecrm.ui.view.DatePickerField
+import br.com.savedra.challengecrm.ui.view.convertMillisToDateString
+import br.com.savedra.challengecrm.ui.view.TimePickerField
+import br.com.savedra.challengecrm.ui.theme.white
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +45,7 @@ fun CreateInviteModal(
   val title by viewModel.newInviteTitle.collectAsState()
   val description by viewModel.newInviteDescription.collectAsState()
   val date by viewModel.newInviteDate.collectAsState()
+  val time by viewModel.newInviteTime.collectAsState()
   val location by viewModel.newInviteLocation.collectAsState()
 
   val segments = listOf(
@@ -102,6 +108,7 @@ fun CreateInviteModal(
     Card(
       modifier = Modifier.fillMaxSize(),
       shape = RoundedCornerShape(12.dp),
+      colors = CardDefaults.cardColors(containerColor = white)
     ) {
       LazyColumn(
         modifier = Modifier.padding(16.dp)
@@ -137,17 +144,28 @@ fun CreateInviteModal(
         }
         item {
           Spacer(modifier = Modifier.height(8.dp))
-          OutlinedTextField(
-            value = date,
-            onValueChange = { viewModel.onNewInviteDateChange(it) },
-            label = { Text("Data do convite") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(
-              capitalization = KeyboardCapitalization.Unspecified,
-              autoCorrectEnabled = true,
-              keyboardType = KeyboardType.Text,
-              imeAction = ImeAction.Unspecified
-            ),
+          DatePickerField(
+            label = "Data do convite",
+            dateString = date,
+            onDateSelected = { millis ->
+              val selectedDate = convertMillisToDateString(millis)
+              viewModel.onNewInviteDateChange(selectedDate)
+            },
+            dateValidator = { utcTimeMillis ->
+              utcTimeMillis >= System.currentTimeMillis()
+            },
+            modifier = Modifier.fillMaxWidth()
+          )
+        }
+        item {
+          Spacer(modifier = Modifier.height(8.dp))
+          TimePickerField(
+            label = "Hora do convite",
+            timeString = time,
+            onTimeSelected = { newTime ->
+              viewModel.onNewInviteTimeChange(newTime)
+            },
+            modifier = Modifier.fillMaxWidth()
           )
         }
         item {
