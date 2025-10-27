@@ -11,6 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.InsertInvitation
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -200,12 +202,7 @@ fun InviteCard(
                     .background(slate200),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = invite.name.first().toString().uppercase(),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate600
-                )
+                Icon(Icons.Default.InsertInvitation, contentDescription = "Criar Convite")
             }
 
             Spacer(modifier = Modifier.width(16.dp))

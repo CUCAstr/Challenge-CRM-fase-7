@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -29,8 +28,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.CustomerViewModel
-
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Mail
 
@@ -48,6 +47,12 @@ fun OperatorHomeScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     var showCustomerDetails by remember { mutableStateOf(false) }
     var selectedCustomer by remember { mutableStateOf<User?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.updateSegmentFilter("Todos")
+        viewModel.updateStateFilter("Todos")
+        viewModel.updateStatusFilter("Todos")
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -120,113 +125,157 @@ fun OperatorHomeScreen(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top
                 ) {
-                    var expandedSegment by remember { mutableStateOf(false) }
-                    val itemsSegment = listOf(
-                        "Todos", "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX"
-                    )
-                    var selectedSegment by remember { mutableStateOf(itemsSegment[0]) }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Filtro por segmento",
+                            color = slate600,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        var expandedSegment by remember { mutableStateOf(false) }
+                        val itemsSegment = listOf(
+                            "Todos", "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX"
+                        )
+                        var selectedSegment by remember { mutableStateOf(itemsSegment[0]) }
 
-                    ExposedDropdownMenuBox(
-                        expanded = expandedSegment,
-                        onExpandedChange = { expandedSegment = !expandedSegment },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Card(
-                            modifier = Modifier.menuAnchor(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = white)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(text = selectedSegment, modifier = Modifier.padding(horizontal = 8.dp))
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment)
-                            }
-                        }
-
-                        ExposedDropdownMenu(
+                        ExposedDropdownMenuBox(
                             expanded = expandedSegment,
-                            onDismissRequest = { expandedSegment = false })
-                        {
-                            itemsSegment.forEach { item ->
-                                DropdownMenuItem(
-                                    text = { Text(text = item) },
-                                    onClick = {
-                                        selectedSegment = item
-                                        expandedSegment = false
-                                        viewModel.updateSegmentFilter(item)
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Text(
-                        text = "<-- Filtro por segmento",
-                        color = slate600,
-                        fontSize = 12.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row (
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ){
-                    var expandedState by remember { mutableStateOf(false) }
-                    val itemsState = listOf(
-                        "Todos", "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
-                        "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba",
-                        "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul",
-                        "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
-                    )
-                    var selectedState by remember { mutableStateOf(itemsState[0]) }
-
-                    ExposedDropdownMenuBox(
-                        expanded = expandedState,
-                        onExpandedChange = { expandedState = !expandedState },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Card(
-                            modifier = Modifier.menuAnchor(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = white)
+                            onExpandedChange = { expandedSegment = !expandedSegment }
                         ) {
-                            Row(
-                                modifier = Modifier.padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Card(
+                                modifier = Modifier.menuAnchor(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = white)
                             ) {
-                                Text(text = selectedState, modifier = Modifier.padding(horizontal = 8.dp))
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                                Row(
+                                    modifier = Modifier.padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = selectedSegment, modifier = Modifier.padding(horizontal = 8.dp), maxLines = 1)
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment)
+                                }
                             }
-                        }
 
-                        ExposedDropdownMenu(
-                            expanded = expandedState,
-                            onDismissRequest = { expandedState = false })
-                        {
-                            itemsState.forEach { item ->
-                                DropdownMenuItem(
-                                    text = { Text(text = item) },
-                                    onClick = {
-                                        selectedState = item
-                                        expandedState = false
-                                        viewModel.updateStateFilter(item)
-                                    }
-                                )
+                            ExposedDropdownMenu(
+                                expanded = expandedSegment,
+                                onDismissRequest = { expandedSegment = false })
+                            {
+                                itemsSegment.forEach { item ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = item) },
+                                        onClick = {
+                                            selectedSegment = item
+                                            expandedSegment = false
+                                            viewModel.updateSegmentFilter(item)
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
 
-                    Text(
-                        text = "<-- Filtro por estado",
-                        color = slate600,
-                        fontSize = 12.sp
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Filtro por estado",
+                            color = slate600,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        var expandedState by remember { mutableStateOf(false) }
+                        val itemsState = listOf(
+                            "Todos", "Acre", "Alagoas", "Amapá", "Amazonas", "Bahia", "Ceará", "Distrito Federal", "Espírito Santo",
+                            "Goiás", "Maranhão", "Mato Grosso", "Mato Grosso do Sul", "Minas Gerais", "Pará", "Paraíba",
+                            "Paraná", "Pernambuco", "Piauí", "Rio de Janeiro", "Rio Grande do Norte", "Rio Grande do Sul",
+                            "Rondônia", "Roraima", "Santa Catarina", "São Paulo", "Sergipe", "Tocantins"
+                        )
+                        var selectedState by remember { mutableStateOf(itemsState[0]) }
+
+                        ExposedDropdownMenuBox(
+                            expanded = expandedState,
+                            onExpandedChange = { expandedState = !expandedState }
+                        ) {
+                            Card(
+                                modifier = Modifier.menuAnchor(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = white)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = selectedState, modifier = Modifier.padding(horizontal = 8.dp), maxLines = 1)
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
+                                }
+                            }
+
+                            ExposedDropdownMenu(
+                                expanded = expandedState,
+                                onDismissRequest = { expandedState = false })
+                            {
+                                itemsState.forEach { item ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = item) },
+                                        onClick = {
+                                            selectedState = item
+                                            expandedState = false
+                                            viewModel.updateStateFilter(item)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Filtro por status",
+                            color = slate600,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        var expandedStatus by remember { mutableStateOf(false) }
+                        val itemsStatus = listOf(
+                            "Todos", "Ativo", "Em negociação", "Inativo", "Aguardando resposta"
+                        )
+                        var selectedStatus by remember { mutableStateOf(itemsStatus[0]) }
+
+                        ExposedDropdownMenuBox(
+                            expanded = expandedStatus,
+                            onExpandedChange = { expandedStatus = !expandedStatus }
+                        ) {
+                            Card(
+                                modifier = Modifier.menuAnchor(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = white)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = selectedStatus, modifier = Modifier.padding(horizontal = 8.dp), maxLines = 1)
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus)
+                                }
+                            }
+
+                            ExposedDropdownMenu(
+                                expanded = expandedStatus,
+                                onDismissRequest = { expandedStatus = false })
+                            {
+                                itemsStatus.forEach { item ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = item) },
+                                        onClick = {
+                                            selectedStatus = item
+                                            expandedStatus = false
+                                            viewModel.updateStatusFilter(item)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -311,12 +360,7 @@ fun CustomerCard(
                     .background(slate200),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = customer.name.first().toString().uppercase(),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate600
-                )
+                Icon(Icons.Default.Person, contentDescription = "Criar Convite")
             }
 
             Spacer(modifier = Modifier.width(16.dp))

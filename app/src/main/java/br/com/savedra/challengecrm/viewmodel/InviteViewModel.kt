@@ -139,11 +139,12 @@ class InviteViewModel : ViewModel() {
     fun getFilteredClients() {
         viewModelScope.launch {
             val allUsers = authRepository.getUsers()
+            val allCostumers = allUsers.filter { it.role == "Cliente" }
             val segmentFilter = _segmentFilter.value
             val stateFilter = _estadoFilter.value
             val statusFilter = _statusFilter.value
 
-            val filtered = allUsers.filter { user ->
+            val filtered = allCostumers.filter { user ->
                 val segmentMatches = when (segmentFilter) {
                     "Todos" -> true
                     else -> user.segment.equals(segmentFilter, ignoreCase = true)
