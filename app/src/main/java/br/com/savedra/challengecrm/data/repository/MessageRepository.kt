@@ -5,16 +5,16 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class MessageRepository {
 
-    private val db = FirebaseFirestore.getInstance()
+  private val db = FirebaseFirestore.getInstance()
 
-    fun sendMessage(message: Message, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        db.collection("messages")
-            .add(message)
-            .addOnSuccessListener {
-                onSuccess()
-            }
-            .addOnFailureListener { e ->
-                onFailure(e)
-            }
-    }
+  fun sendMessage(message: Message, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    db.collection("messages")
+      .add(message)
+      .addOnSuccessListener {
+        onSuccess()
+      }
+      .addOnFailureListener { e ->
+        onFailure(e)
+      }
+  }
 }

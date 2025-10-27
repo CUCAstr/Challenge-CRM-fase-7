@@ -33,165 +33,170 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    userId: String,
-    userName: String,
-    onBackClick: () -> Unit = {},
-    viewModel: ClientMessageViewModel = viewModel()
+  userId: String,
+  userName: String,
+  onBackClick: () -> Unit = {},
+  viewModel: ClientMessageViewModel = viewModel()
 ) {
-    var messageText by remember { mutableStateOf("") }
-    val listState = rememberLazyListState()
+  var messageText by remember { mutableStateOf("") }
+  val listState = rememberLazyListState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(slate50)
+  Column(
+    modifier = Modifier
+        .fillMaxSize()
+        .background(slate50)
+  ) {
+    // Header
+    Card(
+      modifier = Modifier.fillMaxWidth(),
+      colors = CardDefaults.cardColors(containerColor = white),
+      elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        // Header
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = white),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+      Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Icon(
+          imageVector = Icons.Default.ArrowBack,
+          contentDescription = "Voltar",
+          modifier = Modifier
+              .size(24.dp)
+              .clickable { onBackClick() },
+          tint = slate600
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        // Avatar
+        Box(
+          modifier = Modifier
+              .size(40.dp)
+              .background(slate200, CircleShape),
+          contentAlignment = Alignment.Center
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Voltar",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { onBackClick() },
-                    tint = slate600
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Avatar
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(slate200, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = userName.first().toString().uppercase(),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = slate600
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    Text(
-                        text = userName,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = slate800
-                    )
-                    Text(
-                        text = "Online",
-                        fontSize = 12.sp,
-                        color = green500
-                    )
-                }
-            }
+          Text(
+            text = userName.first().toString().uppercase(),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = slate600
+          )
         }
 
-        // Messages List
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
-        ) {
+        Spacer(modifier = Modifier.width(12.dp))
 
+        Column {
+          Text(
+            text = userName,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = slate800
+          )
+          Text(
+            text = "Online",
+            fontSize = 12.sp,
+            color = green500
+          )
         }
-
-        // Message Input
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = white),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextField(
-                    value = messageText,
-                    onValueChange = { messageText = it },
-                    placeholder = { Text("Digite uma mensagem...", color = slate400) },
-                    modifier = Modifier.weight(1f),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = slate100,
-                        unfocusedContainerColor = slate100,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
-                    shape = RoundedCornerShape(20.dp)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                FloatingActionButton(
-                    onClick = {
-                        if (messageText.isNotBlank()) {
-                            messageText = ""
-                        }
-                    },
-                    modifier = Modifier.size(48.dp),
-                    containerColor = purple500,
-                    contentColor = white
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "Enviar",
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
+      }
     }
+
+    // Messages List
+    LazyColumn(
+      state = listState,
+      modifier = Modifier
+          .fillMaxWidth()
+          .weight(1f)
+          .padding(horizontal = 16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+      contentPadding = PaddingValues(vertical = 16.dp)
+    ) {
+
+    }
+
+    // Message Input
+    Card(
+      modifier = Modifier.fillMaxWidth(),
+      colors = CardDefaults.cardColors(containerColor = white),
+      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+      Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        TextField(
+          value = messageText,
+          onValueChange = { messageText = it },
+          placeholder = { Text("Digite uma mensagem...", color = slate400) },
+          modifier = Modifier.weight(1f),
+          colors = TextFieldDefaults.colors(
+            focusedContainerColor = slate100,
+            unfocusedContainerColor = slate100,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+          ),
+          keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Unspecified,
+            autoCorrectEnabled = true,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Unspecified
+          ),
+          shape = RoundedCornerShape(20.dp)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        FloatingActionButton(
+          onClick = {
+            if (messageText.isNotBlank()) {
+              messageText = ""
+            }
+          },
+          modifier = Modifier.size(48.dp),
+          containerColor = purple500,
+          contentColor = white
+        ) {
+          Icon(
+            imageVector = Icons.Default.Send,
+            contentDescription = "Enviar",
+            modifier = Modifier.size(20.dp)
+          )
+        }
+      }
+    }
+  }
 }
 
 @Composable
 fun ChatBubble(
-    isFromUser: Boolean
+  isFromUser: Boolean
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isFromUser) Arrangement.End else Arrangement.Start
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = if (isFromUser) Arrangement.End else Arrangement.Start
+  ) {
+    Card(
+      modifier = Modifier.widthIn(max = 280.dp),
+      shape = RoundedCornerShape(
+        topStart = 16.dp,
+        topEnd = 16.dp,
+        bottomStart = if (isFromUser) 16.dp else 4.dp,
+        bottomEnd = if (isFromUser) 4.dp else 16.dp
+      ),
+      colors = CardDefaults.cardColors(
+        containerColor = if (isFromUser) purple500 else white
+      ),
+      elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Card(
-            modifier = Modifier.widthIn(max = 280.dp),
-            shape = RoundedCornerShape(
-                topStart = 16.dp,
-                topEnd = 16.dp,
-                bottomStart = if (isFromUser) 16.dp else 4.dp,
-                bottomEnd = if (isFromUser) 4.dp else 16.dp
-            ),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isFromUser) purple500 else white
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-            Text(
-                text = "",
-                modifier = Modifier.padding(16.dp),
-                color = if (isFromUser) white else slate800,
-                fontSize = 14.sp
-            )
-        }
+      Text(
+        text = "",
+        modifier = Modifier.padding(16.dp),
+        color = if (isFromUser) white else slate800,
+        fontSize = 14.sp
+      )
     }
+  }
 }

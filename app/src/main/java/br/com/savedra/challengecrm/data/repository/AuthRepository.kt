@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.data.repository
 
+import android.util.Log
 import br.com.savedra.challengecrm.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
@@ -17,7 +18,14 @@ class AuthRepository(
     auth.signInWithEmailAndPassword(email, password).await()
   }
 
-  suspend fun register(email: String, password: String, name: String, role: String, estado: String, segmento: String) {
+  suspend fun register(
+    email: String,
+    password: String,
+    name: String,
+    role: String,
+    estado: String,
+    segment: String
+  ) {
     val authResult = auth.createUserWithEmailAndPassword(email, password).await()
     val firebaseUser = authResult.user
       ?: throw Exception("Usuário não encontrado após o cadasdtro.")
@@ -34,7 +42,7 @@ class AuthRepository(
       "name" to name,
       "role" to role,
       "estado" to estado,
-      "segmento" to segmento,
+      "segment" to segment,
       "memberSince" to FieldValue.serverTimestamp(),
       "notes" to ""
     )
@@ -43,6 +51,8 @@ class AuthRepository(
       userData["score"] = 0
       userData["status"] = "Ativo"
     }
+
+    Log.d("AuthRepository", "userData: $userData")
 
     firestore.collection("users").document(firebaseUser.uid)
       .set(userData)
@@ -63,7 +73,7 @@ class AuthRepository(
         email = document.getString("email") ?: "",
         role = document.getString("role") ?: "",
         estado = document.getString("estado") ?: "",
-        segmento = document.getString("segmento") ?: "",
+        segment = document.getString("segment") ?: "",
         score = (document.getLong("score") ?: 0).toInt(),
         status = document.getString("status") ?: "",
         notes = document.getString("notes") ?: ""

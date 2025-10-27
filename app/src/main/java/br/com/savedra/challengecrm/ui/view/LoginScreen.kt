@@ -33,6 +33,9 @@ import br.com.savedra.challengecrm.ui.theme.slate600
 import br.com.savedra.challengecrm.viewmodel.AuthUIState
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 @Composable
 fun LoginScreen(
   modifier: Modifier = Modifier,
@@ -46,15 +49,17 @@ fun LoginScreen(
   var isError by remember { mutableStateOf(false) }
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
+  val context = LocalContext.current
+
   Box(
     modifier = Modifier
-        .fillMaxWidth()
-        .background(color = slate100)
+      .fillMaxWidth()
+      .background(color = slate100)
   ) {
     Column(
       modifier = modifier
-          .fillMaxSize()
-          .padding(16.dp),
+        .fillMaxSize()
+        .padding(16.dp),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -162,7 +167,7 @@ fun LoginScreen(
 
       when (val state = authState) {
         is AuthUIState.Loading -> {
-          CircularProgressIndicator()
+          Toast.makeText(context, "Realizando seu login...", Toast.LENGTH_SHORT).show()
         }
 
         is AuthUIState.Error -> {
@@ -175,6 +180,7 @@ fun LoginScreen(
               "Cliente" -> navController.navigate(AppRoutes.CLIENT_HOME) {
                 popUpTo(AppRoutes.LOGIN) { inclusive = true }
               }
+
               "Operador" -> navController.navigate(AppRoutes.OPERATOR_HOME) {
                 popUpTo(AppRoutes.LOGIN) { inclusive = true }
               }
