@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.data.repository
 
+import android.util.Log
 import br.com.savedra.challengecrm.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
@@ -43,6 +44,8 @@ class AuthRepository(
       userData["score"] = 0
       userData["status"] = "Ativo"
     }
+
+    Log.d("AuthRepository", "userData: $userData")
 
     firestore.collection("users").document(firebaseUser.uid)
       .set(userData)

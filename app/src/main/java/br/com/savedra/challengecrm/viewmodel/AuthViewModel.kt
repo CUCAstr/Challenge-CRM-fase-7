@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -115,6 +116,7 @@ class AuthViewModel : ViewModel() {
       try {
         authRepository.register(email, password, name, role, state, segment)
         _authUiState.value = AuthUIState.Success(role)
+        Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
       }

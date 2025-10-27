@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.ui.view
 
+import CreateInviteModal
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -41,104 +43,116 @@ fun InvitesScreen(
     var showInviteDetails by remember { mutableStateOf(false) }
     var selectedInvite by remember { mutableStateOf<Invite?>(null) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(slate50)
-        ) {
-            // Header
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = "Painel de Convites",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Gestão de Convites",
-                    fontSize = 16.sp,
-                    color = slate600
-                )
-            }
+    var showCreateInviteModal by remember { mutableStateOf(false) }
 
-            // Search Bar
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showCreateInviteModal = true },
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Criar Convite")
+            }
+        }
+    ) {
+        Box(modifier = Modifier.fillMaxSize().padding(it)) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                    .fillMaxSize()
+                    .background(slate50)
             ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = white)
+                // Header
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Text(
+                        text = "Painel de Convites",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = slate800
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Gestão de Convites",
+                        fontSize = 16.sp,
+                        color = slate600
+                    )
+                }
+
+                // Search Bar
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = white)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = slate400,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = { viewModel.updateSearchQuery(it) },
-                            placeholder = { Text("Filtrar por título...", color = slate400) },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = slate400,
+                                modifier = Modifier.size(20.dp)
                             )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            TextField(
+                                value = searchQuery,
+                                onValueChange = { viewModel.updateSearchQuery(it) },
+                                placeholder = { Text("Filtrar por título...", color = slate400) },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Unspecified, autoCorrectEnabled = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Unspecified),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                )
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Invites List
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(invites) { invite ->
+                        InviteCard(
+                            invite = invite,
+                            onClick = { 
+                                selectedInvite = invite
+                                showInviteDetails = true
+                            }
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Invites List
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(invites) { invite ->
-                    InviteCard(
-                        invite = invite,
-                        onClick = { 
-                            selectedInvite = invite
-                            showInviteDetails = true
-                        }
-                    )
-                }
-            }
+            // Bottom Navigation
+            ScrollableBottomNavigation(
+                onClientsClick = onClientsClick,
+                onInvitesClick = { /* Already on invites screen */ },
+                onPromotionsClick = onPromotionsClick,
+                onCampaignsClick = onCampaignsClick,
+                onLogoutClick = onLogoutClick,
+                isInvitesActive = true,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
-
-        // Bottom Navigation
-        ScrollableBottomNavigation(
-            onClientsClick = onClientsClick,
-            onInvitesClick = { /* Already on invites screen */ },
-            onPromotionsClick = onPromotionsClick,
-            onCampaignsClick = onCampaignsClick,
-            onLogoutClick = onLogoutClick,
-            isInvitesActive = true,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
     }
 
     if (showInviteDetails && selectedInvite != null) {
@@ -148,6 +162,13 @@ fun InvitesScreen(
                 showInviteDetails = false
                 selectedInvite = null
             }
+        )
+    }
+
+    if (showCreateInviteModal) {
+        CreateInviteModal(
+            onDismiss = { showCreateInviteModal = false },
+            viewModel = viewModel
         )
     }
 }
