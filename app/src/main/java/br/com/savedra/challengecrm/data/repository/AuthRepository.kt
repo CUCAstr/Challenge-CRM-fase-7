@@ -23,7 +23,6 @@ class AuthRepository(
     password: String,
     name: String,
     role: String,
-    estado: String,
     segment: String
   ) {
     val authResult = auth.createUserWithEmailAndPassword(email, password).await()
@@ -41,7 +40,6 @@ class AuthRepository(
       "email" to email,
       "name" to name,
       "role" to role,
-      "estado" to estado,
       "segment" to segment,
       "memberSince" to FieldValue.serverTimestamp(),
       "notes" to ""
@@ -72,7 +70,6 @@ class AuthRepository(
         name = document.getString("name") ?: "",
         email = document.getString("email") ?: "",
         role = document.getString("role") ?: "",
-        estado = document.getString("estado") ?: "",
         segment = document.getString("segment") ?: "",
         score = (document.getLong("score") ?: 0).toInt(),
         status = document.getString("status") ?: "",

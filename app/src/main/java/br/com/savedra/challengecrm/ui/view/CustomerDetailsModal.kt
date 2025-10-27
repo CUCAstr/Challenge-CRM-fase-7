@@ -113,14 +113,6 @@ fun CustomerDetailsModal(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-          text = "Estado: ${customer.estado}",
-          fontSize = 14.sp,
-          color = slate700
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
           text = "Segmento: ${customer.segment}",
           fontSize = 14.sp,
           color = slate700

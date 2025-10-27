@@ -63,40 +63,9 @@ fun CreateInviteModal(
     "ESG",
     "CX"
   )
-  val estados = listOf(
-    "Todos",
-    "Acre",
-    "Alagoas",
-    "Amapá",
-    "Amazonas",
-    "Bahia",
-    "Ceará",
-    "Distrito Federal",
-    "Espírito Santo",
-    "Goiás",
-    "Maranhão",
-    "Mato Grosso",
-    "Mato Grosso do Sul",
-    "Minas Gerais",
-    "Pará",
-    "Paraíba",
-    "Paraná",
-    "Pernambuco",
-    "Piauí",
-    "Rio de Janeiro",
-    "Rio Grande do Norte",
-    "Rio Grande do Sul",
-    "Rondônia",
-    "Roraima",
-    "Santa Catarina",
-    "São Paulo",
-    "Sergipe",
-    "Tocantins"
-  )
   val status = listOf("Todos", "Ativo", "Em negociação", "Inativo", "Aguardando resposta")
 
   var expandedSegment by remember { mutableStateOf(false) }
-  var expandedEstado by remember { mutableStateOf(false) }
   var expandedStatus by remember { mutableStateOf(false) }
 
   var showFilteredClients by remember { mutableStateOf(false) }
@@ -221,42 +190,6 @@ fun CreateInviteModal(
                   onClick = {
                     viewModel.onSegmentFilterChange(segment)
                     expandedSegment = false
-                  }
-                )
-              }
-            }
-          }
-        }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
-          ExposedDropdownMenuBox(
-            expanded = expandedEstado,
-            onExpandedChange = { expandedEstado = !expandedEstado },
-            modifier = Modifier.fillMaxWidth()
-          ) {
-            OutlinedTextField(
-              value = viewModel.estadoFilter.collectAsState().value,
-              onValueChange = { },
-              label = { Text("Estado") },
-              readOnly = true,
-              trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEstado)
-              },
-              modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth(),
-            )
-            ExposedDropdownMenu(
-              expanded = expandedEstado,
-              onDismissRequest = { expandedEstado = false },
-              modifier = Modifier.fillMaxWidth()
-            ) {
-              estados.forEach { estado ->
-                DropdownMenuItem(
-                  text = { Text(estado) },
-                  onClick = {
-                    viewModel.onEstadoFilterChange(estado)
-                    expandedEstado = false
                   }
                 )
               }

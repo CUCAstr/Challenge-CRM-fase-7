@@ -45,9 +45,6 @@ class InviteViewModel : ViewModel() {
   private val _segmentFilter = MutableStateFlow("Todos")
   val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
 
-  private val _estadoFilter = MutableStateFlow("Todos")
-  val estadoFilter: StateFlow<String> = _estadoFilter.asStateFlow()
-
   private val _statusFilter = MutableStateFlow("Todos")
   val statusFilter: StateFlow<String> = _statusFilter.asStateFlow()
 
@@ -118,10 +115,6 @@ class InviteViewModel : ViewModel() {
     _segmentFilter.value = segment
   }
 
-  fun onEstadoFilterChange(estado: String) {
-    _estadoFilter.value = estado
-  }
-
   fun onStatusFilterChange(status: String) {
     _statusFilter.value = status
   }
@@ -150,17 +143,12 @@ class InviteViewModel : ViewModel() {
       val allUsers = authRepository.getUsers()
       val allCostumers = allUsers.filter { it.role == "Cliente" }
       val segmentFilter = _segmentFilter.value
-      val stateFilter = _estadoFilter.value
       val statusFilter = _statusFilter.value
 
       val filtered = allCostumers.filter { user ->
         val segmentMatches = when (segmentFilter) {
           "Todos" -> true
           else -> user.segment.equals(segmentFilter, ignoreCase = true)
-        }
-        val stateMatches = when (stateFilter) {
-          "Todos" -> true
-          else -> user.estado.equals(stateFilter, ignoreCase = true)
         }
         val statusMatches = when (statusFilter) {
           "Todos" -> true
@@ -171,7 +159,7 @@ class InviteViewModel : ViewModel() {
         val scoreEnd = _scoreEndFilter.value.toIntOrNull() ?: Int.MAX_VALUE
         val scoreMatches = user.score in scoreStart..scoreEnd
 
-        segmentMatches && stateMatches && statusMatches && scoreMatches
+        segmentMatches && statusMatches && scoreMatches
       }
 
       _filteredClients.value = filtered

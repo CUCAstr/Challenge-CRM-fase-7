@@ -7,7 +7,6 @@ data class User(
   val name: String = "",
   val email: String = "",
   val role: String = "",
-  val estado: String = "",
   val segment: String = "",
   val score: Int = 0,
   val status: String = "",
