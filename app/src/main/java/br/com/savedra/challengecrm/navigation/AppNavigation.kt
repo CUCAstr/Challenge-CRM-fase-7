@@ -149,7 +149,27 @@ fun AppNavigation() {
       )
     }
     composable(AppRoutes.BANNERS) {
-      BannersScreen()
+      BannersScreen(
+        onClientsClick = {
+          navController.navigate(AppRoutes.OPERATOR_HOME) {
+            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
+          }
+        },
+        onInvitesClick = {
+          navController.navigate(AppRoutes.INVITES)
+        },
+        onPromotionsClick = {
+          navController.navigate(AppRoutes.PROMOTIONS)
+        },
+        onCampaignsClick = {
+          navController.navigate(AppRoutes.CAMPAIGNS)
+        },
+        onLogoutClick = {
+          navController.navigate(AppRoutes.LOGIN) {
+            popUpTo(AppRoutes.LOGIN) { inclusive = true }
+          }
+        }
+      )
     }
     composable(
       route = "${AppRoutes.CHAT}/{userId}/{userName}",
