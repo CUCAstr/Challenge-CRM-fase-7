@@ -130,20 +130,31 @@ fun InvitesScreen(
       Spacer(modifier = Modifier.height(16.dp))
 
       // Invites List
-      LazyColumn(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-      ) {
-        items(invites) { invite ->
-          InviteCard(
-            invite = invite,
-            onClick = {
-              selectedInvite = invite
-              showInviteDetails = true
-            }
-          )
+      if (invites.isEmpty()) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+          contentAlignment = Alignment.Center
+        ) {
+          Text("Não há nada para listar.")
+        }
+      } else {
+        LazyColumn(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+          verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+          items(invites) { invite ->
+            InviteCard(
+              invite = invite,
+              onClick = {
+                selectedInvite = invite
+                showInviteDetails = true
+              }
+            )
+          }
         }
       }
     }

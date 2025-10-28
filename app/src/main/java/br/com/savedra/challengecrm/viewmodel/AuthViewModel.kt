@@ -99,7 +99,8 @@ class AuthViewModel : ViewModel() {
     val role = "Cliente"
     val segment = _segment.value
 
-    if (email.isBlank() || password.isBlank() || name.isBlank()) {
+    if (email.isBlank() || password.isBlank() || name.isBlank() || company.isBlank() ||
+      segment.isBlank()) {
       _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
       return
     }

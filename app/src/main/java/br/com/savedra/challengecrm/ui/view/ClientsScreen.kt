@@ -256,20 +256,31 @@ fun OperatorHomeScreen(
       Spacer(modifier = Modifier.height(16.dp))
 
       // Customers List
-      LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-      ) {
-        items(customers) { customer ->
-          CustomerCard(
-            customer = customer,
-            onClick = {
-              selectedCustomer = customer
-              showCustomerDetails = true
-            }
-          )
+      if (customers.isEmpty()) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+          contentAlignment = Alignment.Center
+        ) {
+          Text("Não há nada para listar.")
+        }
+      } else {
+        LazyColumn(
+          modifier = Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 24.dp),
+          verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+          items(customers) { customer ->
+            CustomerCard(
+              customer = customer,
+              onClick = {
+                selectedCustomer = customer
+                showCustomerDetails = true
+              }
+            )
+          }
         }
       }
     }
