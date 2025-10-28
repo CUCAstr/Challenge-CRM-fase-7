@@ -71,7 +71,7 @@ fun RegisterScreen(
         .padding(16.dp)
     ) {
       Text(
-        text = "Bem-vindo a WTC",
+        text = "Bem-vindo a WTC Connect",
         style = TextStyle(
           fontFamily = interFamily,
           fontSize = 24.sp,
