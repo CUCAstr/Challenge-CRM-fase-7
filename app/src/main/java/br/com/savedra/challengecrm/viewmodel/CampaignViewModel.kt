@@ -3,8 +3,8 @@ package br.com.savedra.challengecrm.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.savedra.challengecrm.data.repository.AuthRepository
-import br.com.savedra.challengecrm.data.repository.InviteRepository
-import br.com.savedra.challengecrm.model.Invite
+import br.com.savedra.challengecrm.data.repository.CampaignRepository
+import br.com.savedra.challengecrm.model.Campaign
 import br.com.savedra.challengecrm.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -13,34 +13,30 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class InviteViewModel : ViewModel() {
+class CampaignViewModel : ViewModel() {
 
-  private val inviteRepository = InviteRepository()
-  private val authRepository =
-    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val campaignRepository = CampaignRepository()
+  private val authRepository = AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-  private val _allInvites = MutableStateFlow<List<Invite>>(emptyList())
+  private val _allCampaigns = MutableStateFlow<List<Campaign>>(emptyList())
 
-  private val _filteredInvites = MutableStateFlow<List<Invite>>(emptyList())
-  val filteredInvites: StateFlow<List<Invite>> = _filteredInvites.asStateFlow()
+  private val _filteredCampaigns = MutableStateFlow<List<Campaign>>(emptyList())
+  val filteredCampaigns: StateFlow<List<Campaign>> = _filteredCampaigns.asStateFlow()
 
-  private val _newInviteTitle = MutableStateFlow("")
-  val newInviteTitle: StateFlow<String> = _newInviteTitle.asStateFlow()
+  private val _newCampaignTitle = MutableStateFlow("")
+  val newCampaignTitle: StateFlow<String> = _newCampaignTitle.asStateFlow()
 
-  private val _newInviteDescription = MutableStateFlow("")
-  val newInviteDescription: StateFlow<String> = _newInviteDescription.asStateFlow()
+  private val _newCampaignDescription = MutableStateFlow("")
+  val newCampaignDescription: StateFlow<String> = _newCampaignDescription.asStateFlow()
 
-  private val _newInviteDate = MutableStateFlow("")
-  val newInviteDate: StateFlow<String> = _newInviteDate.asStateFlow()
+  private val _newCampaignStartDate = MutableStateFlow("")
+  val newCampaignStartDate: StateFlow<String> = _newCampaignStartDate.asStateFlow()
 
-  private val _newInviteLocation = MutableStateFlow("")
-  val newInviteLocation: StateFlow<String> = _newInviteLocation.asStateFlow()
-
-  private val _newInviteTime = MutableStateFlow("")
-  val newInviteTime: StateFlow<String> = _newInviteTime.asStateFlow()
+  private val _newCampaignEndDate = MutableStateFlow("")
+  val newCampaignEndDate: StateFlow<String> = _newCampaignEndDate.asStateFlow()
 
   private val _segmentFilter = MutableStateFlow("Todos")
   val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
@@ -58,15 +54,15 @@ class InviteViewModel : ViewModel() {
   val filteredClients: StateFlow<List<User>> = _filteredClients.asStateFlow()
 
   init {
-    loadInvites()
+    loadCampaigns()
   }
 
-  private fun loadInvites() {
+  private fun loadCampaigns() {
     viewModelScope.launch {
-      inviteRepository.getInvites(
+      campaignRepository.getCampaigns(
         onSuccess = {
-          _allInvites.value = it
-          filterInvites()
+          _allCampaigns.value = it
+          filterCampaigns()
         },
         onFailure = {
           // Handle error
@@ -77,38 +73,34 @@ class InviteViewModel : ViewModel() {
 
   fun updateSearchQuery(query: String) {
     _searchQuery.value = query
-    filterInvites()
+    filterCampaigns()
   }
 
-  private fun filterInvites() {
+  private fun filterCampaigns() {
     val query = _searchQuery.value.lowercase()
 
-    val filtered = _allInvites.value.filter { invite ->
-      val nameMatches = invite.name.lowercase().contains(query)
+    val filtered = _allCampaigns.value.filter { campaign ->
+      val nameMatches = campaign.title.lowercase().contains(query)
       nameMatches
     }
 
-    _filteredInvites.value = filtered
+    _filteredCampaigns.value = filtered
   }
 
-  fun onNewInviteTitleChange(title: String) {
-    _newInviteTitle.value = title
+  fun onNewCampaignTitleChange(title: String) {
+    _newCampaignTitle.value = title
   }
 
-  fun onNewInviteDescriptionChange(description: String) {
-    _newInviteDescription.value = description
+  fun onNewCampaignDescriptionChange(description: String) {
+    _newCampaignDescription.value = description
   }
 
-  fun onNewInviteDateChange(date: String) {
-    _newInviteDate.value = date
+  fun onNewCampaignStartDateChange(date: String) {
+    _newCampaignStartDate.value = date
   }
 
-  fun onNewInviteLocationChange(location: String) {
-    _newInviteLocation.value = location
-  }
-
-  fun onNewInviteTimeChange(time: String) {
-    _newInviteTime.value = time
+  fun onNewCampaignEndDateChange(date: String) {
+    _newCampaignEndDate.value = date
   }
 
   fun onSegmentFilterChange(segment: String) {
@@ -127,15 +119,14 @@ class InviteViewModel : ViewModel() {
     _scoreEndFilter.value = score
   }
 
-  fun sendInvite() {
-    val invite = Invite(
-      name = _newInviteTitle.value,
-      description = _newInviteDescription.value,
-      date = _newInviteDate.value,
-      time = _newInviteTime.value,
-      location = _newInviteLocation.value
+  fun sendCampaign() {
+    val campaign = Campaign(
+      title = _newCampaignTitle.value,
+      description = _newCampaignDescription.value,
+      startDate = _newCampaignStartDate.value,
+      endDate = _newCampaignEndDate.value
     )
-    inviteRepository.sendInvite(invite, onSuccess = { loadInvites() }, onFailure = {})
+    campaignRepository.sendCampaign(campaign, onSuccess = { loadCampaigns() }, onFailure = {})
   }
 
   fun getFilteredClients() {

@@ -136,120 +136,24 @@ fun RegisterScreen(
 
       Spacer(modifier = Modifier.height(16.dp))
 
-
-      val roles = listOf("Cliente", "Operador")
-
-      ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth()
-      ) {
-        OutlinedTextField(
-          value = viewModel.role.collectAsState().value,
-          onValueChange = { },
-          label = { Text("Tipo de usuário") },
-          readOnly = true,
-          trailingIcon = {
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-          },
-          modifier = Modifier
-            .menuAnchor()
-            .fillMaxWidth(),
-          colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500,
-            unfocusedBorderColor = slate200
-          ),
-        )
-        ExposedDropdownMenu(
-          expanded = expanded,
-          onDismissRequest = { expanded = false },
-          modifier = Modifier.fillMaxWidth()
-        ) {
-          roles.forEach { role ->
-            DropdownMenuItem(
-              text = { Text(role) },
-              onClick = {
-                viewModel.onRoleChange(role)
-                expanded = false
-              }
-            )
-          }
-        }
-      }
-
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-
-      val estados = listOf(
-        "Acre",
-        "Alagoas",
-        "Amapá",
-        "Amazonas",
-        "Bahia",
-        "Ceará",
-        "Distrito Federal",
-        "Espírito Santo",
-        "Goiás",
-        "Maranhão",
-        "Mato Grosso",
-        "Mato Grosso do Sul",
-        "Minas Gerais",
-        "Pará",
-        "Paraíba",
-        "Paraná",
-        "Pernambuco",
-        "Piauí",
-        "Rio de Janeiro",
-        "Rio Grande do Norte",
-        "Rio Grande do Sul",
-        "Rondônia",
-        "Roraima",
-        "Santa Catarina",
-        "São Paulo",
-        "Sergipe",
-        "Tocantins"
+      OutlinedTextField(
+        value = viewModel.company.collectAsState().value,
+        onValueChange = { viewModel.onCompanyChange(it) },
+        label = { Text("Empresa") },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+          capitalization = KeyboardCapitalization.Unspecified,
+          autoCorrectEnabled = true,
+          keyboardType = KeyboardType.Text,
+          imeAction = ImeAction.Unspecified
+        ),
+        modifier = Modifier
+          .fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+          focusedBorderColor = indigo500,
+          unfocusedBorderColor = slate200
+        ),
       )
-      var expandedEstados by remember { mutableStateOf(false) }
-
-      ExposedDropdownMenuBox(
-        expanded = expandedEstados,
-        onExpandedChange = { expandedEstados = !expandedEstados },
-        modifier = Modifier.fillMaxWidth()
-      ) {
-        OutlinedTextField(
-          value = viewModel.state.collectAsState().value,
-          onValueChange = { },
-          label = { Text("Estado") },
-          readOnly = true,
-          trailingIcon = {
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEstados)
-          },
-          modifier = Modifier
-            .menuAnchor()
-            .fillMaxWidth(),
-          colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500,
-            unfocusedBorderColor = slate200
-          ),
-        )
-        ExposedDropdownMenu(
-          expanded = expandedEstados,
-          onDismissRequest = { expandedEstados = false },
-          modifier = Modifier.fillMaxWidth()
-        ) {
-          estados.forEach { estado ->
-            DropdownMenuItem(
-              text = { Text(estado) },
-              onClick = {
-                viewModel.onEstadoChange(estado)
-                expandedEstados = false
-              }
-            )
-          }
-        }
-      }
-
 
       Spacer(modifier = Modifier.height(16.dp))
 
