@@ -105,7 +105,7 @@ fun CustomerDetailsModal(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-          text = "Membro desde: ${customer.memberSince?.let { dateFormat.format(it) } ?: "N/A"}",
+          text = "Empresa: ${customer.company}",
           fontSize = 14.sp,
           color = slate700
         )
@@ -113,7 +113,7 @@ fun CustomerDetailsModal(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-          text = "Estado: ${customer.estado}",
+          text = "Membro desde: ${customer.memberSince?.let { dateFormat.format(it) } ?: "N/A"}",
           fontSize = 14.sp,
           color = slate700
         )

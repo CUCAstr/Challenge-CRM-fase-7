@@ -1,8 +1,7 @@
 package br.com.savedra.challengecrm.model
 
-data class Campaign(
+data class Banner(
   val title: String = "",
   val description: String = "",
-  val startDate: String = "",
-  val endDate: String = ""
+  val imageUrl: String = ""
 )

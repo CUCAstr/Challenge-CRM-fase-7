@@ -52,7 +52,6 @@ fun OperatorHomeScreen(
 
   LaunchedEffect(Unit) {
     viewModel.updateSegmentFilter("Todos")
-    viewModel.updateStateFilter("Todos")
     viewModel.updateStatusFilter("Todos")
   }
 
@@ -201,86 +200,6 @@ fun OperatorHomeScreen(
 
           Column(modifier = Modifier.weight(1f)) {
             Text(
-              text = "Filtro por estado",
-              color = slate600,
-              fontSize = 12.sp,
-              modifier = Modifier.padding(bottom = 4.dp)
-            )
-            var expandedState by remember { mutableStateOf(false) }
-            val itemsState = listOf(
-              "Todos",
-              "Acre",
-              "Alagoas",
-              "Amapá",
-              "Amazonas",
-              "Bahia",
-              "Ceará",
-              "Distrito Federal",
-              "Espírito Santo",
-              "Goiás",
-              "Maranhão",
-              "Mato Grosso",
-              "Mato Grosso do Sul",
-              "Minas Gerais",
-              "Pará",
-              "Paraíba",
-              "Paraná",
-              "Pernambuco",
-              "Piauí",
-              "Rio de Janeiro",
-              "Rio Grande do Norte",
-              "Rio Grande do Sul",
-              "Rondônia",
-              "Roraima",
-              "Santa Catarina",
-              "São Paulo",
-              "Sergipe",
-              "Tocantins"
-            )
-            var selectedState by remember { mutableStateOf(itemsState[0]) }
-
-            ExposedDropdownMenuBox(
-              expanded = expandedState,
-              onExpandedChange = { expandedState = !expandedState }
-            ) {
-              Card(
-                modifier = Modifier.menuAnchor(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = white)
-              ) {
-                Row(
-                  modifier = Modifier.padding(8.dp),
-                  verticalAlignment = Alignment.CenterVertically
-                ) {
-                  Text(
-                    text = selectedState,
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    maxLines = 1
-                  )
-                  ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedState)
-                }
-              }
-
-              ExposedDropdownMenu(
-                expanded = expandedState,
-                onDismissRequest = { expandedState = false })
-              {
-                itemsState.forEach { item ->
-                  DropdownMenuItem(
-                    text = { Text(text = item) },
-                    onClick = {
-                      selectedState = item
-                      expandedState = false
-                      viewModel.updateStateFilter(item)
-                    }
-                  )
-                }
-              }
-            }
-          }
-
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
               text = "Filtro por status",
               color = slate600,
               fontSize = 12.sp,
@@ -337,20 +256,31 @@ fun OperatorHomeScreen(
       Spacer(modifier = Modifier.height(16.dp))
 
       // Customers List
-      LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-      ) {
-        items(customers) { customer ->
-          CustomerCard(
-            customer = customer,
-            onClick = {
-              selectedCustomer = customer
-              showCustomerDetails = true
-            }
-          )
+      if (customers.isEmpty()) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+          contentAlignment = Alignment.Center
+        ) {
+          Text("Não há nada para listar.")
+        }
+      } else {
+        LazyColumn(
+          modifier = Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 24.dp),
+          verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+          items(customers) { customer ->
+            CustomerCard(
+              customer = customer,
+              onClick = {
+                selectedCustomer = customer
+                showCustomerDetails = true
+              }
+            )
+          }
         }
       }
     }

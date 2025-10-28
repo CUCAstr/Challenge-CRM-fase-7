@@ -1,3 +1,5 @@
+package br.com.savedra.challengecrm.ui.view
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -29,24 +30,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import br.com.savedra.challengecrm.ui.view.FilteredClientsDialog
-import br.com.savedra.challengecrm.ui.view.DatePickerField
-import br.com.savedra.challengecrm.ui.view.convertMillisToDateString
-import br.com.savedra.challengecrm.ui.view.TimePickerField
 import br.com.savedra.challengecrm.ui.theme.white
-import br.com.savedra.challengecrm.viewmodel.InviteViewModel
+import br.com.savedra.challengecrm.viewmodel.BannerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateInviteModal(
+fun CreateBannerModal(
   onDismiss: () -> Unit,
-  viewModel: InviteViewModel
+  viewModel: BannerViewModel
 ) {
-  val title by viewModel.newInviteTitle.collectAsState()
-  val description by viewModel.newInviteDescription.collectAsState()
-  val date by viewModel.newInviteDate.collectAsState()
-  val time by viewModel.newInviteTime.collectAsState()
-  val location by viewModel.newInviteLocation.collectAsState()
+  val title by viewModel.newBannerTitle.collectAsState()
+  val description by viewModel.newBannerDescription.collectAsState()
+  val imageUrl by viewModel.newBannerImageUrl.collectAsState()
 
   val segments = listOf(
     "Todos",
@@ -85,8 +80,8 @@ fun CreateInviteModal(
         item {
           OutlinedTextField(
             value = title,
-            onValueChange = { viewModel.onNewInviteTitleChange(it) },
-            label = { Text("Título do convite") },
+            onValueChange = { viewModel.onNewBannerTitleChange(it) },
+            label = { Text("Título do banner") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -100,8 +95,8 @@ fun CreateInviteModal(
           Spacer(modifier = Modifier.height(8.dp))
           OutlinedTextField(
             value = description,
-            onValueChange = { viewModel.onNewInviteDescriptionChange(it) },
-            label = { Text("Descrição do convite") },
+            onValueChange = { viewModel.onNewBannerDescriptionChange(it) },
+            label = { Text("Descrição do banner") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -113,41 +108,15 @@ fun CreateInviteModal(
         }
         item {
           Spacer(modifier = Modifier.height(8.dp))
-          DatePickerField(
-            label = "Data do convite",
-            dateString = date,
-            onDateSelected = { millis ->
-              val selectedDate = convertMillisToDateString(millis)
-              viewModel.onNewInviteDateChange(selectedDate)
-            },
-            dateValidator = { utcTimeMillis ->
-              utcTimeMillis >= System.currentTimeMillis()
-            },
-            modifier = Modifier.fillMaxWidth()
-          )
-        }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
-          TimePickerField(
-            label = "Hora do convite",
-            timeString = time,
-            onTimeSelected = { newTime ->
-              viewModel.onNewInviteTimeChange(newTime)
-            },
-            modifier = Modifier.fillMaxWidth()
-          )
-        }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
           OutlinedTextField(
-            value = location,
-            onValueChange = { viewModel.onNewInviteLocationChange(it) },
-            label = { Text("Local do convite") },
+            value = imageUrl,
+            onValueChange = { viewModel.onNewBannerImageUrlChange(it) },
+            label = { Text("URL da imagem") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
               autoCorrectEnabled = true,
-              keyboardType = KeyboardType.Text,
+              keyboardType = KeyboardType.Uri,
               imeAction = ImeAction.Unspecified
             ),
           )
@@ -267,7 +236,7 @@ fun CreateInviteModal(
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendInvite()
+              viewModel.sendBanner()
               onDismiss()
             },
             modifier = Modifier.fillMaxWidth()

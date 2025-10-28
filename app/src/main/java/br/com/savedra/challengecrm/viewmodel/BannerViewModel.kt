@@ -3,8 +3,8 @@ package br.com.savedra.challengecrm.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.savedra.challengecrm.data.repository.AuthRepository
-import br.com.savedra.challengecrm.data.repository.InviteRepository
-import br.com.savedra.challengecrm.model.Invite
+import br.com.savedra.challengecrm.data.repository.BannerRepository
+import br.com.savedra.challengecrm.model.Banner
 import br.com.savedra.challengecrm.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -13,34 +13,27 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class InviteViewModel : ViewModel() {
+class BannerViewModel : ViewModel() {
 
-  private val inviteRepository = InviteRepository()
-  private val authRepository =
-    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val bannerRepository = BannerRepository()
+  private val authRepository = AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-  private val _allInvites = MutableStateFlow<List<Invite>>(emptyList())
+  private val _allBanners = MutableStateFlow<List<Banner>>(emptyList())
 
-  private val _filteredInvites = MutableStateFlow<List<Invite>>(emptyList())
-  val filteredInvites: StateFlow<List<Invite>> = _filteredInvites.asStateFlow()
+  private val _filteredBanners = MutableStateFlow<List<Banner>>(emptyList())
+  val filteredBanners: StateFlow<List<Banner>> = _filteredBanners.asStateFlow()
 
-  private val _newInviteTitle = MutableStateFlow("")
-  val newInviteTitle: StateFlow<String> = _newInviteTitle.asStateFlow()
+  private val _newBannerTitle = MutableStateFlow("")
+  val newBannerTitle: StateFlow<String> = _newBannerTitle.asStateFlow()
 
-  private val _newInviteDescription = MutableStateFlow("")
-  val newInviteDescription: StateFlow<String> = _newInviteDescription.asStateFlow()
+  private val _newBannerDescription = MutableStateFlow("")
+  val newBannerDescription: StateFlow<String> = _newBannerDescription.asStateFlow()
 
-  private val _newInviteDate = MutableStateFlow("")
-  val newInviteDate: StateFlow<String> = _newInviteDate.asStateFlow()
-
-  private val _newInviteLocation = MutableStateFlow("")
-  val newInviteLocation: StateFlow<String> = _newInviteLocation.asStateFlow()
-
-  private val _newInviteTime = MutableStateFlow("")
-  val newInviteTime: StateFlow<String> = _newInviteTime.asStateFlow()
+  private val _newBannerImageUrl = MutableStateFlow("")
+  val newBannerImageUrl: StateFlow<String> = _newBannerImageUrl.asStateFlow()
 
   private val _segmentFilter = MutableStateFlow("Todos")
   val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
@@ -58,15 +51,15 @@ class InviteViewModel : ViewModel() {
   val filteredClients: StateFlow<List<User>> = _filteredClients.asStateFlow()
 
   init {
-    loadInvites()
+    loadBanners()
   }
 
-  private fun loadInvites() {
+  private fun loadBanners() {
     viewModelScope.launch {
-      inviteRepository.getInvites(
+      bannerRepository.getBanners(
         onSuccess = {
-          _allInvites.value = it
-          filterInvites()
+          _allBanners.value = it
+          filterBanners()
         },
         onFailure = {
           // Handle error
@@ -77,38 +70,30 @@ class InviteViewModel : ViewModel() {
 
   fun updateSearchQuery(query: String) {
     _searchQuery.value = query
-    filterInvites()
+    filterBanners()
   }
 
-  private fun filterInvites() {
+  private fun filterBanners() {
     val query = _searchQuery.value.lowercase()
 
-    val filtered = _allInvites.value.filter { invite ->
-      val nameMatches = invite.name.lowercase().contains(query)
+    val filtered = _allBanners.value.filter { banner ->
+      val nameMatches = banner.title.lowercase().contains(query)
       nameMatches
     }
 
-    _filteredInvites.value = filtered
+    _filteredBanners.value = filtered
   }
 
-  fun onNewInviteTitleChange(title: String) {
-    _newInviteTitle.value = title
+  fun onNewBannerTitleChange(title: String) {
+    _newBannerTitle.value = title
   }
 
-  fun onNewInviteDescriptionChange(description: String) {
-    _newInviteDescription.value = description
+  fun onNewBannerDescriptionChange(description: String) {
+    _newBannerDescription.value = description
   }
 
-  fun onNewInviteDateChange(date: String) {
-    _newInviteDate.value = date
-  }
-
-  fun onNewInviteLocationChange(location: String) {
-    _newInviteLocation.value = location
-  }
-
-  fun onNewInviteTimeChange(time: String) {
-    _newInviteTime.value = time
+  fun onNewBannerImageUrlChange(imageUrl: String) {
+    _newBannerImageUrl.value = imageUrl
   }
 
   fun onSegmentFilterChange(segment: String) {
@@ -127,15 +112,13 @@ class InviteViewModel : ViewModel() {
     _scoreEndFilter.value = score
   }
 
-  fun sendInvite() {
-    val invite = Invite(
-      name = _newInviteTitle.value,
-      description = _newInviteDescription.value,
-      date = _newInviteDate.value,
-      time = _newInviteTime.value,
-      location = _newInviteLocation.value
+  fun sendBanner() {
+    val banner = Banner(
+      title = _newBannerTitle.value,
+      description = _newBannerDescription.value,
+      imageUrl = _newBannerImageUrl.value
     )
-    inviteRepository.sendInvite(invite, onSuccess = { loadInvites() }, onFailure = {})
+    bannerRepository.sendBanner(banner, onSuccess = { loadBanners() }, onFailure = {})
   }
 
   fun getFilteredClients() {

@@ -7,11 +7,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.ui.view.BannersScreen
 import br.com.savedra.challengecrm.ui.view.CampaignsScreen
 import br.com.savedra.challengecrm.ui.view.ChatScreen
 import br.com.savedra.challengecrm.ui.view.ClientHomeScreen
 import br.com.savedra.challengecrm.ui.view.InvitesScreen
+import br.com.savedra.challengecrm.ui.view.LandingScreen
 import br.com.savedra.challengecrm.ui.view.LoginScreen
 import br.com.savedra.challengecrm.ui.view.OperatorHomeScreen
 import br.com.savedra.challengecrm.ui.view.PromotionsScreen
@@ -19,6 +21,7 @@ import br.com.savedra.challengecrm.ui.view.RegisterScreen
 import br.com.savedra.challengecrm.viewmodel.CustomerViewModel
 
 object AppRoutes {
+  const val LANDING = "landing"
   const val LOGIN = "login"
   const val REGISTER = "register"
   const val CLIENT_HOME = "clientHome"
@@ -35,7 +38,12 @@ fun AppNavigation() {
   val navController = rememberNavController()
   val customerViewModel: CustomerViewModel = viewModel()
 
-  NavHost(navController = navController, startDestination = AppRoutes.LOGIN) {
+  NavHost(navController = navController, startDestination = AppRoutes.LANDING) {
+    composable(AppRoutes.LANDING) {
+      LandingScreen(onAccessSystemClick = {
+        navController.navigate(AppRoutes.LOGIN)
+      })
+    }
     composable(AppRoutes.LOGIN) {
       LoginScreen(navController = navController)
     }
@@ -103,13 +111,73 @@ fun AppNavigation() {
       )
     }
     composable(AppRoutes.PROMOTIONS) {
-      PromotionsScreen()
+      PromotionsScreen(
+        onClientsClick = {
+          navController.navigate(AppRoutes.OPERATOR_HOME) {
+            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
+          }
+        },
+        onInvitesClick = {
+          navController.navigate(AppRoutes.INVITES)
+        },
+        onCampaignsClick = {
+          navController.navigate(AppRoutes.CAMPAIGNS)
+        },
+        onBannersClick = {
+          navController.navigate(AppRoutes.BANNERS)
+        },
+        onLogoutClick = {
+          navController.navigate(AppRoutes.LOGIN) {
+            popUpTo(AppRoutes.LOGIN) { inclusive = true }
+          }
+        }
+      )
     }
     composable(AppRoutes.CAMPAIGNS) {
-      CampaignsScreen()
+      CampaignsScreen(
+        onClientsClick = {
+          navController.navigate(AppRoutes.OPERATOR_HOME) {
+            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
+          }
+        },
+        onInvitesClick = {
+          navController.navigate(AppRoutes.INVITES)
+        },
+        onPromotionsClick = {
+          navController.navigate(AppRoutes.PROMOTIONS)
+        },
+        onBannersClick = {
+          navController.navigate(AppRoutes.BANNERS)
+        },
+        onLogoutClick = {
+          navController.navigate(AppRoutes.LOGIN) {
+            popUpTo(AppRoutes.LOGIN) { inclusive = true }
+          }
+        }
+      )
     }
     composable(AppRoutes.BANNERS) {
-      BannersScreen()
+      BannersScreen(
+        onClientsClick = {
+          navController.navigate(AppRoutes.OPERATOR_HOME) {
+            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
+          }
+        },
+        onInvitesClick = {
+          navController.navigate(AppRoutes.INVITES)
+        },
+        onPromotionsClick = {
+          navController.navigate(AppRoutes.PROMOTIONS)
+        },
+        onCampaignsClick = {
+          navController.navigate(AppRoutes.CAMPAIGNS)
+        },
+        onLogoutClick = {
+          navController.navigate(AppRoutes.LOGIN) {
+            popUpTo(AppRoutes.LOGIN) { inclusive = true }
+          }
+        }
+      )
     }
     composable(
       route = "${AppRoutes.CHAT}/{userId}/{userName}",

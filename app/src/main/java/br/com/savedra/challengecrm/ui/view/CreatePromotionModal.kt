@@ -1,3 +1,5 @@
+package br.com.savedra.challengecrm.ui.view
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +23,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -31,22 +37,23 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import br.com.savedra.challengecrm.ui.view.FilteredClientsDialog
 import br.com.savedra.challengecrm.ui.view.DatePickerField
-import br.com.savedra.challengecrm.ui.view.convertMillisToDateString
 import br.com.savedra.challengecrm.ui.view.TimePickerField
+import br.com.savedra.challengecrm.ui.view.convertMillisToDateString
 import br.com.savedra.challengecrm.ui.theme.white
-import br.com.savedra.challengecrm.viewmodel.InviteViewModel
+import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateInviteModal(
+fun CreatePromotionModal(
   onDismiss: () -> Unit,
-  viewModel: InviteViewModel
+  viewModel: PromotionViewModel
 ) {
-  val title by viewModel.newInviteTitle.collectAsState()
-  val description by viewModel.newInviteDescription.collectAsState()
-  val date by viewModel.newInviteDate.collectAsState()
-  val time by viewModel.newInviteTime.collectAsState()
-  val location by viewModel.newInviteLocation.collectAsState()
+  val title by viewModel.newPromotionTitle.collectAsState()
+  val description by viewModel.newPromotionDescription.collectAsState()
+  val originalValue by viewModel.newPromotionOriginalValue.collectAsState()
+  val promotionValue by viewModel.newPromotionPromotionValue.collectAsState()
+  val dateExpiresIn by viewModel.newPromotionDateExpiresIn.collectAsState()
+  val hoursExpiresIn by viewModel.newPromotionHoursExpiresIn.collectAsState()
 
   val segments = listOf(
     "Todos",
@@ -85,8 +92,8 @@ fun CreateInviteModal(
         item {
           OutlinedTextField(
             value = title,
-            onValueChange = { viewModel.onNewInviteTitleChange(it) },
-            label = { Text("Título do convite") },
+            onValueChange = { viewModel.onNewPromotionTitleChange(it) },
+            label = { Text("Título da promoção") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -100,8 +107,8 @@ fun CreateInviteModal(
           Spacer(modifier = Modifier.height(8.dp))
           OutlinedTextField(
             value = description,
-            onValueChange = { viewModel.onNewInviteDescriptionChange(it) },
-            label = { Text("Descrição do convite") },
+            onValueChange = { viewModel.onNewPromotionDescriptionChange(it) },
+            label = { Text("Descrição da promoção") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -113,12 +120,42 @@ fun CreateInviteModal(
         }
         item {
           Spacer(modifier = Modifier.height(8.dp))
+          OutlinedTextField(
+            value = originalValue,
+            onValueChange = { viewModel.onNewPromotionOriginalValueChange(it) },
+            label = { Text("Valor original") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+              capitalization = KeyboardCapitalization.Unspecified,
+              autoCorrectEnabled = true,
+              keyboardType = KeyboardType.Number,
+              imeAction = ImeAction.Unspecified
+            ),
+          )
+        }
+        item {
+          Spacer(modifier = Modifier.height(8.dp))
+          OutlinedTextField(
+            value = promotionValue,
+            onValueChange = { viewModel.onNewPromotionPromotionValueChange(it) },
+            label = { Text("Valor da promoção") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+              capitalization = KeyboardCapitalization.Unspecified,
+              autoCorrectEnabled = true,
+              keyboardType = KeyboardType.Number,
+              imeAction = ImeAction.Unspecified
+            ),
+          )
+        }
+        item {
+          Spacer(modifier = Modifier.height(8.dp))
           DatePickerField(
-            label = "Data do convite",
-            dateString = date,
+            label = "Data de expiração",
+            dateString = dateExpiresIn,
             onDateSelected = { millis ->
               val selectedDate = convertMillisToDateString(millis)
-              viewModel.onNewInviteDateChange(selectedDate)
+              viewModel.onNewPromotionDateExpiresInChange(selectedDate)
             },
             dateValidator = { utcTimeMillis ->
               utcTimeMillis >= System.currentTimeMillis()
@@ -129,27 +166,12 @@ fun CreateInviteModal(
         item {
           Spacer(modifier = Modifier.height(8.dp))
           TimePickerField(
-            label = "Hora do convite",
-            timeString = time,
+            label = "Hora de expiração",
+            timeString = hoursExpiresIn,
             onTimeSelected = { newTime ->
-              viewModel.onNewInviteTimeChange(newTime)
+              viewModel.onNewPromotionHoursExpiresInChange(newTime)
             },
             modifier = Modifier.fillMaxWidth()
-          )
-        }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
-          OutlinedTextField(
-            value = location,
-            onValueChange = { viewModel.onNewInviteLocationChange(it) },
-            label = { Text("Local do convite") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(
-              capitalization = KeyboardCapitalization.Unspecified,
-              autoCorrectEnabled = true,
-              keyboardType = KeyboardType.Text,
-              imeAction = ImeAction.Unspecified
-            ),
           )
         }
         item {
@@ -262,12 +284,11 @@ fun CreateInviteModal(
             Text("Exibir resultados dos filtros")
           }
         }
-
         item {
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendInvite()
+              viewModel.sendPromotion()
               onDismiss()
             },
             modifier = Modifier.fillMaxWidth()
@@ -277,12 +298,11 @@ fun CreateInviteModal(
         }
       }
     }
-  }
-
-  if (showFilteredClients) {
-    FilteredClientsDialog(
-      clients = viewModel.filteredClients.collectAsState().value,
-      onDismiss = { showFilteredClients = false }
-    )
+    if (showFilteredClients) {
+      FilteredClientsDialog(
+        clients = viewModel.filteredClients.collectAsState().value,
+        onDismiss = { showFilteredClients = false }
+      )
+    }
   }
 }
