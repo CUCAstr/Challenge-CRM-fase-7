@@ -117,6 +117,38 @@ class AuthViewModel : ViewModel() {
     }
   }
 
+  fun registerTestUser(
+    name: String,
+    email: String,
+    password: String,
+    company: String,
+    segment: String,
+    onComplete: () -> Unit
+  ) {
+    val role = "Cliente"
+
+    if (email.isBlank() || password.isBlank() || name.isBlank() || company.isBlank() ||
+      segment.isBlank()) {
+      _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
+      onComplete()
+      return
+    }
+
+    _authUiState.value = AuthUIState.Loading
+    viewModelScope.launch {
+      try {
+        authRepository.register(email, password, name, company, role, segment)
+        _authUiState.value = AuthUIState.Success(role)
+        Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
+      } catch (e: Exception) {
+        _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
+      } finally {
+        onComplete()
+      }
+    }
+  }
+
+
   fun resetUiState() {
     _authUiState.value = AuthUIState.Idle
   }
