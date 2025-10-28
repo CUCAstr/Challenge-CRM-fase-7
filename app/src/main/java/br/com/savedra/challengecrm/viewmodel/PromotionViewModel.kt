@@ -47,6 +47,15 @@ class PromotionViewModel : ViewModel() {
   private val _segmentFilter = MutableStateFlow("Todos")
   val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
 
+  private val _statusFilter = MutableStateFlow("Todos")
+  val statusFilter: StateFlow<String> = _statusFilter.asStateFlow()
+
+  private val _scoreStartFilter = MutableStateFlow("")
+  val scoreStartFilter: StateFlow<String> = _scoreStartFilter.asStateFlow()
+
+  private val _scoreEndFilter = MutableStateFlow("")
+  val scoreEndFilter: StateFlow<String> = _scoreEndFilter.asStateFlow()
+
   private val _filteredClients = MutableStateFlow<List<User>>(emptyList())
   val filteredClients: StateFlow<List<User>> = _filteredClients.asStateFlow()
 
@@ -112,6 +121,18 @@ class PromotionViewModel : ViewModel() {
     _segmentFilter.value = segment
   }
 
+  fun onStatusFilterChange(status: String) {
+    _statusFilter.value = status
+  }
+
+  fun onScoreStartFilterChange(score: String) {
+    _scoreStartFilter.value = score
+  }
+
+  fun onScoreEndFilterChange(score: String) {
+    _scoreEndFilter.value = score
+  }
+
   fun sendPromotion() {
     val promotion = Promotion(
       title = _newPromotionTitle.value,
@@ -129,13 +150,23 @@ class PromotionViewModel : ViewModel() {
       val allUsers = authRepository.getUsers()
       val allCostumers = allUsers.filter { it.role == "Cliente" }
       val segmentFilter = _segmentFilter.value
+      val statusFilter = _statusFilter.value
 
       val filtered = allCostumers.filter { user ->
         val segmentMatches = when (segmentFilter) {
           "Todos" -> true
           else -> user.segment.equals(segmentFilter, ignoreCase = true)
         }
-        segmentMatches
+        val statusMatches = when (statusFilter) {
+          "Todos" -> true
+          else -> user.status.equals(statusFilter, ignoreCase = true)
+        }
+
+        val scoreStart = _scoreStartFilter.value.toIntOrNull() ?: 0
+        val scoreEnd = _scoreEndFilter.value.toIntOrNull() ?: Int.MAX_VALUE
+        val scoreMatches = user.score in scoreStart..scoreEnd
+
+        segmentMatches && statusMatches && scoreMatches
       }
 
       _filteredClients.value = filtered
