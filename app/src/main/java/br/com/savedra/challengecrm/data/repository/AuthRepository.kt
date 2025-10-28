@@ -22,6 +22,7 @@ class AuthRepository(
     email: String,
     password: String,
     name: String,
+    company: String,
     role: String,
     segment: String
   ) {
@@ -39,6 +40,7 @@ class AuthRepository(
       "uid" to firebaseUser.uid,
       "email" to email,
       "name" to name,
+      "company" to company,
       "role" to role,
       "segment" to segment,
       "memberSince" to FieldValue.serverTimestamp(),
@@ -68,6 +70,7 @@ class AuthRepository(
       User(
         id = document.id,
         name = document.getString("name") ?: "",
+        company = document.getString("company") ?: "",
         email = document.getString("email") ?: "",
         role = document.getString("role") ?: "",
         segment = document.getString("segment") ?: "",

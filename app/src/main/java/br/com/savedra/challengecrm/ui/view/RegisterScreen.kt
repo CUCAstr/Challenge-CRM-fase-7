@@ -136,47 +136,24 @@ fun RegisterScreen(
 
       Spacer(modifier = Modifier.height(16.dp))
 
-
-      val roles = listOf("Cliente", "Operador")
-
-      ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth()
-      ) {
-        OutlinedTextField(
-          value = viewModel.role.collectAsState().value,
-          onValueChange = { },
-          label = { Text("Tipo de usuário") },
-          readOnly = true,
-          trailingIcon = {
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-          },
-          modifier = Modifier
-            .menuAnchor()
-            .fillMaxWidth(),
-          colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500,
-            unfocusedBorderColor = slate200
-          ),
-        )
-        ExposedDropdownMenu(
-          expanded = expanded,
-          onDismissRequest = { expanded = false },
-          modifier = Modifier.fillMaxWidth()
-        ) {
-          roles.forEach { role ->
-            DropdownMenuItem(
-              text = { Text(role) },
-              onClick = {
-                viewModel.onRoleChange(role)
-                expanded = false
-              }
-            )
-          }
-        }
-      }
-
+      OutlinedTextField(
+        value = viewModel.company.collectAsState().value,
+        onValueChange = { viewModel.onCompanyChange(it) },
+        label = { Text("Empresa") },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+          capitalization = KeyboardCapitalization.Unspecified,
+          autoCorrectEnabled = true,
+          keyboardType = KeyboardType.Text,
+          imeAction = ImeAction.Unspecified
+        ),
+        modifier = Modifier
+          .fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+          focusedBorderColor = indigo500,
+          unfocusedBorderColor = slate200
+        ),
+      )
 
       Spacer(modifier = Modifier.height(16.dp))
 

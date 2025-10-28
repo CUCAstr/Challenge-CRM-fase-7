@@ -43,8 +43,8 @@ class AuthViewModel : ViewModel() {
   private val _name = MutableStateFlow("")
   val name = _name.asStateFlow()
 
-  private val _role = MutableStateFlow("")
-  val role = _role.asStateFlow()
+  private val _company = MutableStateFlow("")
+  val company = _company.asStateFlow()
 
   private val _segment = MutableStateFlow("")
   val segment = _segment.asStateFlow()
@@ -61,8 +61,8 @@ class AuthViewModel : ViewModel() {
     _name.value = newName
   }
 
-  fun onRoleChange(newRole: String) {
-    _role.value = newRole
+  fun onCompanyChange(newCompany: String) {
+    _company.value = newCompany
   }
 
   fun onSegmentChange(newSegment: String) {
@@ -95,7 +95,8 @@ class AuthViewModel : ViewModel() {
     val name = _name.value
     val email = _email.value
     val password = _password.value
-    val role = _role.value
+    val company = _company.value
+    val role = "Cliente"
     val segment = _segment.value
 
     if (email.isBlank() || password.isBlank() || name.isBlank()) {
@@ -106,7 +107,7 @@ class AuthViewModel : ViewModel() {
     _authUiState.value = AuthUIState.Loading
     viewModelScope.launch {
       try {
-        authRepository.register(email, password, name, role, segment)
+        authRepository.register(email, password, name, company, role, segment)
         _authUiState.value = AuthUIState.Success(role)
         Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {

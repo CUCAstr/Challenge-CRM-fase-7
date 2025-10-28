@@ -5,6 +5,7 @@ import java.util.Date
 data class User(
   val id: String = "",
   val name: String = "",
+  val company: String = "",
   val email: String = "",
   val role: String = "",
   val segment: String = "",
