@@ -23,6 +23,8 @@ import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.theme.slate600
 import br.com.savedra.challengecrm.ui.theme.slate800
+import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
+import br.com.savedra.challengecrm.ui.view.dialogs.convertMillisToDateString
 import br.com.savedra.challengecrm.viewmodel.EventViewModel
 import java.util.Calendar
 

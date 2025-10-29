@@ -29,10 +29,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import br.com.savedra.challengecrm.ui.view.FilteredClientsDialog
-import br.com.savedra.challengecrm.ui.view.DatePickerField
-import br.com.savedra.challengecrm.ui.view.convertMillisToDateString
-import br.com.savedra.challengecrm.ui.view.TimePickerField
+import br.com.savedra.challengecrm.ui.view.dialogs.FilteredClientsDialog
+import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
+import br.com.savedra.challengecrm.ui.view.dialogs.convertMillisToDateString
+import br.com.savedra.challengecrm.ui.view.dialogs.TimePickerField
 import br.com.savedra.challengecrm.ui.theme.white
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 

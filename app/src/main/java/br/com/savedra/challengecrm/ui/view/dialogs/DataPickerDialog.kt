@@ -1,4 +1,4 @@
-package br.com.savedra.challengecrm.ui.view
+package br.com.savedra.challengecrm.ui.view.dialogs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
