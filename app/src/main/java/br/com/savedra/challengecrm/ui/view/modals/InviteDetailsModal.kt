@@ -1,6 +1,5 @@
-package br.com.savedra.challengecrm.ui.view
+package br.com.savedra.challengecrm.ui.view.modals
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -14,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import br.com.savedra.challengecrm.model.Invite
-import br.com.savedra.challengecrm.ui.theme.slate100
 import br.com.savedra.challengecrm.ui.theme.slate800
 import br.com.savedra.challengecrm.ui.theme.white
 

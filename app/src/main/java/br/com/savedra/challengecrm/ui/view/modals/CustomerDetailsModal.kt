@@ -1,10 +1,7 @@
-package br.com.savedra.challengecrm.ui.view
+package br.com.savedra.challengecrm.ui.view.modals
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -13,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -105,6 +101,14 @@ fun CustomerDetailsModal(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
+          text = "Gênero: ${customer.gender}",
+          fontSize = 14.sp,
+          color = slate700
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
           text = "Empresa: ${customer.company}",
           fontSize = 14.sp,
           color = slate700
@@ -138,6 +142,14 @@ fun CustomerDetailsModal(
 
         Text(
           text = "Status: ${customer.status}",
+          fontSize = 14.sp,
+          color = slate700
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+          text = "Categoria: ${customer.category}",
           fontSize = 14.sp,
           color = slate700
         )

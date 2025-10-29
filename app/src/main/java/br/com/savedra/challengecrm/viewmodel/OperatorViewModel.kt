@@ -11,8 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class CustomerViewModel : ViewModel() {
-
+class OperatorViewModel : ViewModel() {
   private val authRepository =
     AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 

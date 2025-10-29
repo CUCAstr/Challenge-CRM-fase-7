@@ -1,5 +1,3 @@
-package br.com.savedra.challengecrm.ui.view
-
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -30,19 +29,24 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import br.com.savedra.challengecrm.ui.view.dialogs.FilteredClientsDialog
+import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
+import br.com.savedra.challengecrm.ui.view.dialogs.convertMillisToDateString
+import br.com.savedra.challengecrm.ui.view.dialogs.TimePickerField
 import br.com.savedra.challengecrm.ui.theme.white
-import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
+import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateCampaignModal(
+fun CreateInviteModal(
   onDismiss: () -> Unit,
-  viewModel: CampaignViewModel
+  viewModel: InviteViewModel
 ) {
-  val title by viewModel.newCampaignTitle.collectAsState()
-  val description by viewModel.newCampaignDescription.collectAsState()
-  val startDate by viewModel.newCampaignStartDate.collectAsState()
-  val endDate by viewModel.newCampaignEndDate.collectAsState()
+  val title by viewModel.newInviteTitle.collectAsState()
+  val description by viewModel.newInviteDescription.collectAsState()
+  val date by viewModel.newInviteDate.collectAsState()
+  val time by viewModel.newInviteTime.collectAsState()
+  val location by viewModel.newInviteLocation.collectAsState()
 
   val segments = listOf(
     "Todos",
@@ -81,8 +85,8 @@ fun CreateCampaignModal(
         item {
           OutlinedTextField(
             value = title,
-            onValueChange = { viewModel.onNewCampaignTitleChange(it) },
-            label = { Text("Título da campanha") },
+            onValueChange = { viewModel.onNewInviteTitleChange(it) },
+            label = { Text("Título do convite") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -96,8 +100,8 @@ fun CreateCampaignModal(
           Spacer(modifier = Modifier.height(8.dp))
           OutlinedTextField(
             value = description,
-            onValueChange = { viewModel.onNewCampaignDescriptionChange(it) },
-            label = { Text("Descrição da campanha") },
+            onValueChange = { viewModel.onNewInviteDescriptionChange(it) },
+            label = { Text("Descrição do convite") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -110,11 +114,11 @@ fun CreateCampaignModal(
         item {
           Spacer(modifier = Modifier.height(8.dp))
           DatePickerField(
-            label = "Data inicial da campanha",
-            dateString = startDate,
+            label = "Data do convite",
+            dateString = date,
             onDateSelected = { millis ->
               val selectedDate = convertMillisToDateString(millis)
-              viewModel.onNewCampaignStartDateChange(selectedDate)
+              viewModel.onNewInviteDateChange(selectedDate)
             },
             dateValidator = { utcTimeMillis ->
               utcTimeMillis >= System.currentTimeMillis()
@@ -124,17 +128,28 @@ fun CreateCampaignModal(
         }
         item {
           Spacer(modifier = Modifier.height(8.dp))
-          DatePickerField(
-            label = "Data final da campanha",
-            dateString = endDate,
-            onDateSelected = { millis ->
-              val selectedDate = convertMillisToDateString(millis)
-              viewModel.onNewCampaignEndDateChange(selectedDate)
-            },
-            dateValidator = { utcTimeMillis ->
-              utcTimeMillis >= System.currentTimeMillis()
+          TimePickerField(
+            label = "Hora do convite",
+            timeString = time,
+            onTimeSelected = { newTime ->
+              viewModel.onNewInviteTimeChange(newTime)
             },
             modifier = Modifier.fillMaxWidth()
+          )
+        }
+        item {
+          Spacer(modifier = Modifier.height(8.dp))
+          OutlinedTextField(
+            value = location,
+            onValueChange = { viewModel.onNewInviteLocationChange(it) },
+            label = { Text("Local do convite") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+              capitalization = KeyboardCapitalization.Unspecified,
+              autoCorrectEnabled = true,
+              keyboardType = KeyboardType.Text,
+              imeAction = ImeAction.Unspecified
+            ),
           )
         }
         item {
@@ -252,7 +267,7 @@ fun CreateCampaignModal(
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendCampaign()
+              viewModel.sendInvite()
               onDismiss()
             },
             modifier = Modifier.fillMaxWidth()

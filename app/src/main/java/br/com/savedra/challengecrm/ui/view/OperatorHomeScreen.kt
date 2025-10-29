@@ -27,12 +27,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.ui.theme.*
-import br.com.savedra.challengecrm.viewmodel.CustomerViewModel
+import br.com.savedra.challengecrm.viewmodel.OperatorViewModel
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.PhotoCameraBack
+import br.com.savedra.challengecrm.ui.view.modals.CustomerDetailsModal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +44,7 @@ fun OperatorHomeScreen(
   onCampaignsClick: () -> Unit = {},
   onBannersClick: () -> Unit = {},
   onLogoutClick: () -> Unit = {},
-  viewModel: CustomerViewModel = viewModel()
+  viewModel: OperatorViewModel = viewModel()
 ) {
   val customers by viewModel.filteredCustomers.collectAsState()
   val searchQuery by viewModel.searchQuery.collectAsState()

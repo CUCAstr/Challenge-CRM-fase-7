@@ -12,5 +12,8 @@ data class User(
   val score: Int = 0,
   val status: String = "",
   val memberSince: Date? = null,
-  val notes: String = ""
+  val notes: String = "",
+  val gender: String = "",
+  val phone: String = "",
+  val category: String = ""
 )

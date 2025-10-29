@@ -24,7 +24,10 @@ class AuthRepository(
     name: String,
     company: String,
     role: String,
-    segment: String
+    segment: String,
+    gender: String,
+    phone: String,
+    category: String
   ) {
     val authResult = auth.createUserWithEmailAndPassword(email, password).await()
     val firebaseUser = authResult.user
@@ -43,6 +46,9 @@ class AuthRepository(
       "company" to company,
       "role" to role,
       "segment" to segment,
+      "gender" to gender,
+      "phone" to phone,
+      "category" to category,
       "memberSince" to FieldValue.serverTimestamp(),
       "notes" to ""
     )
@@ -76,7 +82,10 @@ class AuthRepository(
         segment = document.getString("segment") ?: "",
         score = (document.getLong("score") ?: 0).toInt(),
         status = document.getString("status") ?: "",
-        notes = document.getString("notes") ?: ""
+        notes = document.getString("notes") ?: "",
+        gender = document.getString("gender") ?: "",
+        phone = document.getString("phone") ?: "",
+        category = document.getString("category") ?: ""
       )
     }
   }

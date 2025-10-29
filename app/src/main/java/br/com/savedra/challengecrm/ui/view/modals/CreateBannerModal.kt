@@ -1,4 +1,4 @@
-package br.com.savedra.challengecrm.ui.view
+package br.com.savedra.challengecrm.ui.view.modals
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import br.com.savedra.challengecrm.ui.theme.white
+import br.com.savedra.challengecrm.ui.view.dialogs.FilteredClientsDialog
 import br.com.savedra.challengecrm.viewmodel.BannerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

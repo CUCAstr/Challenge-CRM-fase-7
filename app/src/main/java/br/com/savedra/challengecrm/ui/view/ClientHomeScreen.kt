@@ -1,30 +1,29 @@
 package br.com.savedra.challengecrm.ui.view
 
+import CreateInviteModal
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material.icons.filled.Campaign
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.model.Message
 import br.com.savedra.challengecrm.ui.theme.*
-import br.com.savedra.challengecrm.viewmodel.ClientMessageViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,19 +32,26 @@ import java.util.*
 fun ClientHomeScreen(
   onMessageClick: (Message) -> Unit = {},
   onLogoutClick: () -> Unit = {},
-  viewModel: ClientMessageViewModel = viewModel()
+  onEventsCenterClick: () -> Unit,
+  onBusinessClubClick: () -> Unit,
+  onSheratonHotelClick: () -> Unit,
 ) {
+  var selectedFilter by remember { mutableStateOf("Convites") }
+  var expanded by remember { mutableStateOf(false) }
+  val options = listOf("Selecione", "Lidas", "Não lidas")
+  var selectedOptionText by remember { mutableStateOf(options[0]) }
+
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
       modifier = Modifier
-          .fillMaxSize()
-          .background(slate50)
+        .fillMaxSize()
+        .background(slate50)
     ) {
       // Header
       Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp)
+          .fillMaxWidth()
+          .padding(24.dp)
       ) {
         Text(
           text = "Caixa de Entrada",
@@ -64,22 +70,65 @@ fun ClientHomeScreen(
       // Filter Tabs
       Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
+          .fillMaxWidth()
+          .padding(horizontal = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
       ) {
+        FilterTab(
+          text = "Campanhas",
+          isSelected = selectedFilter == "Campanhas",
+          onClick = { selectedFilter = "Campanhas" }
+        )
+        FilterTab(
+          text = "Banners",
+          isSelected = selectedFilter == "Banners",
+          onClick = { selectedFilter = "Banners" }
+        )
+      }
 
+      Spacer(modifier = Modifier.height(8.dp))
+
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        FilterTab(
+          text = "Convites",
+          isSelected = selectedFilter == "Convites",
+          onClick = { selectedFilter = "Convites" }
+        )
+        FilterTab(
+          text = "Promoções",
+          isSelected = selectedFilter == "Promoções",
+          onClick = { selectedFilter = "Promoções" }
+        )
       }
 
       Spacer(modifier = Modifier.height(16.dp))
+
+      LazyColumn(
+        modifier = Modifier
+          .fillMaxWidth()
+          .weight(1f)
+          .padding(horizontal = 24.dp)
+      ) {
+        //TODO: Lista do Firebase dependendo do filtro
+      }
     }
 
-    // Bottom Navigation
     BottomNavigationClient(
-      onInboxClick = { /* Already on inbox screen */ },
+      onInboxClick = { },
       onLogoutClick = onLogoutClick,
       isInboxActive = true,
-      modifier = Modifier.align(Alignment.BottomCenter)
+      isEventsCenterActive = false,
+      isBusinessClubActive = false,
+      isSheratonHotelActive = false,
+      modifier = Modifier.align(Alignment.BottomCenter),
+      onEventsCenterClick = onEventsCenterClick,
+      onBusinessClubClick = onBusinessClubClick,
+      onSheratonHotelClick = onSheratonHotelClick
     )
   }
 }
@@ -112,7 +161,13 @@ fun BottomNavigationClient(
   onInboxClick: () -> Unit,
   onLogoutClick: () -> Unit,
   isInboxActive: Boolean = false,
-  modifier: Modifier = Modifier
+  isEventsCenterActive: Boolean = false,
+  isBusinessClubActive: Boolean = false,
+  isSheratonHotelActive: Boolean = false,
+  modifier: Modifier = Modifier,
+  onEventsCenterClick: () -> Unit,
+  onBusinessClubClick: () -> Unit,
+  onSheratonHotelClick: () -> Unit,
 ) {
   Card(
     modifier = modifier.fillMaxWidth(),
@@ -121,9 +176,10 @@ fun BottomNavigationClient(
   ) {
     Row(
       modifier = Modifier
-          .fillMaxWidth()
-          .padding(16.dp),
-      horizontalArrangement = Arrangement.SpaceEvenly
+        .fillMaxWidth()
+        .padding(16.dp),
+      horizontalArrangement = Arrangement.SpaceEvenly,
+      verticalAlignment = Alignment.CenterVertically
     ) {
       // Inbox
       Column(
@@ -140,7 +196,72 @@ fun BottomNavigationClient(
         Text(
           text = "Entrada",
           color = if (isInboxActive) purple500 else white,
-          fontSize = 12.sp
+          fontSize = 12.sp,
+          textAlign = TextAlign.Center,
+          fontWeight = FontWeight.Medium
+        )
+      }
+
+      // Events Center
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onEventsCenterClick() }
+      ) {
+        Icon(
+          imageVector = Icons.Default.DateRange,
+          contentDescription = "Events Center",
+          tint = if (isEventsCenterActive) purple500 else white,
+          modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = "Events\nCenter",
+          color = if (isEventsCenterActive) purple500 else white,
+          fontSize = 12.sp,
+          textAlign = TextAlign.Center,
+          fontWeight = FontWeight.Medium
+        )
+      }
+
+      // Business Club
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onBusinessClubClick() }
+      ) {
+        Icon(
+          imageVector = Icons.Default.Business,
+          contentDescription = "Business Club",
+          tint = if (isBusinessClubActive) purple500 else white,
+          modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = "Business\nClub",
+          color = if (isBusinessClubActive) purple500 else white,
+          fontSize = 12.sp,
+          textAlign = TextAlign.Center,
+          fontWeight = FontWeight.Medium
+        )
+      }
+
+      // Sheraton Hotel
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onSheratonHotelClick() }
+      ) {
+        Icon(
+          imageVector = Icons.Default.Home,
+          contentDescription = "Sheraton Hotel",
+          tint = if (isSheratonHotelActive) purple500 else white,
+          modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = "Sheraton\nHotel",
+          color = if (isSheratonHotelActive) purple500 else white,
+          fontSize = 12.sp,
+          textAlign = TextAlign.Center,
+          fontWeight = FontWeight.Medium
         )
       }
 
@@ -150,7 +271,7 @@ fun BottomNavigationClient(
         modifier = Modifier.clickable { onLogoutClick() }
       ) {
         Icon(
-          imageVector = Icons.Default.ExitToApp,
+          imageVector = Icons.AutoMirrored.Filled.ExitToApp,
           contentDescription = "Sair",
           tint = white,
           modifier = Modifier.size(24.dp)
@@ -159,7 +280,9 @@ fun BottomNavigationClient(
         Text(
           text = "Sair",
           color = white,
-          fontSize = 12.sp
+          fontSize = 12.sp,
+          textAlign = TextAlign.Center,
+          fontWeight = FontWeight.Medium
         )
       }
     }

@@ -28,6 +28,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.model.Promotion
 import br.com.savedra.challengecrm.ui.theme.*
+import br.com.savedra.challengecrm.ui.view.modals.CreatePromotionModal
 import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
