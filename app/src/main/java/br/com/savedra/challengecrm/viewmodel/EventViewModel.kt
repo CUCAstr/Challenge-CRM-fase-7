@@ -3,7 +3,7 @@ package br.com.savedra.challengecrm.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.savedra.challengecrm.data.repository.EventRepository
-import br.com.savedra.challengecrm.model.Event
+import br.com.savedra.challengecrm.model.EventsCenter
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,7 @@ class EventViewModel : ViewModel() {
     private val _eventUiState = MutableStateFlow<EventUIState>(EventUIState.Idle)
     val eventUiState = _eventUiState
 
-    fun saveEvent(event: Event) {
+    fun saveEvent(event: EventsCenter) {
         _eventUiState.value = EventUIState.Loading
         viewModelScope.launch {
             try {

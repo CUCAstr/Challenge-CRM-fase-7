@@ -1,6 +1,6 @@
 package br.com.savedra.challengecrm.model
 
-data class Event(
+data class EventsCenter(
     val eventName: String = "",
     val eventDate: String = "",
     val segment: String = "",

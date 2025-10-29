@@ -61,9 +61,6 @@ fun AppNavigation() {
         composable(AppRoutes.OPERATOR_HOME) {
             OperatorHomeScreen(
                 viewModel = customerViewModel,
-                onCustomerClick = { customer ->
-                    navController.navigate("${AppRoutes.CHAT}/${customer.id}/${customer.name}")
-                },
                 onInvitesClick = {
                     navController.navigate(AppRoutes.INVITES)
                 },
@@ -229,23 +226,6 @@ fun AppNavigation() {
                 },
                 onBusinessClubClick = {
                     navController.navigate(AppRoutes.BUSINESS_CLUB)
-                }
-            )
-        }
-        composable(
-            route = "${AppRoutes.CHAT}/{userId}/{userName}",
-            arguments = listOf(
-                navArgument("userId") { type = NavType.StringType },
-                navArgument("userName") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId") ?: ""
-            val userName = backStackEntry.arguments?.getString("userName") ?: ""
-            ChatScreen(
-                userId = userId,
-                userName = userName,
-                onBackClick = {
-                    navController.popBackStack()
                 }
             )
         }

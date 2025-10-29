@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import br.com.savedra.challengecrm.model.Event
+import br.com.savedra.challengecrm.model.EventsCenter
 import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.theme.slate600
@@ -354,7 +354,7 @@ fun EventsCenterScreen(
 
             Button(
                 onClick = {
-                    val event = Event(
+                    val event = EventsCenter(
                         eventName = eventName,
                         eventDate = eventDate,
                         segment = segment,
