@@ -1,6 +1,6 @@
 package br.com.savedra.challengecrm.ui.view
 
-import CreateInviteModal
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,113 +24,317 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.savedra.challengecrm.model.Message
 import br.com.savedra.challengecrm.ui.theme.*
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.savedra.challengecrm.model.Banner
+import br.com.savedra.challengecrm.model.Campaign
+import br.com.savedra.challengecrm.model.Invite
+import br.com.savedra.challengecrm.model.Promotion
+import br.com.savedra.challengecrm.viewmodel.BannerViewModel
+import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
+import br.com.savedra.challengecrm.viewmodel.InviteViewModel
+import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientHomeScreen(
-  onMessageClick: (Message) -> Unit = {},
-  onLogoutClick: () -> Unit = {},
-  onEventsCenterClick: () -> Unit,
-  onBusinessClubClick: () -> Unit,
-  onSheratonHotelClick: () -> Unit,
+    onMessageClick: (Message) -> Unit = {},
+    onLogoutClick: () -> Unit = {},
+    onEventsCenterClick: () -> Unit,
+    onBusinessClubClick: () -> Unit,
+    onSheratonHotelClick: () -> Unit,
+    campaignViewModel: CampaignViewModel = viewModel(),
+    bannerViewModel: BannerViewModel = viewModel(),
+    inviteViewModel: InviteViewModel = viewModel(),
+    promotionViewModel: PromotionViewModel = viewModel()
 ) {
-  var selectedFilter by remember { mutableStateOf("Convites") }
-  var expanded by remember { mutableStateOf(false) }
-  val options = listOf("Selecione", "Lidas", "Não lidas")
-  var selectedOptionText by remember { mutableStateOf(options[0]) }
+    var selectedFilter by remember { mutableStateOf("Convites") }
+    val campaigns by campaignViewModel.filteredCampaigns.collectAsState()
+    val banners by bannerViewModel.filteredBanners.collectAsState()
+    val invites by inviteViewModel.filteredInvites.collectAsState()
+    val promotions by promotionViewModel.filteredPromotions.collectAsState()
 
-  Box(modifier = Modifier.fillMaxSize()) {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .background(slate50)
-    ) {
-      // Header
-      Column(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(24.dp)
-      ) {
-        Text(
-          text = "Caixa de Entrada",
-          fontSize = 28.sp,
-          fontWeight = FontWeight.Bold,
-          color = slate800
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-          text = "Suas comunicações recentes",
-          fontSize = 16.sp,
-          color = slate600
-        )
-      }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(slate50)
+        ) {
+            // Header
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                Text(
+                    text = "Caixa de Entrada",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = slate800
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Suas comunicações recentes",
+                    fontSize = 16.sp,
+                    color = slate600
+                )
+            }
 
-      // Filter Tabs
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-        FilterTab(
-          text = "Campanhas",
-          isSelected = selectedFilter == "Campanhas",
-          onClick = { selectedFilter = "Campanhas" }
-        )
-        FilterTab(
-          text = "Banners",
-          isSelected = selectedFilter == "Banners",
-          onClick = { selectedFilter = "Banners" }
-        )
-      }
+            // Filter Tabs
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterTab(
+                    text = "Campanhas",
+                    isSelected = selectedFilter == "Campanhas",
+                    onClick = { selectedFilter = "Campanhas" }
+                )
+                FilterTab(
+                    text = "Banners",
+                    isSelected = selectedFilter == "Banners",
+                    onClick = { selectedFilter = "Banners" }
+                )
+            }
 
-      Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-        FilterTab(
-          text = "Convites",
-          isSelected = selectedFilter == "Convites",
-          onClick = { selectedFilter = "Convites" }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterTab(
+                    text = "Convites",
+                    isSelected = selectedFilter == "Convites",
+                    onClick = { selectedFilter = "Convites" }
+                )
+                FilterTab(
+                    text = "Promoções",
+                    isSelected = selectedFilter == "Promoções",
+                    onClick = { selectedFilter = "Promoções" }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 24.dp)
+            ) {
+                when (selectedFilter) {
+                    "Campanhas" -> {
+                        items(campaigns) { campaign ->
+                            CampaignItem(campaign)
+                        }
+                    }
+                    "Banners" -> {
+                        items(banners) { banner ->
+                            BannerItem(banner)
+                        }
+                    }
+                    "Convites" -> {
+                        items(invites) { invite ->
+                            InviteItem(invite)
+                        }
+                    }
+                    "Promoções" -> {
+                        items(promotions) { promotion ->
+                            PromotionItem(promotion)
+                        }
+                    }
+                }
+            }
+        }
+
+        BottomNavigationClient(
+            onInboxClick = { },
+            onLogoutClick = onLogoutClick,
+            isInboxActive = true,
+            isEventsCenterActive = false,
+            isBusinessClubActive = false,
+            isSheratonHotelActive = false,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            onEventsCenterClick = onEventsCenterClick,
+            onBusinessClubClick = onBusinessClubClick,
+            onSheratonHotelClick = onSheratonHotelClick
         )
-        FilterTab(
-          text = "Promoções",
-          isSelected = selectedFilter == "Promoções",
-          onClick = { selectedFilter = "Promoções" }
-        )
-      }
-
-      Spacer(modifier = Modifier.height(16.dp))
-
-      LazyColumn(
-        modifier = Modifier
-          .fillMaxWidth()
-          .weight(1f)
-          .padding(horizontal = 24.dp)
-      ) {
-        //TODO: Lista do Firebase dependendo do filtro
-      }
     }
+}
 
-    BottomNavigationClient(
-      onInboxClick = { },
-      onLogoutClick = onLogoutClick,
-      isInboxActive = true,
-      isEventsCenterActive = false,
-      isBusinessClubActive = false,
-      isSheratonHotelActive = false,
-      modifier = Modifier.align(Alignment.BottomCenter),
-      onEventsCenterClick = onEventsCenterClick,
-      onBusinessClubClick = onBusinessClubClick,
-      onSheratonHotelClick = onSheratonHotelClick
-    )
-  }
+@Composable
+fun CampaignItem(campaign: Campaign) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = white)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = campaign.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = slate800
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = campaign.description,
+                fontSize = 14.sp,
+                color = slate600
+            )
+        }
+    }
+}
+
+@Composable
+fun BannerItem(banner: Banner) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = white)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = banner.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = slate800
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = banner.description,
+                fontSize = 14.sp,
+                color = slate600
+            )
+        }
+    }
+}
+
+@Composable
+fun InviteItem(invite: Invite) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = white)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = invite.name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = slate800
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = invite.description,
+                fontSize = 14.sp,
+                color = slate600
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row {
+                Text(
+                    text = "Local: ",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = slate800
+                )
+                Text(
+                    text = invite.location,
+                    fontSize = 14.sp,
+                    color = slate600
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Row {
+                Text(
+                    text = "Data: ",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = slate800
+                )
+                Text(
+                    text = invite.date,
+                    fontSize = 14.sp,
+                    color = slate600
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PromotionItem(promotion: Promotion) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = white)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = promotion.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = slate800
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = promotion.description,
+                fontSize = 14.sp,
+                color = slate600
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row {
+                Text(
+                    text = "De: ",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = slate800
+                )
+                Text(
+                    text = promotion.originalValue,
+                    fontSize = 14.sp,
+                    color = slate600
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Row {
+                Text(
+                    text = "Por: ",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = slate800
+                )
+                Text(
+                    text = promotion.promotionValue,
+                    fontSize = 14.sp,
+                    color = purple500
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -286,18 +490,5 @@ fun BottomNavigationClient(
         )
       }
     }
-  }
-}
-
-private fun formatTimestamp(timestamp: Date): String {
-  val now = Date()
-  val diff = now.time - timestamp.time
-  val days = diff / (24 * 60 * 60 * 1000)
-
-  return when {
-    days == 0L -> "Hoje"
-    days == 1L -> "Ontem"
-    days < 7L -> "${days} dias atrás"
-    else -> SimpleDateFormat("dd/MM", Locale.getDefault()).format(timestamp)
   }
 }
