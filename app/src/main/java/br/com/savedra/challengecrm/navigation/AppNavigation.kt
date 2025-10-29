@@ -197,6 +197,7 @@ fun AppNavigation() {
         }
         composable(AppRoutes.BUSINESS_CLUB) {
             BusinessClubScreen(
+                navController = navController,
                 onLogoutClick = {
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.LOGIN) { inclusive = true }

@@ -8,6 +8,6 @@ class EventRepository(
     private val firestore: FirebaseFirestore
 ) {
     suspend fun saveEvent(event: Event) {
-        firestore.collection("events").add(event).await()
+        firestore.collection("eventsCenter").add(event).await()
     }
 }
