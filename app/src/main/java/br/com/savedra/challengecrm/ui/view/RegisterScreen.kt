@@ -157,6 +157,68 @@ fun RegisterScreen(
 
       Spacer(modifier = Modifier.height(16.dp))
 
+      val genderOptions = listOf("Masculino", "Feminino", "Outro")
+      var genderExpanded by remember { mutableStateOf(false) }
+
+      ExposedDropdownMenuBox(
+        expanded = genderExpanded,
+        onExpandedChange = { genderExpanded = !genderExpanded },
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        OutlinedTextField(
+          value = viewModel.gender.collectAsState().value,
+          onValueChange = { },
+          label = { Text("Gênero") },
+          readOnly = true,
+          trailingIcon = {
+            ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded)
+          },
+          modifier = Modifier
+            .menuAnchor()
+            .fillMaxWidth(),
+          colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = indigo500,
+            unfocusedBorderColor = slate200
+          ),
+        )
+        ExposedDropdownMenu(
+          expanded = genderExpanded,
+          onDismissRequest = { genderExpanded = false },
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          genderOptions.forEach { gender ->
+            DropdownMenuItem(
+              text = { Text(gender) },
+              onClick = {
+                viewModel.onGenderChange(gender)
+                genderExpanded = false
+              }
+            )
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+
+      OutlinedTextField(
+        value = viewModel.phone.collectAsState().value,
+        onValueChange = { viewModel.onPhoneChange(it) },
+        label = { Text("Telefone") },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+          keyboardType = KeyboardType.Phone,
+          imeAction = ImeAction.Unspecified
+        ),
+        modifier = Modifier
+          .fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+          focusedBorderColor = indigo500,
+          unfocusedBorderColor = slate200
+        ),
+      )
+
+      Spacer(modifier = Modifier.height(16.dp))
+
 
       val segments = listOf(
         "ED",

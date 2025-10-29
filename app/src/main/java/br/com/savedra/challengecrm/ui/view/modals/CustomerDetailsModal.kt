@@ -101,6 +101,14 @@ fun CustomerDetailsModal(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
+          text = "Gênero: ${customer.gender}",
+          fontSize = 14.sp,
+          color = slate700
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
           text = "Empresa: ${customer.company}",
           fontSize = 14.sp,
           color = slate700
@@ -134,6 +142,14 @@ fun CustomerDetailsModal(
 
         Text(
           text = "Status: ${customer.status}",
+          fontSize = 14.sp,
+          color = slate700
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+          text = "Categoria: ${customer.category}",
           fontSize = 14.sp,
           color = slate700
         )

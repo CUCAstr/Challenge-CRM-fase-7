@@ -49,6 +49,12 @@ class AuthViewModel : ViewModel() {
   private val _segment = MutableStateFlow("")
   val segment = _segment.asStateFlow()
 
+  private val _gender = MutableStateFlow("")
+  val gender = _gender.asStateFlow()
+
+  private val _phone = MutableStateFlow("")
+  val phone = _phone.asStateFlow()
+
   fun onEmailChange(newEmail: String) {
     _email.value = newEmail
   }
@@ -67,6 +73,14 @@ class AuthViewModel : ViewModel() {
 
   fun onSegmentChange(newSegment: String) {
     _segment.value = newSegment
+  }
+
+  fun onGenderChange(newGender: String) {
+    _gender.value = newGender
+  }
+
+  fun onPhoneChange(newPhone: String) {
+    _phone.value = newPhone
   }
 
   fun login() {
@@ -98,9 +112,12 @@ class AuthViewModel : ViewModel() {
     val company = _company.value
     val role = "Cliente"
     val segment = _segment.value
+    val gender = _gender.value
+    val phone = _phone.value
+    val category = "Basico"
 
     if (email.isBlank() || password.isBlank() || name.isBlank() || company.isBlank() ||
-      segment.isBlank()) {
+      segment.isBlank() || gender.isBlank() || phone.isBlank()) {
       _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
       return
     }
@@ -108,7 +125,7 @@ class AuthViewModel : ViewModel() {
     _authUiState.value = AuthUIState.Loading
     viewModelScope.launch {
       try {
-        authRepository.register(email, password, name, company, role, segment)
+        authRepository.register(email, password, name, company, role, segment, gender, phone, category)
         _authUiState.value = AuthUIState.Success(role)
         Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {
@@ -137,7 +154,7 @@ class AuthViewModel : ViewModel() {
     _authUiState.value = AuthUIState.Loading
     viewModelScope.launch {
       try {
-        authRepository.register(email, password, name, company, role, segment)
+        authRepository.register(email, password, name, company, role, segment, "", "", "Basico")
         _authUiState.value = AuthUIState.Success(role)
         Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {
