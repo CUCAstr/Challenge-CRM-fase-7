@@ -216,6 +216,7 @@ fun AppNavigation() {
         }
         composable(AppRoutes.SHERATON_HOTEL) {
             SheratonHotelScreen(
+                navController = navController,
                 onLogoutClick = {
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.LOGIN) { inclusive = true }
