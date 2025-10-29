@@ -7,9 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.ui.view.*
-import br.com.savedra.challengecrm.viewmodel.CustomerViewModel
+import br.com.savedra.challengecrm.viewmodel.OperatorViewModel
 
 object AppRoutes {
     const val LANDING = "landing"
@@ -30,7 +29,7 @@ object AppRoutes {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val customerViewModel: CustomerViewModel = viewModel()
+    val customerViewModel: OperatorViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = AppRoutes.LANDING) {
         composable(AppRoutes.LANDING) {
