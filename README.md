@@ -18,18 +18,13 @@ Divisão de tarefas pensada para que o time trabalhe em paralelo, minimizando bl
 Juan será o responsável por criar a fundação do projeto. O trabalho dele é o ponto de partida para todos os outros.
 
 1. **Extras:**
-    - Padronizar a tela de registro (Localidade por extenso).
-    - Excluir cliente VIP da tela de registro (deixar o operador selecionar quem é VIP)
-    - Todos clientes começarem sendo "Não VIPs"
+    - Polir o app.
 
 ### Função 2: Thaysa - Visão do Operador (Módulo CRM)
 Thaysa focará na principal ferramenta do operador: a lista de clientes. Ela começará a trabalhar assim que Juan tiver a estrutura base do projeto pronta.
 
 1. **Extras:**
-    - Selecionar quem é cliente VIP.
     - Enviar os convites e campanhas por segmentação.
-    - Excluir o formulário de "mensagens" (deixar pra enviar direto do chat).
-    - Arrumar bug do filtro (ao mudar de página a filtragem permanece, deveria voltar ao estado normal aparecendo todos clientes).
 
 ### Função 3: Luca - Visão do Cliente (Campanhas e Mensagens)
 Luca cuidará da experiência do cliente, garantindo que ele receba e visualize as comunicações enviadas pelo operador.
