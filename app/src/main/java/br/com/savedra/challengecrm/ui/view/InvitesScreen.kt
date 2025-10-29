@@ -11,9 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.InsertInvitation
 import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.model.Invite
 import br.com.savedra.challengecrm.ui.theme.*
+import br.com.savedra.challengecrm.ui.view.modals.InviteDetailsModal
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

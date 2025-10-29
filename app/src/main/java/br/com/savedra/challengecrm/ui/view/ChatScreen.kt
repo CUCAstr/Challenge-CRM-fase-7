@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -59,7 +61,7 @@ fun ChatScreen(
         verticalAlignment = Alignment.CenterVertically
       ) {
         Icon(
-          imageVector = Icons.Default.ArrowBack,
+          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
           contentDescription = "Voltar",
           modifier = Modifier
               .size(24.dp)
@@ -160,7 +162,7 @@ fun ChatScreen(
           contentColor = white
         ) {
           Icon(
-            imageVector = Icons.Default.Send,
+            imageVector = Icons.AutoMirrored.Filled.Send,
             contentDescription = "Enviar",
             modifier = Modifier.size(20.dp)
           )

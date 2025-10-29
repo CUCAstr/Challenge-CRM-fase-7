@@ -1,4 +1,4 @@
-package br.com.savedra.challengecrm.ui.view
+package br.com.savedra.challengecrm.ui.view.modals
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer

@@ -33,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.PhotoCameraBack
+import br.com.savedra.challengecrm.ui.view.modals.CustomerDetailsModal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

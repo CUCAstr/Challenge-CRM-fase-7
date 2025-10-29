@@ -1,4 +1,4 @@
-package br.com.savedra.challengecrm.ui.view
+package br.com.savedra.challengecrm.ui.view.modals
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,18 +31,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import br.com.savedra.challengecrm.ui.theme.white
-import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
+import br.com.savedra.challengecrm.ui.view.FilteredClientsDialog
+import br.com.savedra.challengecrm.viewmodel.BannerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateCampaignModal(
+fun CreateBannerModal(
   onDismiss: () -> Unit,
-  viewModel: CampaignViewModel
+  viewModel: BannerViewModel
 ) {
-  val title by viewModel.newCampaignTitle.collectAsState()
-  val description by viewModel.newCampaignDescription.collectAsState()
-  val startDate by viewModel.newCampaignStartDate.collectAsState()
-  val endDate by viewModel.newCampaignEndDate.collectAsState()
+  val title by viewModel.newBannerTitle.collectAsState()
+  val description by viewModel.newBannerDescription.collectAsState()
+  val imageUrl by viewModel.newBannerImageUrl.collectAsState()
 
   val segments = listOf(
     "Todos",
@@ -81,8 +81,8 @@ fun CreateCampaignModal(
         item {
           OutlinedTextField(
             value = title,
-            onValueChange = { viewModel.onNewCampaignTitleChange(it) },
-            label = { Text("Título da campanha") },
+            onValueChange = { viewModel.onNewBannerTitleChange(it) },
+            label = { Text("Título do banner") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -96,8 +96,8 @@ fun CreateCampaignModal(
           Spacer(modifier = Modifier.height(8.dp))
           OutlinedTextField(
             value = description,
-            onValueChange = { viewModel.onNewCampaignDescriptionChange(it) },
-            label = { Text("Descrição da campanha") },
+            onValueChange = { viewModel.onNewBannerDescriptionChange(it) },
+            label = { Text("Descrição do banner") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
               capitalization = KeyboardCapitalization.Unspecified,
@@ -109,32 +109,17 @@ fun CreateCampaignModal(
         }
         item {
           Spacer(modifier = Modifier.height(8.dp))
-          DatePickerField(
-            label = "Data inicial da campanha",
-            dateString = startDate,
-            onDateSelected = { millis ->
-              val selectedDate = convertMillisToDateString(millis)
-              viewModel.onNewCampaignStartDateChange(selectedDate)
-            },
-            dateValidator = { utcTimeMillis ->
-              utcTimeMillis >= System.currentTimeMillis()
-            },
-            modifier = Modifier.fillMaxWidth()
-          )
-        }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
-          DatePickerField(
-            label = "Data final da campanha",
-            dateString = endDate,
-            onDateSelected = { millis ->
-              val selectedDate = convertMillisToDateString(millis)
-              viewModel.onNewCampaignEndDateChange(selectedDate)
-            },
-            dateValidator = { utcTimeMillis ->
-              utcTimeMillis >= System.currentTimeMillis()
-            },
-            modifier = Modifier.fillMaxWidth()
+          OutlinedTextField(
+            value = imageUrl,
+            onValueChange = { viewModel.onNewBannerImageUrlChange(it) },
+            label = { Text("URL da imagem") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+              capitalization = KeyboardCapitalization.Unspecified,
+              autoCorrectEnabled = true,
+              keyboardType = KeyboardType.Uri,
+              imeAction = ImeAction.Unspecified
+            ),
           )
         }
         item {
@@ -252,7 +237,7 @@ fun CreateCampaignModal(
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendCampaign()
+              viewModel.sendBanner()
               onDismiss()
             },
             modifier = Modifier.fillMaxWidth()
