@@ -1,6 +1,8 @@
 package br.com.savedra.challengecrm.navigation
 
+import NewChatScreen
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -8,7 +10,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import br.com.savedra.challengecrm.ui.view.*
+import br.com.savedra.challengecrm.viewmodel.ChatViewModel
 import br.com.savedra.challengecrm.viewmodel.OperatorViewModel
+import androidx.compose.runtime.*
+
+import br.com.savedra.challengecrm.viewmodel.UsersViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 object AppRoutes {
     const val LANDING = "landing"
@@ -30,6 +37,7 @@ object AppRoutes {
 fun AppNavigation() {
     val navController = rememberNavController()
     val customerViewModel: OperatorViewModel = viewModel()
+    val usersViewModel: UsersViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = AppRoutes.LANDING) {
         composable(AppRoutes.LANDING) {
@@ -45,9 +53,6 @@ fun AppNavigation() {
         }
         composable(AppRoutes.CLIENT_HOME) {
             ClientHomeScreen(
-                onMessageClick = {
-                    navController.navigate("${AppRoutes.CHAT}/operadorId/Operador")
-                },
                 onLogoutClick = {
                     navController.navigate(AppRoutes.LOGIN) {
                         popUpTo(AppRoutes.LOGIN) { inclusive = true }
@@ -55,12 +60,21 @@ fun AppNavigation() {
                 },
                 onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) },
                 onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) },
-                onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) }
+                onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) },
+                onChatClick = {
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+                    // TODO: Precisa arrumar o ID do operador
+                    navController.navigate("${AppRoutes.CHAT}/${currentUser?.uid}/userId")
+                }
             )
         }
         composable(AppRoutes.OPERATOR_HOME) {
             OperatorHomeScreen(
                 viewModel = customerViewModel,
+                onCustomerClick = {
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+                    navController.navigate("${AppRoutes.CHAT}/${currentUser?.uid}/${it.id}")
+                },
                 onInvitesClick = {
                     navController.navigate(AppRoutes.INVITES)
                 },
@@ -79,6 +93,33 @@ fun AppNavigation() {
                     }
                 }
             )
+        }
+        composable(
+            route = "${AppRoutes.CHAT}/{operatorId}/{userId}",
+            arguments = listOf(
+                navArgument("operatorId") { type = NavType.StringType },
+                navArgument("userId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val operatorId = backStackEntry.arguments?.getString("operatorId")
+            val userId = backStackEntry.arguments?.getString("userId")
+            val chatViewModel: ChatViewModel = viewModel()
+            val users by usersViewModel.users.collectAsState()
+
+            val operator = users.find { it.id == operatorId }
+            val user = users.find { it.id == userId }
+            val currentSenderId = FirebaseAuth.getInstance().currentUser?.uid
+
+            if (operator != null && user != null && currentSenderId != null) {
+                NewChatScreen(
+                    viewModel = chatViewModel,
+                    operator = operator,
+                    user = user,
+                    currentSenderId = currentSenderId
+                )
+            } else {
+                // Handle user not found
+            }
         }
         composable(AppRoutes.INVITES) {
             InvitesScreen(

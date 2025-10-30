@@ -1,4 +1,3 @@
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,7 +15,7 @@ import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.viewmodel.ChatViewModel
 
 @Composable
-fun ChatScreen(
+fun NewChatScreen(
   viewModel: ChatViewModel,
   operator: User, //TODO: Talvez de erro
   user: User,

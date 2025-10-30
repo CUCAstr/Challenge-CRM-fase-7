@@ -34,21 +34,20 @@ import br.com.savedra.challengecrm.viewmodel.BannerViewModel
 import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
-import java.text.SimpleDateFormat
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientHomeScreen(
-    onMessageClick: (Message) -> Unit = {},
-    onLogoutClick: () -> Unit = {},
-    onEventsCenterClick: () -> Unit,
-    onBusinessClubClick: () -> Unit,
-    onSheratonHotelClick: () -> Unit,
-    campaignViewModel: CampaignViewModel = viewModel(),
-    bannerViewModel: BannerViewModel = viewModel(),
-    inviteViewModel: InviteViewModel = viewModel(),
-    promotionViewModel: PromotionViewModel = viewModel()
+  onMessageClick: (Message) -> Unit = {},
+  onLogoutClick: () -> Unit = {},
+  onEventsCenterClick: () -> Unit,
+  onBusinessClubClick: () -> Unit,
+  onSheratonHotelClick: () -> Unit,
+  campaignViewModel: CampaignViewModel = viewModel(),
+  bannerViewModel: BannerViewModel = viewModel(),
+  inviteViewModel: InviteViewModel = viewModel(),
+  promotionViewModel: PromotionViewModel = viewModel(),
+  onChatClick: () -> Unit
 ) {
     var selectedFilter by remember { mutableStateOf("Convites") }
     val campaigns by campaignViewModel.filteredCampaigns.collectAsState()
@@ -59,21 +58,32 @@ fun ClientHomeScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(slate50)
+              .fillMaxSize()
+              .background(slate50)
         ) {
-            // Header
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
+                  .fillMaxWidth()
+                  .padding(24.dp)
             ) {
-                Text(
-                    text = "Caixa de Entrada",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate800
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Caixa de Entrada",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = slate800
+                    )
+                    Button(
+                        onClick = { },
+                        colors = ButtonDefaults.buttonColors(containerColor = purple500)
+                    ) {
+                        Text(text = "Chat")
+                    }
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Suas comunicações recentes",
@@ -82,11 +92,10 @@ fun ClientHomeScreen(
                 )
             }
 
-            // Filter Tabs
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                  .fillMaxWidth()
+                  .padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FilterTab(
@@ -105,8 +114,8 @@ fun ClientHomeScreen(
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                  .fillMaxWidth()
+                  .padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 FilterTab(
@@ -125,9 +134,9 @@ fun ClientHomeScreen(
 
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 24.dp)
+                  .fillMaxWidth()
+                  .weight(1f)
+                  .padding(horizontal = 24.dp)
             ) {
                 when (selectedFilter) {
                     "Campanhas" -> {
@@ -153,6 +162,8 @@ fun ClientHomeScreen(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(80.dp))
 
         BottomNavigationClient(
             onInboxClick = { },
