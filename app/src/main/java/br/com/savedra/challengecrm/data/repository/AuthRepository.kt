@@ -82,6 +82,7 @@ class AuthRepository(
         segment = document.getString("segment") ?: "",
         score = (document.getLong("score") ?: 0).toInt(),
         status = document.getString("status") ?: "",
+        memberSince = document.getTimestamp("memberSince")?.toDate(),
         notes = document.getString("notes") ?: "",
         gender = document.getString("gender") ?: "",
         phone = document.getString("phone") ?: "",

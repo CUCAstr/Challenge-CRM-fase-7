@@ -135,7 +135,7 @@ class AuthViewModel : ViewModel() {
     val segment = _segment.value
     val gender = _gender.value
     val phone = _phone.value
-    val category = "Basico"
+    val category = "Básico"
 
     if (email.isBlank() || password.isBlank() || name.isBlank() || company.isBlank() ||
       segment.isBlank() || gender.isBlank() || phone.isBlank()
@@ -187,7 +187,7 @@ class AuthViewModel : ViewModel() {
     _authUiState.value = AuthUIState.Loading
     viewModelScope.launch {
       try {
-        authRepository.register(email, password, name, company, role, segment, "", "", "Basico")
+        authRepository.register(email, password, name, company, role, segment, "", "", "Básico")
         _authUiState.value = AuthUIState.Success(role)
         Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {
