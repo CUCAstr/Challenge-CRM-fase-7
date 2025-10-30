@@ -30,6 +30,7 @@ import br.com.savedra.challengecrm.model.Promotion
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.CreatePromotionModal
 import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +48,11 @@ fun PromotionsScreen(
   var selectedPromotion by remember { mutableStateOf<Promotion?>(null) }
 
   var showCreatePromotionModal by remember { mutableStateOf(false) }
+  val focusManager = LocalFocusManager.current
+
+  LaunchedEffect(Unit) {
+      focusManager.clearFocus()
+  }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(

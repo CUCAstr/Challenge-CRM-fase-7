@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,6 +41,12 @@ fun SheratonHotelScreen(
 
     val sheratonHotelUiState by sheratonHotelViewModel.sheratonUiState.collectAsState()
     val context = LocalContext.current
+
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(Unit) {
+        focusManager.clearFocus()
+    }
 
     LaunchedEffect(sheratonHotelUiState) {
         when (sheratonHotelUiState) {

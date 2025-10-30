@@ -30,6 +30,7 @@ import br.com.savedra.challengecrm.model.Campaign
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.CreateCampaignModal
 import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +48,11 @@ fun CampaignsScreen(
   var selectedCampaign by remember { mutableStateOf<Campaign?>(null) }
 
   var showCreateCampaignModal by remember { mutableStateOf(false) }
+  val focusManager = LocalFocusManager.current
+
+  LaunchedEffect(Unit) {
+      focusManager.clearFocus()
+  }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(

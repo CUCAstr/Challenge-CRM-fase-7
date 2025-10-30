@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.PhotoCameraBack
 import br.com.savedra.challengecrm.ui.view.modals.CustomerDetailsModal
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,10 +51,12 @@ fun OperatorHomeScreen(
   val searchQuery by viewModel.searchQuery.collectAsState()
   var showCustomerDetails by remember { mutableStateOf(false) }
   var selectedCustomer by remember { mutableStateOf<User?>(null) }
+  val focusManager = LocalFocusManager.current
 
   LaunchedEffect(Unit) {
     viewModel.updateSegmentFilter("Todos")
     viewModel.updateStatusFilter("Todos")
+    focusManager.clearFocus()
   }
 
   Box(modifier = Modifier.fillMaxSize()) {

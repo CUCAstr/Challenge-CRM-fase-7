@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.ui.view
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,13 +35,13 @@ import br.com.savedra.challengecrm.viewmodel.AuthUIState
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 
-import android.widget.Toast
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +60,11 @@ fun RegisterScreen(
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
   val context = LocalContext.current
+  val focusManager = LocalFocusManager.current
+
+  LaunchedEffect(Unit) {
+      focusManager.clearFocus()
+  }
 
   Box(
     modifier = Modifier

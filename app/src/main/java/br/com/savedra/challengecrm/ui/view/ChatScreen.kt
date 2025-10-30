@@ -14,6 +14,8 @@ import br.com.savedra.challengecrm.model.Message
 import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.viewmodel.ChatViewModel
 
+import androidx.compose.ui.platform.LocalFocusManager
+
 @Composable
 fun ChatScreen(
   viewModel: ChatViewModel,
@@ -22,8 +24,10 @@ fun ChatScreen(
   currentSenderId: String,
   currentUserRole: String
 ) {
+  val focusManager = LocalFocusManager.current
   LaunchedEffect(Unit) {
     viewModel.loadMessages(operator.id, user.id)
+    focusManager.clearFocus()
   }
 
   val messages by viewModel.messages.collectAsState()
