@@ -275,7 +275,8 @@ fun CreateInviteModal(
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendInvite(onDismiss)
+              viewModel.sendInvite() 
+              onDismiss()
             },
             modifier = Modifier.fillMaxWidth()
           ) {

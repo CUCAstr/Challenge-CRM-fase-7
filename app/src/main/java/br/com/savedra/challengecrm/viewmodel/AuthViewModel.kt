@@ -18,7 +18,7 @@ import br.com.savedra.challengecrm.model.User
 sealed class AuthUIState {
   object Idle : AuthUIState()
   object Loading : AuthUIState()
-  data class Success(val user: User?) : AuthUIState()
+  data class Success(val user: User?, val role: String?) : AuthUIState()
   data class Error(val message: String) : AuthUIState()
 }
 
@@ -44,14 +44,14 @@ class AuthViewModel : ViewModel() {
     checkCurrentUser()
   }
 
-  private fun checkCurrentUser() {
+  fun checkCurrentUser() {
     viewModelScope.launch {
       try {
         // Tenta obter os dados do usuário que já pode estar logado
         val user = authRepository.getCurrentUserData()
         if (user != null) {
           _currentUser.value = user
-          _authUiState.value = AuthUIState.Success(user) // Opcional: atualizar o estado da UI
+          _authUiState.value = AuthUIState.Success(user, user.role)
           Log.d("AuthViewModel", "Usuário já logado encontrado: ${user.email}")
         }
       } catch (e: Exception) {
@@ -125,7 +125,7 @@ class AuthViewModel : ViewModel() {
         authRepository.login(email, password)
         val user = authRepository.getCurrentUserData()
         _currentUser.value = user
-        _authUiState.value = AuthUIState.Success(user)
+        _authUiState.value = AuthUIState.Success(user, user?.role)
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
       }
@@ -166,7 +166,7 @@ class AuthViewModel : ViewModel() {
         )
         val user = authRepository.getCurrentUserData()
         _currentUser.value = user
-        _authUiState.value = AuthUIState.Success(user)
+        _authUiState.value = AuthUIState.Success(user, user?.role)
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
       }
@@ -180,16 +180,12 @@ class AuthViewModel : ViewModel() {
   fun logout() {
     viewModelScope.launch {
       try {
-        // Efetua o logout no repositório (que chama o Firebase Auth)
         authRepository.logout()
-        // Limpa o estado do usuário atual na ViewModel
         _currentUser.value = null
-        // Reseta o estado da UI para o estado inicial
         _authUiState.value = AuthUIState.Idle
         Log.d("AuthViewModel", "Usuário deslogado com sucesso.")
       } catch (e: Exception) {
         Log.e("AuthViewModel", "Erro ao fazer logout", e)
-        // Mesmo em caso de erro, tenta limpar o estado local
         _currentUser.value = null
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro ao deslogar")
       }

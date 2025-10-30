@@ -296,7 +296,8 @@ fun CreatePromotionModal(
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendPromotion(onDismiss)
+              viewModel.sendPromotion()
+              onDismiss()
             },
             modifier = Modifier.fillMaxWidth()
           ) {
