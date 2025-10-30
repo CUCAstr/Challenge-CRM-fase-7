@@ -33,6 +33,7 @@ import androidx.compose.ui.window.DialogProperties
 import br.com.savedra.challengecrm.ui.theme.white
 import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
 import br.com.savedra.challengecrm.ui.view.dialogs.FilteredClientsDialog
+import br.com.savedra.challengecrm.ui.view.dialogs.convertDateStringToMillis
 import br.com.savedra.challengecrm.ui.view.dialogs.convertMillisToDateString
 import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
 
@@ -118,6 +119,7 @@ fun CreateCampaignModal(
             onDateSelected = { millis ->
               val selectedDate = convertMillisToDateString(millis)
               viewModel.onNewCampaignStartDateChange(selectedDate)
+              viewModel.onNewCampaignEndDateChange("")
             },
             dateValidator = { utcTimeMillis ->
               utcTimeMillis >= System.currentTimeMillis()
@@ -127,18 +129,29 @@ fun CreateCampaignModal(
         }
         item {
           Spacer(modifier = Modifier.height(8.dp))
-          DatePickerField(
-            label = "Data final da campanha",
-            dateString = endDate,
-            onDateSelected = { millis ->
-              val selectedDate = convertMillisToDateString(millis)
-              viewModel.onNewCampaignEndDateChange(selectedDate)
-            },
-            dateValidator = { utcTimeMillis ->
-              utcTimeMillis >= System.currentTimeMillis()
-            },
-            modifier = Modifier.fillMaxWidth()
-          )
+          val startDateMillis = if (startDate.isNotEmpty()) {
+              convertDateStringToMillis(startDate)
+          } else {
+              0L
+          }
+          key(startDate) { // Force recomposition when startDate changes
+              DatePickerField(
+                label = "Data final da campanha",
+                dateString = endDate,
+                onDateSelected = { millis ->
+                  val selectedDate = convertMillisToDateString(millis)
+                  viewModel.onNewCampaignEndDateChange(selectedDate)
+                },
+                dateValidator = { utcTimeMillis ->
+                  if (startDateMillis > 0) {
+                    utcTimeMillis >= startDateMillis
+                  } else {
+                    utcTimeMillis >= System.currentTimeMillis()
+                  }
+                },
+                modifier = Modifier.fillMaxWidth()
+              )
+          }
         }
         item {
           Spacer(modifier = Modifier.height(16.dp))

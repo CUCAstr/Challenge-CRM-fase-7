@@ -18,6 +18,7 @@ import br.com.savedra.challengecrm.model.SheratonHotel
 import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
+import br.com.savedra.challengecrm.ui.view.dialogs.convertDateStringToMillis
 import br.com.savedra.challengecrm.ui.view.dialogs.convertMillisToDateString
 import br.com.savedra.challengecrm.viewmodel.SheratonHotelViewModel
 import java.util.Calendar
@@ -32,8 +33,8 @@ fun SheratonHotelScreen(
   onBusinessClubClick: () -> Unit,
   sheratonHotelViewModel: SheratonHotelViewModel = viewModel()
 ) {
-  var checkInDateMillis by remember { mutableStateOf("") }
-  var checkOutDateMillis by remember { mutableStateOf("") }
+  var checkInDate by remember { mutableStateOf("") }
+  var checkOutDate by remember { mutableStateOf("") }
   var guests by remember { mutableStateOf("") }
   var roomType by remember { mutableStateOf("Standard") }
   var specialRequests by remember { mutableStateOf("") }
@@ -81,35 +82,45 @@ fun SheratonHotelScreen(
 
       DatePickerField(
         label = "Check-in",
-        dateString = checkInDateMillis,
-        onDateSelected = { checkInDateMillis = convertMillisToDateString(it) },
+        dateString = checkInDate,
+        onDateSelected = { 
+            checkInDate = convertMillisToDateString(it)
+            checkOutDate = ""
+         },
         dateValidator = { date ->
           val today = Calendar.getInstance()
           today.set(Calendar.HOUR_OF_DAY, 0)
           today.set(Calendar.MINUTE, 0)
           today.set(Calendar.SECOND, 0)
           today.set(Calendar.MILLISECOND, 0)
-          val sevenDaysFromNow = Calendar.getInstance()
-          sevenDaysFromNow.add(Calendar.DAY_OF_YEAR, 7)
-          date >= today.timeInMillis && date <= sevenDaysFromNow.timeInMillis
+          date >= today.timeInMillis
         },
       )
       Spacer(modifier = Modifier.height(16.dp))
-      DatePickerField(
-        label = "Check-out",
-        dateString = checkOutDateMillis,
-        onDateSelected = { checkOutDateMillis = convertMillisToDateString(it) },
-        dateValidator = { date ->
-          val today = Calendar.getInstance()
-          today.set(Calendar.HOUR_OF_DAY, 0)
-          today.set(Calendar.MINUTE, 0)
-          today.set(Calendar.SECOND, 0)
-          today.set(Calendar.MILLISECOND, 0)
-          val sevenDaysFromNow = Calendar.getInstance()
-          sevenDaysFromNow.add(Calendar.DAY_OF_YEAR, 7)
-          date >= today.timeInMillis && date <= sevenDaysFromNow.timeInMillis
-        },
-      )
+      val checkInDateMillis = if (checkInDate.isNotEmpty()) {
+          convertDateStringToMillis(checkInDate)
+      } else {
+          0L
+      }
+      key(checkInDate) {
+          DatePickerField(
+            label = "Check-out",
+            dateString = checkOutDate,
+            onDateSelected = { checkOutDate = convertMillisToDateString(it) },
+            dateValidator = { date ->
+              if (checkInDateMillis > 0) {
+                date >= checkInDateMillis
+              } else {
+                val today = Calendar.getInstance()
+                today.set(Calendar.HOUR_OF_DAY, 0)
+                today.set(Calendar.MINUTE, 0)
+                today.set(Calendar.SECOND, 0)
+                today.set(Calendar.MILLISECOND, 0)
+                date >= today.timeInMillis
+              }
+            },
+          )
+      }
       Spacer(modifier = Modifier.height(16.dp))
       OutlinedTextField(
         value = guests,
@@ -134,8 +145,8 @@ fun SheratonHotelScreen(
       Button(
         onClick = {
           val event = SheratonHotel(
-            checkInDate = checkInDateMillis,
-            checkOutDate = checkOutDateMillis,
+            checkInDate = checkInDate,
+            checkOutDate = checkOutDate,
             guests = guests,
             roomType = roomType,
             specialRequests = specialRequests
