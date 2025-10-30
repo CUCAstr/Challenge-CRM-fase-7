@@ -54,21 +54,14 @@ class CampaignViewModel : ViewModel() {
   private val _filteredClients = MutableStateFlow<List<User>>(emptyList())
   val filteredClients: StateFlow<List<User>> = _filteredClients.asStateFlow()
 
-  init {
-    loadCampaigns()
-  }
-
-  private fun loadCampaigns() {
+  fun loadCampaigns(userSegment: String? = null) {
     viewModelScope.launch {
-      campaignRepository.getCampaigns(
-        onSuccess = {
-          _allCampaigns.value = it
-          filterCampaigns()
-        },
-        onFailure = {
-          // Handle error
+        try {
+            _allCampaigns.value = campaignRepository.getCampaigns(userSegment)
+            filterCampaigns()
+        } catch (e: Exception) {
+            // Handle error
         }
-      )
     }
   }
 
@@ -123,7 +116,7 @@ class CampaignViewModel : ViewModel() {
   private val _showError = MutableStateFlow(false)
   val showError: StateFlow<Boolean> = _showError.asStateFlow()
 
-  fun sendCampaign(onSuccess: () -> Unit) {
+  fun sendCampaign() {
     if (
       _newCampaignTitle.value.isBlank() ||
       _newCampaignDescription.value.isBlank() ||
@@ -134,21 +127,30 @@ class CampaignViewModel : ViewModel() {
       return
     }
 
-    val campaign = Campaign(
-      title = _newCampaignTitle.value,
-      description = _newCampaignDescription.value,
-      startDate = _newCampaignStartDate.value,
-      endDate = _newCampaignEndDate.value
-    )
-    campaignRepository.sendCampaign(campaign, onSuccess = {
-      loadCampaigns()
-      _newCampaignTitle.value = ""
-      _newCampaignDescription.value = ""
-      _newCampaignStartDate.value = ""
-      _newCampaignEndDate.value = ""
-      _showError.value = false
-      onSuccess()
-    }, onFailure = {})
+    viewModelScope.launch {
+        val campaign = Campaign(
+          title = _newCampaignTitle.value,
+          description = _newCampaignDescription.value,
+          startDate = _newCampaignStartDate.value,
+          endDate = _newCampaignEndDate.value,
+          segment = _segmentFilter.value
+        )
+        campaignRepository.sendCampaign(campaign)
+        loadCampaigns()
+        clearNewCampaignFields()
+    }
+  }
+
+  fun clearNewCampaignFields() {
+    _newCampaignTitle.value = ""
+    _newCampaignDescription.value = ""
+    _newCampaignStartDate.value = ""
+    _newCampaignEndDate.value = ""
+    _segmentFilter.value = "Todos"
+    _statusFilter.value = "Todos"
+    _scoreStartFilter.value = ""
+    _scoreEndFilter.value = ""
+    _filteredClients.value = emptyList()
   }
 
   fun getFilteredClients() {

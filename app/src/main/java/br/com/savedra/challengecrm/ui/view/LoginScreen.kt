@@ -181,8 +181,8 @@ fun LoginScreen(
         }
 
         is AuthUIState.Success -> {
-          LaunchedEffect(state.role) {
-            when (state.role) {
+          LaunchedEffect(state.user) {
+            when (state.user?.role) {
               "Cliente" -> navController.navigate(AppRoutes.CLIENT_HOME) {
                 popUpTo(AppRoutes.LOGIN) { inclusive = true }
               }

@@ -276,7 +276,8 @@ fun CreateCampaignModal(
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendCampaign(onDismiss)
+              viewModel.sendCampaign()
+              onDismiss()
             },
             modifier = Modifier.fillMaxWidth()
           ) {

@@ -57,21 +57,14 @@ class InviteViewModel : ViewModel() {
   private val _filteredClients = MutableStateFlow<List<User>>(emptyList())
   val filteredClients: StateFlow<List<User>> = _filteredClients.asStateFlow()
 
-  init {
-    loadInvites()
-  }
-
-  private fun loadInvites() {
+  fun loadInvites(userSegment: String? = null) {
     viewModelScope.launch {
-      inviteRepository.getInvites(
-        onSuccess = {
-          _allInvites.value = it
-          filterInvites()
-        },
-        onFailure = {
-          // Handle error
+        try {
+            _allInvites.value = inviteRepository.getInvites(userSegment)
+            filterInvites()
+        } catch (e: Exception) {
+            // Handle error
         }
-      )
     }
   }
 
@@ -130,7 +123,7 @@ class InviteViewModel : ViewModel() {
   private val _showError = MutableStateFlow(false)
   val showError: StateFlow<Boolean> = _showError.asStateFlow()
 
-  fun sendInvite(onSuccess: () -> Unit) {
+  fun sendInvite() {
     if (
       _newInviteTitle.value.isBlank() ||
       _newInviteDescription.value.isBlank() ||
@@ -142,23 +135,32 @@ class InviteViewModel : ViewModel() {
       return
     }
 
-    val invite = Invite(
-      name = _newInviteTitle.value,
-      description = _newInviteDescription.value,
-      date = _newInviteDate.value,
-      time = _newInviteTime.value,
-      location = _newInviteLocation.value
-    )
-    inviteRepository.sendInvite(invite, onSuccess = {
-      loadInvites()
-      _newInviteTitle.value = ""
-      _newInviteDescription.value = ""
-      _newInviteDate.value = ""
-      _newInviteTime.value = ""
-      _newInviteLocation.value = ""
-      _showError.value = false
-      onSuccess()
-    }, onFailure = {})
+    viewModelScope.launch {
+        val invite = Invite(
+          name = _newInviteTitle.value,
+          description = _newInviteDescription.value,
+          date = _newInviteDate.value,
+          time = _newInviteTime.value,
+          location = _newInviteLocation.value,
+          segment = _segmentFilter.value
+        )
+        inviteRepository.sendInvite(invite)
+        loadInvites()
+        clearNewInviteFields()
+    }
+  }
+
+  fun clearNewInviteFields() {
+    _newInviteTitle.value = ""
+    _newInviteDescription.value = ""
+    _newInviteDate.value = ""
+    _newInviteLocation.value = ""
+    _newInviteTime.value = ""
+    _segmentFilter.value = "Todos"
+    _statusFilter.value = "Todos"
+    _scoreStartFilter.value = ""
+    _scoreEndFilter.value = ""
+    _filteredClients.value = emptyList()
   }
 
   fun getFilteredClients() {

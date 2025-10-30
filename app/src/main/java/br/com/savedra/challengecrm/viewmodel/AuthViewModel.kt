@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+import br.com.savedra.challengecrm.model.User
+
 sealed class AuthUIState {
   object Idle : AuthUIState()
   object Loading : AuthUIState()
-  data class Success(val role: String?) : AuthUIState()
+  data class Success(val user: User?, val role: String?) : AuthUIState()
   data class Error(val message: String) : AuthUIState()
 }
 
@@ -32,7 +34,32 @@ class AuthViewModel : ViewModel() {
 
   private val _authUiState = MutableStateFlow<AuthUIState>(AuthUIState.Idle)
 
-  val authUiState = _authUiState
+  val authUiState = _authUiState.asStateFlow()
+
+  private val _currentUser = MutableStateFlow<User?>(null)
+  val currentUser = _currentUser.asStateFlow()
+
+  init {
+    // Verifica o estado de autenticação na inicialização do ViewModel
+    checkCurrentUser()
+  }
+
+  fun checkCurrentUser() {
+    viewModelScope.launch {
+      try {
+        // Tenta obter os dados do usuário que já pode estar logado
+        val user = authRepository.getCurrentUserData()
+        if (user != null) {
+          _currentUser.value = user
+          _authUiState.value = AuthUIState.Success(user, user.role)
+          Log.d("AuthViewModel", "Usuário já logado encontrado: ${user.email}")
+        }
+      } catch (e: Exception) {
+        // Erro ao buscar dados do usuário, pode ser que não esteja logado
+        Log.e("AuthViewModel", "Erro ao verificar usuário atual", e)
+      }
+    }
+  }
 
   private val _email = MutableStateFlow("")
   val email = _email.asStateFlow()
@@ -83,27 +110,6 @@ class AuthViewModel : ViewModel() {
     _phone.value = newPhone
   }
 
-  fun checkCurrentUser() {
-    viewModelScope.launch {
-        _authUiState.value = AuthUIState.Loading
-        try {
-            val user = authRepository.getCurrentUser()
-            if (user != null) {
-                val role = authRepository.getUserRole(user.uid)
-                if (role != null) {
-                    _authUiState.value = AuthUIState.Success(role)
-                } else {
-                    _authUiState.value = AuthUIState.Error("User role not found")
-                }
-            } else {
-                _authUiState.value = AuthUIState.Error("No user logged in")
-            }
-        } catch (e: Exception) {
-            _authUiState.value = AuthUIState.Error(e.message ?: "Unknown error")
-        }
-    }
-  }
-
   fun login() {
     val email = _email.value
     val password = _password.value
@@ -117,9 +123,9 @@ class AuthViewModel : ViewModel() {
     viewModelScope.launch {
       try {
         authRepository.login(email, password)
-        val user = authRepository.getCurrentUser()
-        val role = user?.let { authRepository.getUserRole(it.uid) }
-        _authUiState.value = AuthUIState.Success(role)
+        val user = authRepository.getCurrentUserData()
+        _currentUser.value = user
+        _authUiState.value = AuthUIState.Success(user, user?.role)
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
       }
@@ -158,48 +164,31 @@ class AuthViewModel : ViewModel() {
           phone,
           category
         )
-        _authUiState.value = AuthUIState.Success(role)
-        Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
+        val user = authRepository.getCurrentUserData()
+        _currentUser.value = user
+        _authUiState.value = AuthUIState.Success(user, user?.role)
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
       }
     }
   }
-
-  fun registerTestUser(
-    name: String,
-    email: String,
-    password: String,
-    company: String,
-    segment: String,
-    onComplete: () -> Unit
-  ) {
-    val role = "Cliente"
-
-    if (email.isBlank() || password.isBlank() || name.isBlank() || company.isBlank() ||
-      segment.isBlank()
-    ) {
-      _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
-      onComplete()
-      return
-    }
-
-    _authUiState.value = AuthUIState.Loading
-    viewModelScope.launch {
-      try {
-        authRepository.register(email, password, name, company, role, segment, "", "", "Básico")
-        _authUiState.value = AuthUIState.Success(role)
-        Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
-      } catch (e: Exception) {
-        _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
-      } finally {
-        onComplete()
-      }
-    }
-  }
-
 
   fun resetUiState() {
     _authUiState.value = AuthUIState.Idle
+  }
+
+  fun logout() {
+    viewModelScope.launch {
+      try {
+        authRepository.logout()
+        _currentUser.value = null
+        _authUiState.value = AuthUIState.Idle
+        Log.d("AuthViewModel", "Usuário deslogado com sucesso.")
+      } catch (e: Exception) {
+        Log.e("AuthViewModel", "Erro ao fazer logout", e)
+        _currentUser.value = null
+        _authUiState.value = AuthUIState.Error(e.message ?: "Erro ao deslogar")
+      }
+    }
   }
 }
