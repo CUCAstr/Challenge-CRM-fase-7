@@ -6,13 +6,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCameraBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.setValue
@@ -25,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import br.com.savedra.challengecrm.model.Message
 import br.com.savedra.challengecrm.ui.theme.*
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.draw.clip
 import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.model.Banner
 import br.com.savedra.challengecrm.model.Campaign
@@ -181,170 +187,198 @@ fun ClientHomeScreen(
 
 @Composable
 fun CampaignItem(campaign: Campaign) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = white)
+  Card(
+    modifier = Modifier
+      .fillMaxWidth(),
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = campaign.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = slate800
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = campaign.description,
-                fontSize = 14.sp,
-                color = slate600
-            )
-        }
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.Campaign, contentDescription = "Criar Convite")
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = campaign.title,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = campaign.description,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
     }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
 }
 
 @Composable
 fun BannerItem(banner: Banner) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = white)
+  Card(
+    modifier = Modifier
+      .fillMaxWidth(),
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = banner.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = slate800
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = banner.description,
-                fontSize = 14.sp,
-                color = slate600
-            )
-        }
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.PhotoCameraBack, contentDescription = "Criar Convite")
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = banner.title,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = banner.description,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
     }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
 }
 
 @Composable
 fun InviteItem(invite: Invite) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = white)
+  Card(
+    modifier = Modifier
+      .fillMaxWidth(),
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = invite.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = slate800
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = invite.description,
-                fontSize = 14.sp,
-                color = slate600
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row {
-                Text(
-                    text = "Local: ",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = slate800
-                )
-                Text(
-                    text = invite.location,
-                    fontSize = 14.sp,
-                    color = slate600
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Row {
-                Text(
-                    text = "Data: ",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = slate800
-                )
-                Text(
-                    text = invite.date,
-                    fontSize = 14.sp,
-                    color = slate600
-                )
-            }
-        }
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.Mail, contentDescription = "Criar Convite")
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = invite.name,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = invite.description,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
     }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
 }
 
 @Composable
 fun PromotionItem(promotion: Promotion) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = white)
+  Card(
+    modifier = Modifier
+      .fillMaxWidth(),
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = promotion.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = slate800
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = promotion.description,
-                fontSize = 14.sp,
-                color = slate600
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row {
-                Text(
-                    text = "De: ",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = slate800
-                )
-                Text(
-                    text = promotion.originalValue,
-                    fontSize = 14.sp,
-                    color = slate600
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Row {
-                Text(
-                    text = "Por: ",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = slate800
-                )
-                Text(
-                    text = promotion.promotionValue,
-                    fontSize = 14.sp,
-                    color = purple500
-                )
-            }
-        }
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.CardGiftcard, contentDescription = "Criar Convite")
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = promotion.title,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = promotion.description,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
     }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
 }
 
 @Composable
