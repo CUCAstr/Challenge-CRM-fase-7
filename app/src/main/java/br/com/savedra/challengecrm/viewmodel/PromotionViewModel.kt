@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 class PromotionViewModel : ViewModel() {
 
   private val promotionRepository = PromotionRepository()
-  private val authRepository = AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val authRepository =
+    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -133,7 +134,22 @@ class PromotionViewModel : ViewModel() {
     _scoreEndFilter.value = score
   }
 
-  fun sendPromotion() {
+  private val _showError = MutableStateFlow(false)
+  val showError: StateFlow<Boolean> = _showError.asStateFlow()
+
+  fun sendPromotion(onSuccess: () -> Unit) {
+    if (
+      _newPromotionTitle.value.isBlank() ||
+      _newPromotionDescription.value.isBlank() ||
+      _newPromotionOriginalValue.value.isBlank() ||
+      _newPromotionPromotionValue.value.isBlank() ||
+      _newPromotionDateExpiresIn.value.isBlank() ||
+      _newPromotionHoursExpiresIn.value.isBlank()
+    ) {
+      _showError.value = true
+      return
+    }
+
     val promotion = Promotion(
       title = _newPromotionTitle.value,
       description = _newPromotionDescription.value,
@@ -142,7 +158,17 @@ class PromotionViewModel : ViewModel() {
       dateExpiresIn = _newPromotionDateExpiresIn.value,
       hoursExpiresIn = _newPromotionHoursExpiresIn.value
     )
-    promotionRepository.sendPromotion(promotion, onSuccess = { loadPromotions() }, onFailure = {})
+    promotionRepository.sendPromotion(promotion, onSuccess = {
+      loadPromotions()
+      _newPromotionTitle.value = ""
+      _newPromotionDescription.value = ""
+      _newPromotionOriginalValue.value = ""
+      _newPromotionPromotionValue.value = ""
+      _newPromotionDateExpiresIn.value = ""
+      _newPromotionHoursExpiresIn.value = ""
+      _showError.value = false
+      onSuccess()
+    }, onFailure = {})
   }
 
   fun getFilteredClients() {

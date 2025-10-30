@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 class BannerViewModel : ViewModel() {
 
   private val bannerRepository = BannerRepository()
-  private val authRepository = AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val authRepository =
+    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -112,13 +113,28 @@ class BannerViewModel : ViewModel() {
     _scoreEndFilter.value = score
   }
 
-  fun sendBanner() {
+  private val _showError = MutableStateFlow(false)
+  val showError: StateFlow<Boolean> = _showError.asStateFlow()
+
+  fun sendBanner(onSuccess: () -> Unit) {
+    if (_newBannerTitle.value.isBlank() || _newBannerDescription.value.isBlank() || _newBannerImageUrl.value.isBlank()) {
+      _showError.value = true
+      return
+    }
+
     val banner = Banner(
       title = _newBannerTitle.value,
       description = _newBannerDescription.value,
       imageUrl = _newBannerImageUrl.value
     )
-    bannerRepository.sendBanner(banner, onSuccess = { loadBanners() }, onFailure = {})
+    bannerRepository.sendBanner(banner, onSuccess = {
+      loadBanners()
+      _newBannerTitle.value = ""
+      _newBannerDescription.value = ""
+      _newBannerImageUrl.value = ""
+      _showError.value = false
+      onSuccess()
+    }, onFailure = {})
   }
 
   fun getFilteredClients() {

@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 class CampaignViewModel : ViewModel() {
 
   private val campaignRepository = CampaignRepository()
-  private val authRepository = AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val authRepository =
+    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -119,14 +120,35 @@ class CampaignViewModel : ViewModel() {
     _scoreEndFilter.value = score
   }
 
-  fun sendCampaign() {
+  private val _showError = MutableStateFlow(false)
+  val showError: StateFlow<Boolean> = _showError.asStateFlow()
+
+  fun sendCampaign(onSuccess: () -> Unit) {
+    if (
+      _newCampaignTitle.value.isBlank() ||
+      _newCampaignDescription.value.isBlank() ||
+      _newCampaignStartDate.value.isBlank() ||
+      _newCampaignEndDate.value.isBlank()
+    ) {
+      _showError.value = true
+      return
+    }
+
     val campaign = Campaign(
       title = _newCampaignTitle.value,
       description = _newCampaignDescription.value,
       startDate = _newCampaignStartDate.value,
       endDate = _newCampaignEndDate.value
     )
-    campaignRepository.sendCampaign(campaign, onSuccess = { loadCampaigns() }, onFailure = {})
+    campaignRepository.sendCampaign(campaign, onSuccess = {
+      loadCampaigns()
+      _newCampaignTitle.value = ""
+      _newCampaignDescription.value = ""
+      _newCampaignStartDate.value = ""
+      _newCampaignEndDate.value = ""
+      _showError.value = false
+      onSuccess()
+    }, onFailure = {})
   }
 
   fun getFilteredClients() {

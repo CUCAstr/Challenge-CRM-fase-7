@@ -83,6 +83,27 @@ class AuthViewModel : ViewModel() {
     _phone.value = newPhone
   }
 
+  fun checkCurrentUser() {
+    viewModelScope.launch {
+        _authUiState.value = AuthUIState.Loading
+        try {
+            val user = authRepository.getCurrentUser()
+            if (user != null) {
+                val role = authRepository.getUserRole(user.uid)
+                if (role != null) {
+                    _authUiState.value = AuthUIState.Success(role)
+                } else {
+                    _authUiState.value = AuthUIState.Error("User role not found")
+                }
+            } else {
+                _authUiState.value = AuthUIState.Error("No user logged in")
+            }
+        } catch (e: Exception) {
+            _authUiState.value = AuthUIState.Error(e.message ?: "Unknown error")
+        }
+    }
+  }
+
   fun login() {
     val email = _email.value
     val password = _password.value
@@ -114,10 +135,11 @@ class AuthViewModel : ViewModel() {
     val segment = _segment.value
     val gender = _gender.value
     val phone = _phone.value
-    val category = "Basico"
+    val category = "Básico"
 
     if (email.isBlank() || password.isBlank() || name.isBlank() || company.isBlank() ||
-      segment.isBlank() || gender.isBlank() || phone.isBlank()) {
+      segment.isBlank() || gender.isBlank() || phone.isBlank()
+    ) {
       _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
       return
     }
@@ -125,7 +147,17 @@ class AuthViewModel : ViewModel() {
     _authUiState.value = AuthUIState.Loading
     viewModelScope.launch {
       try {
-        authRepository.register(email, password, name, company, role, segment, gender, phone, category)
+        authRepository.register(
+          email,
+          password,
+          name,
+          company,
+          role,
+          segment,
+          gender,
+          phone,
+          category
+        )
         _authUiState.value = AuthUIState.Success(role)
         Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {
@@ -145,7 +177,8 @@ class AuthViewModel : ViewModel() {
     val role = "Cliente"
 
     if (email.isBlank() || password.isBlank() || name.isBlank() || company.isBlank() ||
-      segment.isBlank()) {
+      segment.isBlank()
+    ) {
       _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
       onComplete()
       return
@@ -154,7 +187,7 @@ class AuthViewModel : ViewModel() {
     _authUiState.value = AuthUIState.Loading
     viewModelScope.launch {
       try {
-        authRepository.register(email, password, name, company, role, segment, "", "", "Basico")
+        authRepository.register(email, password, name, company, role, segment, "", "", "Básico")
         _authUiState.value = AuthUIState.Success(role)
         Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {

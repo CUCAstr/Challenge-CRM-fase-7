@@ -5,9 +5,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class BusinessClubRepository(
-    private val firestore: FirebaseFirestore
+  private val firestore: FirebaseFirestore
 ) {
-    suspend fun saveBusinessClub(businessClub: BusinessClub) {
-        firestore.collection("businessClub").add(businessClub).await()
-    }
+  suspend fun saveBusinessClub(businessClub: BusinessClub) {
+    firestore.collection("businessClub").add(businessClub).await()
+  }
 }

@@ -21,11 +21,20 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+import java.time.LocalDate
+
 fun convertMillisToDateString(millis: Long): String {
   val instant = Instant.ofEpochMilli(millis)
   val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     .withZone(ZoneId.of("UTC"))
   return formatter.format(instant)
+}
+
+fun convertDateStringToMillis(dateString: String): Long {
+    if (dateString.isEmpty()) return 0L
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val localDate = LocalDate.parse(dateString, formatter)
+    return localDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
 }
 
 

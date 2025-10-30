@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.ui.view
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,13 +35,13 @@ import br.com.savedra.challengecrm.viewmodel.AuthUIState
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 
-import android.widget.Toast
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +60,11 @@ fun RegisterScreen(
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
   val context = LocalContext.current
+  val focusManager = LocalFocusManager.current
+
+  LaunchedEffect(Unit) {
+    focusManager.clearFocus()
+  }
 
   Box(
     modifier = Modifier
@@ -71,23 +77,15 @@ fun RegisterScreen(
         .padding(16.dp)
     ) {
       Text(
-        text = "Bem-vindo a WTC Connect",
-        style = TextStyle(
-          fontFamily = interFamily,
-          fontSize = 24.sp,
-          fontWeight = FontWeight.Bold
-        ),
-        modifier = Modifier.padding(bottom = 6.dp)
+        text = "Bem-vindo a WTC Connect", style = TextStyle(
+          fontFamily = interFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold
+        ), modifier = Modifier.padding(bottom = 6.dp)
       )
 
       Text(
-        text = "Crie sua conta para continuar",
-        style = TextStyle(
-          fontFamily = interFamily,
-          fontSize = 14.sp,
-          fontWeight = FontWeight.Normal
-        ),
-        modifier = Modifier.padding(bottom = 24.dp)
+        text = "Crie sua conta para continuar", style = TextStyle(
+          fontFamily = interFamily, fontSize = 14.sp, fontWeight = FontWeight.Normal
+        ), modifier = Modifier.padding(bottom = 24.dp)
       )
 
       OutlinedTextField(
@@ -101,11 +99,9 @@ fun RegisterScreen(
           keyboardType = KeyboardType.Text,
           imeAction = ImeAction.Unspecified
         ),
-        modifier = Modifier
-          .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
         ),
       )
 
@@ -126,11 +122,9 @@ fun RegisterScreen(
           keyboardType = KeyboardType.Email,
           imeAction = ImeAction.Unspecified
         ),
-        modifier = Modifier
-          .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
         ),
       )
 
@@ -147,11 +141,9 @@ fun RegisterScreen(
           keyboardType = KeyboardType.Text,
           imeAction = ImeAction.Unspecified
         ),
-        modifier = Modifier
-          .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
         ),
       )
 
@@ -177,8 +169,7 @@ fun RegisterScreen(
             .menuAnchor()
             .fillMaxWidth(),
           colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500,
-            unfocusedBorderColor = slate200
+            focusedBorderColor = indigo500, unfocusedBorderColor = slate200
           ),
         )
         ExposedDropdownMenu(
@@ -187,13 +178,10 @@ fun RegisterScreen(
           modifier = Modifier.fillMaxWidth()
         ) {
           genderOptions.forEach { gender ->
-            DropdownMenuItem(
-              text = { Text(gender) },
-              onClick = {
-                viewModel.onGenderChange(gender)
-                genderExpanded = false
-              }
-            )
+            DropdownMenuItem(text = { Text(gender) }, onClick = {
+              viewModel.onGenderChange(gender)
+              genderExpanded = false
+            })
           }
         }
       }
@@ -206,14 +194,11 @@ fun RegisterScreen(
         label = { Text("Telefone") },
         singleLine = true,
         keyboardOptions = KeyboardOptions(
-          keyboardType = KeyboardType.Phone,
-          imeAction = ImeAction.Unspecified
+          keyboardType = KeyboardType.Phone, imeAction = ImeAction.Unspecified
         ),
-        modifier = Modifier
-          .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
         ),
       )
 
@@ -253,8 +238,7 @@ fun RegisterScreen(
             .menuAnchor()
             .fillMaxWidth(),
           colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500,
-            unfocusedBorderColor = slate200
+            focusedBorderColor = indigo500, unfocusedBorderColor = slate200
           ),
         )
         ExposedDropdownMenu(
@@ -263,13 +247,10 @@ fun RegisterScreen(
           modifier = Modifier.fillMaxWidth()
         ) {
           segments.forEach { segment ->
-            DropdownMenuItem(
-              text = { Text(segment) },
-              onClick = {
-                viewModel.onSegmentChange(segment)
-                expandedSegment = false
-              }
-            )
+            DropdownMenuItem(text = { Text(segment) }, onClick = {
+              viewModel.onSegmentChange(segment)
+              expandedSegment = false
+            })
           }
         }
       }
@@ -286,8 +267,7 @@ fun RegisterScreen(
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
-          val image = if (passwordVisible)
-            Icons.Filled.Visibility
+          val image = if (passwordVisible) Icons.Filled.Visibility
           else Icons.Filled.VisibilityOff
 
           val description = if (passwordVisible) "Hide password" else "Show password"
@@ -297,8 +277,7 @@ fun RegisterScreen(
           }
         },
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500,
-          unfocusedBorderColor = slate200
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
         ),
         modifier = Modifier.fillMaxWidth()
       )
@@ -309,19 +288,15 @@ fun RegisterScreen(
 
       Button(
         onClick = { viewModel.register() },
-        modifier = Modifier
-          .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
           containerColor = slate600,
         ),
         shape = RoundedCornerShape(8.dp)
       ) {
         Text(
-          text = "Realizar cadastro",
-          style = TextStyle(
-            fontFamily = interFamily,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal
+          text = "Realizar cadastro", style = TextStyle(
+            fontFamily = interFamily, fontSize = 14.sp, fontWeight = FontWeight.Normal
           )
         )
       }
