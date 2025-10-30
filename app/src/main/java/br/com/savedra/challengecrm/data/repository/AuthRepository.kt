@@ -92,11 +92,22 @@ class AuthRepository(
   }
 
   suspend fun getOperators(): List<User> {
-    val snapshot = firestore.collection("users")
-      .whereEqualTo("role", "Operador")
-      .get()
-      .await()
-    return snapshot.documents.map { document ->
+    // Tenta por role em PT/EN. Se vazio, faz fallback trazendo todos e filtrando != Cliente
+    val ptEnRoles = listOf("Operador", "Operator")
+    val query = firestore.collection("users")
+      .whereIn("role", ptEnRoles)
+    val snapshot = try {
+      query.get().await()
+    } catch (_: Exception) {
+      null
+    }
+
+    val docs = snapshot?.documents?.takeIf { it.isNotEmpty() } ?: run {
+      val all = firestore.collection("users").get().await()
+      all.documents.filter { (it.getString("role") ?: "") != "Cliente" }
+    }
+
+    return docs.map { document ->
       User(
         id = document.id,
         name = document.getString("name") ?: "",
