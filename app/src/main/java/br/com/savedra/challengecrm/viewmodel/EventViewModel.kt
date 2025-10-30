@@ -28,6 +28,16 @@ class EventViewModel : ViewModel() {
   val eventUiState = _eventUiState
 
   fun saveEvent(event: EventsCenter) {
+    if (event.eventName.isBlank() || event.eventDate.isBlank() ||
+        event.segment.isBlank() || event.numberOfPeople.isBlank() || event.eventSetup.isBlank()
+        || event.audienceProfile.isBlank() || event.eventPeriodicity.isBlank()
+        || event.competingWith.isBlank() || event.budget.isBlank() ||
+        event.numberOfApartments.isBlank() || event.decisiveFactor.isBlank()
+        || event.necessaryDifferential.isBlank()) {
+      _eventUiState.value = EventUIState.Error("Todos os campos devem ser preenchidos.")
+      return
+    }
+
     _eventUiState.value = EventUIState.Loading
     viewModelScope.launch {
       try {

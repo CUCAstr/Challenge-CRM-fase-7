@@ -130,7 +130,7 @@ class InviteViewModel : ViewModel() {
   private val _showError = MutableStateFlow(false)
   val showError: StateFlow<Boolean> = _showError.asStateFlow()
 
-  fun sendInvite() {
+  fun sendInvite(onSuccess: () -> Unit) {
     if (
       _newInviteTitle.value.isBlank() ||
       _newInviteDescription.value.isBlank() ||
@@ -157,6 +157,7 @@ class InviteViewModel : ViewModel() {
       _newInviteTime.value = ""
       _newInviteLocation.value = ""
       _showError.value = false
+      onSuccess()
     }, onFailure = {})
   }
 

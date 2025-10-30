@@ -123,7 +123,7 @@ class CampaignViewModel : ViewModel() {
   private val _showError = MutableStateFlow(false)
   val showError: StateFlow<Boolean> = _showError.asStateFlow()
 
-  fun sendCampaign() {
+  fun sendCampaign(onSuccess: () -> Unit) {
     if (
       _newCampaignTitle.value.isBlank() ||
       _newCampaignDescription.value.isBlank() ||
@@ -147,6 +147,7 @@ class CampaignViewModel : ViewModel() {
       _newCampaignStartDate.value = ""
       _newCampaignEndDate.value = ""
       _showError.value = false
+      onSuccess()
     }, onFailure = {})
   }
 

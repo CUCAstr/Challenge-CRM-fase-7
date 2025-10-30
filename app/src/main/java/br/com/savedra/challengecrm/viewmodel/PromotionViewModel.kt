@@ -137,7 +137,7 @@ class PromotionViewModel : ViewModel() {
   private val _showError = MutableStateFlow(false)
   val showError: StateFlow<Boolean> = _showError.asStateFlow()
 
-  fun sendPromotion() {
+  fun sendPromotion(onSuccess: () -> Unit) {
     if (
       _newPromotionTitle.value.isBlank() ||
       _newPromotionDescription.value.isBlank() ||
@@ -167,6 +167,7 @@ class PromotionViewModel : ViewModel() {
       _newPromotionDateExpiresIn.value = ""
       _newPromotionHoursExpiresIn.value = ""
       _showError.value = false
+      onSuccess()
     }, onFailure = {})
   }
 

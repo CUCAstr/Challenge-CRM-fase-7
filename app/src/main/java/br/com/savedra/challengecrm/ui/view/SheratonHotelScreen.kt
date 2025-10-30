@@ -165,7 +165,7 @@ fun SheratonHotelScreen(
 
         is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Error -> {
           val errorMessage =
-            (sheratonHotelUiState as br.com.savedra.challengecrm.viewmodel.EventUIState.Error).message
+            (sheratonHotelUiState as br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Error).message
           Text(errorMessage, color = MaterialTheme.colorScheme.error)
         }
 

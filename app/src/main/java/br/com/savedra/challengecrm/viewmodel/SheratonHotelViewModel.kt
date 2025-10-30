@@ -29,7 +29,7 @@ class SheratonHotelViewModel : ViewModel() {
 
   fun saveSheratonHotel(sheratonHotel: SheratonHotel) {
     if (sheratonHotel.checkInDate.isBlank() || sheratonHotel.checkOutDate.isBlank() || sheratonHotel.guests.isBlank() || sheratonHotel.roomType.isBlank()) {
-      _sheratonUiState.value = SheratonHotelUIState.Error("Todos os campos obrigatórios devem ser preenchidos.")
+      _sheratonUiState.value = SheratonHotelUIState.Error("Todos os campos devem ser preenchidos.")
       return
     }
 

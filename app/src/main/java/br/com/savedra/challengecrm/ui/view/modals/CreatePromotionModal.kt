@@ -285,11 +285,18 @@ fun CreatePromotionModal(
           }
         }
         item {
+          if (viewModel.showError.collectAsState().value) {
+            Text(
+              "Todos os campos devem ser preenchidos.",
+              color = MaterialTheme.colorScheme.error,
+              style = MaterialTheme.typography.bodySmall,
+              modifier = Modifier.padding(top = 8.dp)
+            )
+          }
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendPromotion()
-              onDismiss()
+              viewModel.sendPromotion(onDismiss)
             },
             modifier = Modifier.fillMaxWidth()
           ) {

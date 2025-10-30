@@ -116,7 +116,7 @@ class BannerViewModel : ViewModel() {
   private val _showError = MutableStateFlow(false)
   val showError: StateFlow<Boolean> = _showError.asStateFlow()
 
-  fun sendBanner() {
+  fun sendBanner(onSuccess: () -> Unit) {
     if (_newBannerTitle.value.isBlank() || _newBannerDescription.value.isBlank() || _newBannerImageUrl.value.isBlank()) {
       _showError.value = true
       return
@@ -133,6 +133,7 @@ class BannerViewModel : ViewModel() {
       _newBannerDescription.value = ""
       _newBannerImageUrl.value = ""
       _showError.value = false
+      onSuccess()
     }, onFailure = {})
   }
 

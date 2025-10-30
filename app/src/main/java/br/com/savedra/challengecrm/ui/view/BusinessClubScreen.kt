@@ -164,7 +164,7 @@ fun BusinessClubScreen(
 
         is br.com.savedra.challengecrm.viewmodel.BusinessClubUIState.Error -> {
           val errorMessage =
-            (businessUiState as br.com.savedra.challengecrm.viewmodel.EventUIState.Error).message
+            (businessUiState as br.com.savedra.challengecrm.viewmodel.BusinessClubUIState.Error).message
           Text(errorMessage, color = MaterialTheme.colorScheme.error)
         }
 
