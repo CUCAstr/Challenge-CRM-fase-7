@@ -2,19 +2,13 @@ package br.com.savedra.challengecrm.data.repository
 
 import br.com.savedra.challengecrm.model.Banner
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 class BannerRepository {
   private val firestore = FirebaseFirestore.getInstance()
 
-  fun sendBanner(banner: Banner, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    firestore.collection("banners")
-      .add(banner)
-      .addOnSuccessListener {
-        onSuccess()
-      }
-      .addOnFailureListener { e ->
-        onFailure(e)
-      }
+  suspend fun sendBanner(banner: Banner) {
+    firestore.collection("banners").add(banner).await()
   }
 
   fun getBanners(userSegment: String? = null, onSuccess: (List<Banner>) -> Unit, onFailure: (Exception) -> Unit) {

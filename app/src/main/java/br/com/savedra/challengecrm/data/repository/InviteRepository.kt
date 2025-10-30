@@ -2,19 +2,13 @@ package br.com.savedra.challengecrm.data.repository
 
 import br.com.savedra.challengecrm.model.Invite
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 class InviteRepository {
   private val firestore = FirebaseFirestore.getInstance()
 
-  fun sendInvite(invite: Invite, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    firestore.collection("invites")
-      .add(invite)
-      .addOnSuccessListener {
-        onSuccess()
-      }
-      .addOnFailureListener { e ->
-        onFailure(e)
-      }
+  suspend fun sendInvite(invite: Invite) {
+    firestore.collection("invites").add(invite).await()
   }
 
   fun getInvites(userSegment: String? = null, onSuccess: (List<Invite>) -> Unit, onFailure: (Exception) -> Unit) {

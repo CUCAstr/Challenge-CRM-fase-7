@@ -129,18 +129,19 @@ class InviteViewModel : ViewModel() {
   }
 
   fun sendInvite() {
-    val invite = Invite(
-      name = _newInviteTitle.value,
-      description = _newInviteDescription.value,
-      date = _newInviteDate.value,
-      time = _newInviteTime.value,
-      location = _newInviteLocation.value,
-      segment = _segmentFilter.value
-    )
-    inviteRepository.sendInvite(invite, onSuccess = { 
+    viewModelScope.launch {
+        val invite = Invite(
+          name = _newInviteTitle.value,
+          description = _newInviteDescription.value,
+          date = _newInviteDate.value,
+          time = _newInviteTime.value,
+          location = _newInviteLocation.value,
+          segment = _segmentFilter.value
+        )
+        inviteRepository.sendInvite(invite)
         loadInvites()
         clearNewInviteFields()
-    }, onFailure = {})
+    }
   }
 
   fun clearNewInviteFields() {

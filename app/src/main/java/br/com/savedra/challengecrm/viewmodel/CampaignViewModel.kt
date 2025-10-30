@@ -121,17 +121,18 @@ class CampaignViewModel : ViewModel() {
   }
 
   fun sendCampaign() {
-    val campaign = Campaign(
-      title = _newCampaignTitle.value,
-      description = _newCampaignDescription.value,
-      startDate = _newCampaignStartDate.value,
-      endDate = _newCampaignEndDate.value,
-      segment = _segmentFilter.value
-    )
-    campaignRepository.sendCampaign(campaign, onSuccess = { 
+    viewModelScope.launch {
+        val campaign = Campaign(
+          title = _newCampaignTitle.value,
+          description = _newCampaignDescription.value,
+          startDate = _newCampaignStartDate.value,
+          endDate = _newCampaignEndDate.value,
+          segment = _segmentFilter.value
+        )
+        campaignRepository.sendCampaign(campaign)
         loadCampaigns()
         clearNewCampaignFields()
-    }, onFailure = {})
+    }
   }
 
   fun clearNewCampaignFields() {

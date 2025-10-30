@@ -2,19 +2,13 @@ package br.com.savedra.challengecrm.data.repository
 
 import br.com.savedra.challengecrm.model.Promotion
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 class PromotionRepository {
   private val firestore = FirebaseFirestore.getInstance()
 
-  fun sendPromotion(promotion: Promotion, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    firestore.collection("promotions")
-      .add(promotion)
-      .addOnSuccessListener {
-        onSuccess()
-      }
-      .addOnFailureListener { e ->
-        onFailure(e)
-      }
+  suspend fun sendPromotion(promotion: Promotion) {
+    firestore.collection("promotions").add(promotion).await()
   }
 
   fun getPromotions(userSegment: String? = null, onSuccess: (List<Promotion>) -> Unit, onFailure: (Exception) -> Unit) {

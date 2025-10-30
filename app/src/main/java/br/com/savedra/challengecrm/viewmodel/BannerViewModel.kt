@@ -114,16 +114,17 @@ class BannerViewModel : ViewModel() {
   }
 
   fun sendBanner() {
-    val banner = Banner(
-      title = _newBannerTitle.value,
-      description = _newBannerDescription.value,
-      imageUrl = _newBannerImageUrl.value,
-      segment = _segmentFilter.value
-    )
-    bannerRepository.sendBanner(banner, onSuccess = { 
+    viewModelScope.launch {
+        val banner = Banner(
+          title = _newBannerTitle.value,
+          description = _newBannerDescription.value,
+          imageUrl = _newBannerImageUrl.value,
+          segment = _segmentFilter.value
+        )
+        bannerRepository.sendBanner(banner)
         loadBanners()
         clearNewBannerFields()
-    }, onFailure = {})
+    }
   }
 
   fun clearNewBannerFields() {

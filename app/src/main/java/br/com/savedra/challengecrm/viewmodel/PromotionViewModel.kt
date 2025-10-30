@@ -135,19 +135,20 @@ class PromotionViewModel : ViewModel() {
   }
 
   fun sendPromotion() {
-    val promotion = Promotion(
-      title = _newPromotionTitle.value,
-      description = _newPromotionDescription.value,
-      originalValue = _newPromotionOriginalValue.value,
-      promotionValue = _newPromotionPromotionValue.value,
-      dateExpiresIn = _newPromotionDateExpiresIn.value,
-      hoursExpiresIn = _newPromotionHoursExpiresIn.value,
-      segment = _segmentFilter.value
-    )
-    promotionRepository.sendPromotion(promotion, onSuccess = { 
+    viewModelScope.launch {
+        val promotion = Promotion(
+          title = _newPromotionTitle.value,
+          description = _newPromotionDescription.value,
+          originalValue = _newPromotionOriginalValue.value,
+          promotionValue = _newPromotionPromotionValue.value,
+          dateExpiresIn = _newPromotionDateExpiresIn.value,
+          hoursExpiresIn = _newPromotionHoursExpiresIn.value,
+          segment = _segmentFilter.value
+        )
+        promotionRepository.sendPromotion(promotion)
         loadPromotions()
         clearNewPromotionFields()
-    }, onFailure = {})
+    }
   }
 
   fun clearNewPromotionFields() {

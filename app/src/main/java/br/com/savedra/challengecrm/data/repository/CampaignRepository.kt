@@ -2,19 +2,13 @@ package br.com.savedra.challengecrm.data.repository
 
 import br.com.savedra.challengecrm.model.Campaign
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 class CampaignRepository {
   private val firestore = FirebaseFirestore.getInstance()
 
-  fun sendCampaign(campaign: Campaign, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-    firestore.collection("campaigns")
-      .add(campaign)
-      .addOnSuccessListener {
-        onSuccess()
-      }
-      .addOnFailureListener { e ->
-        onFailure(e)
-      }
+  suspend fun sendCampaign(campaign: Campaign) {
+    firestore.collection("campaigns").add(campaign).await()
   }
 
   fun getCampaigns(userSegment: String? = null, onSuccess: (List<Campaign>) -> Unit, onFailure: (Exception) -> Unit) {
