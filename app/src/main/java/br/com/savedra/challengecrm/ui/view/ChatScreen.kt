@@ -51,8 +51,10 @@ fun ChatScreen(
 
   var text by remember { mutableStateOf("") }
 
+  val otherUser = if (currentUserRole == "Cliente") operator else user
+
   Column(modifier = Modifier.fillMaxSize()) {
-    ChatHeader(operatorName = operator.name, operatorEmail = operator.email)
+    ChatHeader(operatorName = otherUser.name, operatorEmail = otherUser.email)
     LazyColumn(
       state = listState,
       modifier = Modifier
@@ -61,11 +63,7 @@ fun ChatScreen(
       verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
       items(messages) { message ->
-        val isFromCurrentUser = if (currentUserRole == "Cliente") {
-          message.senderId != currentSenderId
-        } else {
-          message.senderId == currentSenderId
-        }
+        val isFromCurrentUser = message.senderId == currentSenderId
         MessageBubble(
           message = message,
           isFromCurrentUser = isFromCurrentUser
