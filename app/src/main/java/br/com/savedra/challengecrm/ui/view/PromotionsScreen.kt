@@ -39,6 +39,7 @@ fun PromotionsScreen(
   onInvitesClick: () -> Unit = {},
   onCampaignsClick: () -> Unit = {},
   onBannersClick: () -> Unit = {},
+  onChatsClick: () -> Unit = {},
   onLogoutClick: () -> Unit = {},
   viewModel: PromotionViewModel = viewModel()
 ) {
@@ -171,6 +172,7 @@ fun PromotionsScreen(
       onPromotionsClick = { /* Already on promotions screen */ },
       onCampaignsClick = onCampaignsClick,
       onBannersClick = onBannersClick,
+      onChatsClick = onChatsClick,
       onLogoutClick = onLogoutClick,
       isPromotionsActive = true,
       modifier = Modifier.align(Alignment.BottomCenter)

@@ -39,6 +39,7 @@ fun InvitesScreen(
   onPromotionsClick: () -> Unit = {},
   onCampaignsClick: () -> Unit = {},
   onBannersClick: () -> Unit = {},
+  onChatsClick: () -> Unit = {},
   onLogoutClick: () -> Unit = {},
   viewModel: InviteViewModel = viewModel()
 ) {
@@ -171,6 +172,7 @@ fun InvitesScreen(
       onPromotionsClick = onPromotionsClick,
       onCampaignsClick = onCampaignsClick,
       onBannersClick = onBannersClick,
+      onChatsClick = onChatsClick,
       onLogoutClick = onLogoutClick,
       isInvitesActive = true,
       modifier = Modifier.align(Alignment.BottomCenter)

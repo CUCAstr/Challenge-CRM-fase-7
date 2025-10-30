@@ -42,6 +42,28 @@ class ChatViewModel : ViewModel() {
     }
   }
 
+  fun loadGroupMessages(segment: String) {
+    viewModelScope.launch {
+      repository.getGroupMessages(segment).collect { messageList ->
+        _messages.value = messageList
+      }
+    }
+  }
+
+  fun sendGroupMessage(text: String, senderId: String, segment: String) {
+    if (text.isBlank()) return
+
+    val message = Message(
+      senderId = senderId,
+      text = text,
+      timestamp = Date()
+    )
+
+    viewModelScope.launch {
+      repository.sendGroupMessage(segment, message)
+    }
+  }
+
   fun sendMessage(
     text: String,
     senderId: String,

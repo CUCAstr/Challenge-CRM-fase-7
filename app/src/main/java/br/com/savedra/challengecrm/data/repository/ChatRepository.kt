@@ -46,6 +46,28 @@ class ChatRepository {
     awaitClose { registration.remove() }
   }
 
+  fun getGroupMessages(segment: String): Flow<List<Message>> = callbackFlow {
+    val messageCollection = chatCollection.document(segment)
+      .collection("messages")
+      .orderBy("timestamp", Query.Direction.ASCENDING)
+
+    val registration = messageCollection.addSnapshotListener { snapshot, error ->
+      if (error != null) {
+        close(error)
+        return@addSnapshotListener
+      }
+      if (snapshot != null) {
+        val messages = snapshot.toObjects(Message::class.java).mapIndexed { index, message ->
+          message.copy(snapshot.documents[index].id)
+        }
+
+        trySend(messages)
+      }
+    }
+
+    awaitClose { registration.remove() }
+  }
+
   suspend fun sendMessage(chatRoomId: String, message: Message, chatRoomInfo: ChatRoom) {
     try {
       val participants = listOf(chatRoomInfo.operatorId, chatRoomInfo.userId)
@@ -62,6 +84,17 @@ class ChatRepository {
       chatCollection.document(chatRoomId).set(roomData, SetOptions.merge())
 
       chatCollection.document(chatRoomId)
+        .collection("messages")
+        .add(message)
+        .await()
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
+  }
+
+  suspend fun sendGroupMessage(segment: String, message: Message) {
+    try {
+      chatCollection.document(segment)
         .collection("messages")
         .add(message)
         .await()

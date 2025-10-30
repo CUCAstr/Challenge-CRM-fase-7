@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -164,7 +165,7 @@ fun MessageInputRow(
     )
     Spacer(modifier = Modifier.width(8.dp))
     IconButton(onClick = onSendClick, enabled = text.isNotBlank()) {
-      Icon(Icons.Default.Send, contentDescription = "Enviar")
+      Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar")
     }
   }
 }

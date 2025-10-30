@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 @Composable
 fun OperatorHomeScreen(
   onCustomerClick: (User) -> Unit = {},
+  onChatsClick: () -> Unit = {},
   onInvitesClick: () -> Unit = {},
   onPromotionsClick: () -> Unit = {},
   onCampaignsClick: () -> Unit = {},
@@ -292,12 +293,14 @@ fun OperatorHomeScreen(
     // Bottom Navigation
     ScrollableBottomNavigation(
       onClientsClick = { /* Already on clients screen */ },
+      onChatsClick = onChatsClick,
       onInvitesClick = onInvitesClick,
       onPromotionsClick = onPromotionsClick,
       onCampaignsClick = onCampaignsClick,
       onBannersClick = onBannersClick,
       onLogoutClick = onLogoutClick,
       isClientsActive = true,
+      isChatsActive = false,
       modifier = Modifier.align(Alignment.BottomCenter)
     )
   }
@@ -384,12 +387,14 @@ fun CustomerCard(
 @Composable
 fun ScrollableBottomNavigation(
   onClientsClick: () -> Unit,
+  onChatsClick: () -> Unit,
   onInvitesClick: () -> Unit,
   onPromotionsClick: () -> Unit,
   onCampaignsClick: () -> Unit,
   onBannersClick: () -> Unit,
   onLogoutClick: () -> Unit,
   isClientsActive: Boolean = false,
+  isChatsActive: Boolean = false,
   isInvitesActive: Boolean = false,
   isPromotionsActive: Boolean = false,
   isCampaignsActive: Boolean = false,
@@ -424,6 +429,27 @@ fun ScrollableBottomNavigation(
           Text(
             text = "Clientes",
             color = if (isClientsActive) purple500 else slate400,
+            fontSize = 12.sp
+          )
+        }
+      }
+      item {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier
+            .clickable { onChatsClick() }
+            .width(80.dp)
+        ) {
+          Icon(
+            imageVector = Icons.Default.Mail,
+            contentDescription = "Chats",
+            tint = if (isChatsActive) purple500 else slate400,
+            modifier = Modifier.size(24.dp)
+          )
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = "Chats",
+            color = if (isChatsActive) purple500 else slate400,
             fontSize = 12.sp
           )
         }

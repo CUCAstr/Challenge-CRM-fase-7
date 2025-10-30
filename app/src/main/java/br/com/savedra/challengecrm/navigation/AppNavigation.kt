@@ -33,6 +33,8 @@ object AppRoutes {
   const val BUSINESS_CLUB = "businessClub"
   const val SHERATON_HOTEL = "sheratonHotel"
   const val OPERATOR_LIST = "operatorList"
+  const val SEGMENT_CHATS = "segmentChats"
+  const val GROUP_CHAT = "groupChat"
 }
 
 @Composable
@@ -77,6 +79,9 @@ fun AppNavigation() {
         onCustomerClick = {
           val currentUser = FirebaseAuth.getInstance().currentUser
           navController.navigate("${AppRoutes.CHAT}/${currentUser?.uid}/${it.id}")
+        },
+        onChatsClick = {
+          navController.navigate(AppRoutes.SEGMENT_CHATS)
         },
         onInvitesClick = {
           navController.navigate(AppRoutes.INVITES)
@@ -277,13 +282,36 @@ fun AppNavigation() {
         onInboxClick = {
           navController.navigate(AppRoutes.CLIENT_HOME)
         },
+        onBusinessClubClick = {
+          navController.navigate(AppRoutes.BUSINESS_CLUB)
+        },
         onEventsCenterClick = {
           navController.navigate(AppRoutes.EVENTS_CENTER)
         },
-        onBusinessClubClick = {
-          navController.navigate(AppRoutes.BUSINESS_CLUB)
-        }
       )
+    }
+    composable(AppRoutes.SEGMENT_CHATS) {
+      SegmentChatsScreen(navController = navController)
+    }
+    composable(
+      route = "${AppRoutes.GROUP_CHAT}/{segment}",
+      arguments = listOf(
+        navArgument("segment") { type = NavType.StringType }
+      )
+    ) { backStackEntry ->
+      val segment = backStackEntry.arguments?.getString("segment")
+      val chatViewModel: ChatViewModel = viewModel()
+      val currentSenderId = FirebaseAuth.getInstance().currentUser?.uid
+
+      if (segment != null && currentSenderId != null) {
+        GroupChatScreen(
+          viewModel = chatViewModel,
+          segment = segment,
+          currentSenderId = currentSenderId
+        )
+      } else {
+        // Handle error
+      }
     }
   }
 }

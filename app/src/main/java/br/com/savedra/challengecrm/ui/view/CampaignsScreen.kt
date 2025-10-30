@@ -39,6 +39,7 @@ fun CampaignsScreen(
   onInvitesClick: () -> Unit = {},
   onPromotionsClick: () -> Unit = {},
   onBannersClick: () -> Unit = {},
+  onChatsClick: () -> Unit = {},
   onLogoutClick: () -> Unit = {},
   viewModel: CampaignViewModel = viewModel()
 ) {
@@ -171,6 +172,7 @@ fun CampaignsScreen(
       onPromotionsClick = onPromotionsClick,
       onCampaignsClick = { /* Already on campaigns screen */ },
       onBannersClick = onBannersClick,
+      onChatsClick = onChatsClick,
       onLogoutClick = onLogoutClick,
       isCampaignsActive = true,
       modifier = Modifier.align(Alignment.BottomCenter)
