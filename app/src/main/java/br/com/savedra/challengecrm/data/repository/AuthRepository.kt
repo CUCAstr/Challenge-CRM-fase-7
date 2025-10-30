@@ -91,6 +91,30 @@ class AuthRepository(
     }
   }
 
+  suspend fun getOperators(): List<User> {
+    val snapshot = firestore.collection("users")
+      .whereEqualTo("role", "Operador")
+      .get()
+      .await()
+    return snapshot.documents.map { document ->
+      User(
+        id = document.id,
+        name = document.getString("name") ?: "",
+        company = document.getString("company") ?: "",
+        email = document.getString("email") ?: "",
+        role = document.getString("role") ?: "",
+        segment = document.getString("segment") ?: "",
+        score = (document.getLong("score") ?: 0).toInt(),
+        status = document.getString("status") ?: "",
+        memberSince = document.getTimestamp("memberSince")?.toDate(),
+        notes = document.getString("notes") ?: "",
+        gender = document.getString("gender") ?: "",
+        phone = document.getString("phone") ?: "",
+        category = document.getString("category") ?: ""
+      )
+    }
+  }
+
   suspend fun updateUserNotes(userId: String, notes: String) {
     firestore.collection("users").document(userId)
       .update("notes", notes)

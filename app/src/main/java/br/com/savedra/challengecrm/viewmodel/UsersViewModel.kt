@@ -18,13 +18,23 @@ class UsersViewModel : ViewModel() {
   private val _users = MutableStateFlow<List<User>>(emptyList())
   val users: StateFlow<List<User>> = _users.asStateFlow()
 
+  private val _operators = MutableStateFlow<List<User>>(emptyList())
+  val operators: StateFlow<List<User>> = _operators.asStateFlow()
+
   init {
     loadUsers()
+    loadOperators()
   }
 
   private fun loadUsers() {
     viewModelScope.launch {
       _users.value = authRepository.getUsers()
+    }
+  }
+
+  private fun loadOperators() {
+    viewModelScope.launch {
+      _operators.value = authRepository.getOperators()
     }
   }
 }
