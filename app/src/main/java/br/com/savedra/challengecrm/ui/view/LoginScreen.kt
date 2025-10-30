@@ -41,11 +41,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 fun LoginScreen(
   modifier: Modifier = Modifier,
   navController: NavController,
-  viewModel: AuthViewModel = viewModel()
+  authViewModel: AuthViewModel
 ) {
-  val email by viewModel.email.collectAsState()
-  val password by viewModel.password.collectAsState()
-  val authState by viewModel.authUiState.collectAsState()
+  val email by authViewModel.email.collectAsState()
+  val password by authViewModel.password.collectAsState()
+  val authState by authViewModel.authUiState.collectAsState()
 
   var isError by remember { mutableStateOf(false) }
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -92,7 +92,7 @@ fun LoginScreen(
       OutlinedTextField(
         value = email,
         onValueChange = {
-          viewModel.onEmailChange(it)
+          authViewModel.onEmailChange(it)
           isError = !isValidEmail(it)
         },
         label = { Text("Email") },
@@ -111,7 +111,7 @@ fun LoginScreen(
 
       OutlinedTextField(
         value = password,
-        onValueChange = { viewModel.onPasswordChange(it) },
+        onValueChange = { authViewModel.onPasswordChange(it) },
         label = { Text("Password") },
         singleLine = true,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -137,7 +137,7 @@ fun LoginScreen(
       Spacer(modifier = Modifier.height(24.dp))
 
       Button(
-        onClick = { viewModel.login() },
+        onClick = { authViewModel.login() },
         modifier = Modifier
           .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
@@ -208,6 +208,6 @@ private fun isValidEmail(email: String): Boolean {
 @Composable
 fun LoginScreenPreview() {
   ChallengeCRMTheme {
-    LoginScreen(navController = rememberNavController())
+    LoginScreen(navController = rememberNavController(), authViewModel = AuthViewModel())
   }
 }

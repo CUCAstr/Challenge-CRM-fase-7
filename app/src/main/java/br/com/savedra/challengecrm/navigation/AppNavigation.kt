@@ -55,7 +55,7 @@ fun AppNavigation() {
       })
     }
     composable(AppRoutes.LOGIN) {
-      LoginScreen(navController = navController)
+      LoginScreen(navController = navController, authViewModel = authViewModel)
     }
     composable(AppRoutes.REGISTER) {
       RegisterScreen(navController = navController)
