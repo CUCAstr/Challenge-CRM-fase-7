@@ -83,6 +83,27 @@ class AuthViewModel : ViewModel() {
     _phone.value = newPhone
   }
 
+  fun checkCurrentUser() {
+    viewModelScope.launch {
+        _authUiState.value = AuthUIState.Loading
+        try {
+            val user = authRepository.getCurrentUser()
+            if (user != null) {
+                val role = authRepository.getUserRole(user.uid)
+                if (role != null) {
+                    _authUiState.value = AuthUIState.Success(role)
+                } else {
+                    _authUiState.value = AuthUIState.Error("User role not found")
+                }
+            } else {
+                _authUiState.value = AuthUIState.Error("No user logged in")
+            }
+        } catch (e: Exception) {
+            _authUiState.value = AuthUIState.Error(e.message ?: "Unknown error")
+        }
+    }
+  }
+
   fun login() {
     val email = _email.value
     val password = _password.value
