@@ -11,21 +11,15 @@ class CampaignRepository {
     firestore.collection("campaigns").add(campaign).await()
   }
 
-  fun getCampaigns(userSegment: String? = null, onSuccess: (List<Campaign>) -> Unit, onFailure: (Exception) -> Unit) {
+  suspend fun getCampaigns(userSegment: String? = null): List<Campaign> {
     val query = if (userSegment != null) {
         firestore.collection("campaigns").whereIn("segment", listOf(userSegment, "Todos"))
     } else {
         firestore.collection("campaigns")
     }
-    query.get()
-      .addOnSuccessListener { result ->
-        val campaigns = result.map { document ->
-          document.toObject(Campaign::class.java)
-        }
-        onSuccess(campaigns)
-      }
-      .addOnFailureListener { e ->
-        onFailure(e)
-      }
+    val result = query.get().await()
+    return result.map { document ->
+        document.toObject(Campaign::class.java)
+    }
   }
 }

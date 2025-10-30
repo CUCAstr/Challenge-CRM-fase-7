@@ -46,6 +46,8 @@ import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
 
+import android.util.Log
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientHomeScreen(
@@ -57,7 +59,7 @@ fun ClientHomeScreen(
   bannerViewModel: BannerViewModel = viewModel(),
   inviteViewModel: InviteViewModel = viewModel(),
   promotionViewModel: PromotionViewModel = viewModel(),
-  onChatClick: () -> Unit
+  onChatClick: () -> Unit,
   notificationViewModel: NotificationViewModel = viewModel(),
   authViewModel: AuthViewModel = viewModel()
 ) {
@@ -65,18 +67,29 @@ fun ClientHomeScreen(
   val notificationMessage by notificationViewModel.notificationMessage.collectAsState()
   val currentUser by authViewModel.currentUser.collectAsState()
 
+  // Efeito para buscar dados apenas quando o usuário estiver carregado
   LaunchedEffect(currentUser) {
+    Log.d("NotificationDebug", "LaunchedEffect triggered. currentUser: $currentUser")
+    // Verifica se o usuário não é nulo e tem um segmento antes de buscar os dados
     currentUser?.segment?.let {
+      Log.d("NotificationDebug", "User segment found: $it. Fetching counts...")
       notificationViewModel.fetchNotificationCounts(it)
-    }
+      campaignViewModel.loadCampaigns(it)
+      bannerViewModel.loadBanners(it)
+      inviteViewModel.loadInvites(it)
+      promotionViewModel.loadPromotions(it)
+    } ?: Log.d("NotificationDebug", "User or segment is null. Waiting for user data to load.")
   }
 
+  // Exibe o diálogo de notificação se necessário
   if (showNotification) {
     NotificationDialog(
       message = notificationMessage,
       onDismiss = { notificationViewModel.dismissNotification() }
     )
   }
+
+  // Estados para os filtros e listas
   var selectedFilter by remember { mutableStateOf("Convites") }
   val campaigns by campaignViewModel.filteredCampaigns.collectAsState()
   val banners by bannerViewModel.filteredBanners.collectAsState()
@@ -84,161 +97,169 @@ fun ClientHomeScreen(
   val promotions by promotionViewModel.filteredPromotions.collectAsState()
 
   Box(modifier = Modifier.fillMaxSize()) {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .background(slate50)
-    ) {
+    // Mostra um indicador de carregamento enquanto o usuário está sendo carregado
+    if (currentUser == null) {
+      CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    } else {
+      // Mostra o conteúdo principal quando o usuário estiver carregado
       Column(
         modifier = Modifier
-          .fillMaxWidth()
-          .padding(24.dp)
+          .fillMaxSize()
+          .background(slate50)
       ) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
+        Column(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)
         ) {
-          Text(
-            text = "Caixa de Entrada",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = slate800
-          )
-          Button(
-            onClick = onChatClick,
-            colors = ButtonDefaults.buttonColors(containerColor = purple500)
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            Text(text = "Chat")
+            Text(
+              text = "Caixa de Entrada",
+              fontSize = 28.sp,
+              fontWeight = FontWeight.Bold,
+              color = slate800
+            )
+            Button(
+              onClick = onChatClick,
+              colors = ButtonDefaults.buttonColors(containerColor = purple500)
+            ) {
+              Text(text = "Chat")
+            }
           }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-          text = "Suas comunicações recentes",
-          fontSize = 16.sp,
-          color = slate600
-        )
-      }
-
-      // Filter Tabs
-      val filters = listOf("Campanhas", "Banners", "Convites", "Promoções")
-      LazyRow(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-        items(filters) { filter ->
-          FilterTab(
-            text = filter,
-            isSelected = selectedFilter == filter,
-            onClick = { selectedFilter = filter }
+          Spacer(modifier = Modifier.height(4.dp))
+          Text(
+            text = "Suas comunicações recentes",
+            fontSize = 16.sp,
+            color = slate600
           )
         }
-      }
 
-      Spacer(modifier = Modifier.height(16.dp))
+        // Abas de filtro
+        val filters = listOf("Campanhas", "Banners", "Convites", "Promoções")
+        LazyRow(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+          horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          items(filters) { filter ->
+            FilterTab(
+              text = filter,
+              isSelected = selectedFilter == filter,
+              onClick = { selectedFilter = filter }
+            )
+          }
+        }
 
-      LazyColumn(
-        modifier = Modifier
-          .fillMaxWidth()
-          .weight(1f)
-          .padding(horizontal = 24.dp)
-      ) {
-        when (selectedFilter) {
-          "Campanhas" -> {
-            if (campaigns.isEmpty()) {
-              item {
-                Box(
-                  modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                  contentAlignment = Alignment.Center
-                ) {
-                  Text("Não há nada para listar.")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Lista de itens filtrados
+        LazyColumn(
+          modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f)
+            .padding(horizontal = 24.dp)
+        ) {
+          when (selectedFilter) {
+            "Campanhas" -> {
+              if (campaigns.isEmpty()) {
+                item {
+                  Box(
+                    modifier = Modifier
+                      .fillMaxSize()
+                      .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                  ) {
+                    Text("Não há nada para listar.")
+                  }
                 }
-              }
-            } else {
-              items(campaigns) { campaign ->
-                CampaignItem(campaign)
+              } else {
+                items(campaigns) { campaign ->
+                  CampaignItem(campaign)
+                }
               }
             }
-          }
 
-          "Banners" -> {
-            if (banners.isEmpty()) {
-              item {
-                Box(
-                  modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                  contentAlignment = Alignment.Center
-                ) {
-                  Text("Não há nada para listar.")
+            "Banners" -> {
+              if (banners.isEmpty()) {
+                item {
+                  Box(
+                    modifier = Modifier
+                      .fillMaxSize()
+                      .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                  ) {
+                    Text("Não há nada para listar.")
+                  }
                 }
-              }
-            } else {
-              items(banners) { banner ->
-                BannerItem(banner)
+              } else {
+                items(banners) { banner ->
+                  BannerItem(banner)
+                }
               }
             }
-          }
 
-          "Convites" -> {
-            if (invites.isEmpty()) {
-              item {
-                Box(
-                  modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                  contentAlignment = Alignment.Center
-                ) {
-                  Text("Não há nada para listar.")
+            "Convites" -> {
+              if (invites.isEmpty()) {
+                item {
+                  Box(
+                    modifier = Modifier
+                      .fillMaxSize()
+                      .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                  ) {
+                    Text("Não há nada para listar.")
+                  }
                 }
-              }
-            } else {
-              items(invites) { invite ->
-                InviteItem(invite)
+              } else {
+                items(invites) { invite ->
+                  InviteItem(invite)
+                }
               }
             }
-          }
 
-          "Promoções" -> {
-            if (promotions.isEmpty()) {
-              item {
-                Box(
-                  modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                  contentAlignment = Alignment.Center
-                ) {
-                  Text("Não há nada para listar.")
+            "Promoções" -> {
+              if (promotions.isEmpty()) {
+                item {
+                  Box(
+                    modifier = Modifier
+                      .fillMaxSize()
+                      .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                  ) {
+                    Text("Não há nada para listar.")
+                  }
                 }
-              }
-            } else {
-              items(promotions) { promotion ->
-                PromotionItem(promotion)
+              } else {
+                items(promotions) { promotion ->
+                  PromotionItem(promotion)
+                }
               }
             }
           }
         }
       }
+
+      Spacer(modifier = Modifier.height(80.dp))
+
+      // Menu de navegação inferior
+      BottomNavigationClient(
+        onInboxClick = { },
+        onLogoutClick = onLogoutClick,
+        isInboxActive = true,
+        isEventsCenterActive = false,
+        isBusinessClubActive = false,
+        isSheratonHotelActive = false,
+        modifier = Modifier.align(Alignment.BottomCenter),
+        onEventsCenterClick = onEventsCenterClick,
+        onBusinessClubClick = onBusinessClubClick,
+        onSheratonHotelClick = onSheratonHotelClick
+      )
     }
-
-    Spacer(modifier = Modifier.height(80.dp))
-
-    BottomNavigationClient(
-      onInboxClick = { },
-      onLogoutClick = onLogoutClick,
-      isInboxActive = true,
-      isEventsCenterActive = false,
-      isBusinessClubActive = false,
-      isSheratonHotelActive = false,
-      modifier = Modifier.align(Alignment.BottomCenter),
-      onEventsCenterClick = onEventsCenterClick,
-      onBusinessClubClick = onBusinessClubClick,
-      onSheratonHotelClick = onSheratonHotelClick
-    )
   }
 }
 

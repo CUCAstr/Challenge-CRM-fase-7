@@ -11,21 +11,15 @@ class InviteRepository {
     firestore.collection("invites").add(invite).await()
   }
 
-  fun getInvites(userSegment: String? = null, onSuccess: (List<Invite>) -> Unit, onFailure: (Exception) -> Unit) {
+  suspend fun getInvites(userSegment: String? = null): List<Invite> {
     val query = if (userSegment != null) {
         firestore.collection("invites").whereIn("segment", listOf(userSegment, "Todos"))
     } else {
         firestore.collection("invites")
     }
-    query.get()
-      .addOnSuccessListener { result ->
-        val invites = result.map { document ->
-          document.toObject(Invite::class.java)
-        }
-        onSuccess(invites)
-      }
-      .addOnFailureListener { e ->
-        onFailure(e)
-      }
+    val result = query.get().await()
+    return result.map { document ->
+        document.toObject(Invite::class.java)
+    }
   }
 }

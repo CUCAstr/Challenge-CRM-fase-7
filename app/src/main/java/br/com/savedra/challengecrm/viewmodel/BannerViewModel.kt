@@ -51,22 +51,14 @@ class BannerViewModel : ViewModel() {
   private val _filteredClients = MutableStateFlow<List<User>>(emptyList())
   val filteredClients: StateFlow<List<User>> = _filteredClients.asStateFlow()
 
-  init {
-    loadBanners()
-  }
-
-  private fun loadBanners() {
+  fun loadBanners(userSegment: String? = null) {
     viewModelScope.launch {
-      bannerRepository.getBanners(
-        userSegment = null,
-        onSuccess = {
-          _allBanners.value = it
-          filterBanners()
-        },
-        onFailure = {
-          // Handle error
+        try {
+            _allBanners.value = bannerRepository.getBanners(userSegment)
+            filterBanners()
+        } catch (e: Exception) {
+            // Handle error
         }
-      )
     }
   }
 
@@ -117,26 +109,12 @@ class BannerViewModel : ViewModel() {
   private val _showError = MutableStateFlow(false)
   val showError: StateFlow<Boolean> = _showError.asStateFlow()
 
-  fun sendBanner(onSuccess: () -> Unit) {
+  fun sendBanner() {
     if (_newBannerTitle.value.isBlank() || _newBannerDescription.value.isBlank() || _newBannerImageUrl.value.isBlank()) {
       _showError.value = true
       return
     }
 
-    val banner = Banner(
-      title = _newBannerTitle.value,
-      description = _newBannerDescription.value,
-      imageUrl = _newBannerImageUrl.value
-    )
-    bannerRepository.sendBanner(banner, onSuccess = {
-      loadBanners()
-      _newBannerTitle.value = ""
-      _newBannerDescription.value = ""
-      _newBannerImageUrl.value = ""
-      _showError.value = false
-      onSuccess()
-    }, onFailure = {})
-  fun sendBanner() {
     viewModelScope.launch {
         val banner = Banner(
           title = _newBannerTitle.value,

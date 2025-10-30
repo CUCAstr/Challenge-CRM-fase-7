@@ -60,22 +60,14 @@ class PromotionViewModel : ViewModel() {
   private val _filteredClients = MutableStateFlow<List<User>>(emptyList())
   val filteredClients: StateFlow<List<User>> = _filteredClients.asStateFlow()
 
-  init {
-    loadPromotions()
-  }
-
-  private fun loadPromotions() {
+  fun loadPromotions(userSegment: String? = null) {
     viewModelScope.launch {
-      promotionRepository.getPromotions(
-        userSegment = null,
-        onSuccess = {
-          _allPromotions.value = it
-          filterPromotions()
-        },
-        onFailure = {
-          // Handle error
+        try {
+            _allPromotions.value = promotionRepository.getPromotions(userSegment)
+            filterPromotions()
+        } catch (e: Exception) {
+            // Handle error
         }
-      )
     }
   }
 
@@ -138,7 +130,7 @@ class PromotionViewModel : ViewModel() {
   private val _showError = MutableStateFlow(false)
   val showError: StateFlow<Boolean> = _showError.asStateFlow()
 
-  fun sendPromotion(onSuccess: () -> Unit) {
+  fun sendPromotion() {
     if (
       _newPromotionTitle.value.isBlank() ||
       _newPromotionDescription.value.isBlank() ||
@@ -151,26 +143,6 @@ class PromotionViewModel : ViewModel() {
       return
     }
 
-    val promotion = Promotion(
-      title = _newPromotionTitle.value,
-      description = _newPromotionDescription.value,
-      originalValue = _newPromotionOriginalValue.value,
-      promotionValue = _newPromotionPromotionValue.value,
-      dateExpiresIn = _newPromotionDateExpiresIn.value,
-      hoursExpiresIn = _newPromotionHoursExpiresIn.value
-    )
-    promotionRepository.sendPromotion(promotion, onSuccess = {
-      loadPromotions()
-      _newPromotionTitle.value = ""
-      _newPromotionDescription.value = ""
-      _newPromotionOriginalValue.value = ""
-      _newPromotionPromotionValue.value = ""
-      _newPromotionDateExpiresIn.value = ""
-      _newPromotionHoursExpiresIn.value = ""
-      _showError.value = false
-      onSuccess()
-    }, onFailure = {})
-  fun sendPromotion() {
     viewModelScope.launch {
         val promotion = Promotion(
           title = _newPromotionTitle.value,
