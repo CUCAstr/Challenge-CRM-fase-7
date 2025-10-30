@@ -28,6 +28,11 @@ class SheratonHotelViewModel : ViewModel() {
   val sheratonUiState = _sheratonUiState
 
   fun saveSheratonHotel(sheratonHotel: SheratonHotel) {
+    if (sheratonHotel.checkInDate.isBlank() || sheratonHotel.checkOutDate.isBlank() || sheratonHotel.guests.isBlank() || sheratonHotel.roomType.isBlank()) {
+      _sheratonUiState.value = SheratonHotelUIState.Error("Todos os campos obrigatórios devem ser preenchidos.")
+      return
+    }
+
     _sheratonUiState.value = SheratonHotelUIState.Loading
     viewModelScope.launch {
       try {

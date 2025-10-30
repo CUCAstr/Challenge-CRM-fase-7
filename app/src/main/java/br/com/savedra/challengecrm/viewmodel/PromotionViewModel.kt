@@ -134,7 +134,22 @@ class PromotionViewModel : ViewModel() {
     _scoreEndFilter.value = score
   }
 
+  private val _showError = MutableStateFlow(false)
+  val showError: StateFlow<Boolean> = _showError.asStateFlow()
+
   fun sendPromotion() {
+    if (
+      _newPromotionTitle.value.isBlank() ||
+      _newPromotionDescription.value.isBlank() ||
+      _newPromotionOriginalValue.value.isBlank() ||
+      _newPromotionPromotionValue.value.isBlank() ||
+      _newPromotionDateExpiresIn.value.isBlank() ||
+      _newPromotionHoursExpiresIn.value.isBlank()
+    ) {
+      _showError.value = true
+      return
+    }
+
     val promotion = Promotion(
       title = _newPromotionTitle.value,
       description = _newPromotionDescription.value,
@@ -143,7 +158,16 @@ class PromotionViewModel : ViewModel() {
       dateExpiresIn = _newPromotionDateExpiresIn.value,
       hoursExpiresIn = _newPromotionHoursExpiresIn.value
     )
-    promotionRepository.sendPromotion(promotion, onSuccess = { loadPromotions() }, onFailure = {})
+    promotionRepository.sendPromotion(promotion, onSuccess = {
+      loadPromotions()
+      _newPromotionTitle.value = ""
+      _newPromotionDescription.value = ""
+      _newPromotionOriginalValue.value = ""
+      _newPromotionPromotionValue.value = ""
+      _newPromotionDateExpiresIn.value = ""
+      _newPromotionHoursExpiresIn.value = ""
+      _showError.value = false
+    }, onFailure = {})
   }
 
   fun getFilteredClients() {

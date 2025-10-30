@@ -113,13 +113,27 @@ class BannerViewModel : ViewModel() {
     _scoreEndFilter.value = score
   }
 
+  private val _showError = MutableStateFlow(false)
+  val showError: StateFlow<Boolean> = _showError.asStateFlow()
+
   fun sendBanner() {
+    if (_newBannerTitle.value.isBlank() || _newBannerDescription.value.isBlank() || _newBannerImageUrl.value.isBlank()) {
+      _showError.value = true
+      return
+    }
+
     val banner = Banner(
       title = _newBannerTitle.value,
       description = _newBannerDescription.value,
       imageUrl = _newBannerImageUrl.value
     )
-    bannerRepository.sendBanner(banner, onSuccess = { loadBanners() }, onFailure = {})
+    bannerRepository.sendBanner(banner, onSuccess = {
+      loadBanners()
+      _newBannerTitle.value = ""
+      _newBannerDescription.value = ""
+      _newBannerImageUrl.value = ""
+      _showError.value = false
+    }, onFailure = {})
   }
 
   fun getFilteredClients() {

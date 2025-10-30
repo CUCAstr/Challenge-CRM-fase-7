@@ -127,7 +127,21 @@ class InviteViewModel : ViewModel() {
     _scoreEndFilter.value = score
   }
 
+  private val _showError = MutableStateFlow(false)
+  val showError: StateFlow<Boolean> = _showError.asStateFlow()
+
   fun sendInvite() {
+    if (
+      _newInviteTitle.value.isBlank() ||
+      _newInviteDescription.value.isBlank() ||
+      _newInviteDate.value.isBlank() ||
+      _newInviteTime.value.isBlank() ||
+      _newInviteLocation.value.isBlank()
+    ) {
+      _showError.value = true
+      return
+    }
+
     val invite = Invite(
       name = _newInviteTitle.value,
       description = _newInviteDescription.value,
@@ -135,7 +149,15 @@ class InviteViewModel : ViewModel() {
       time = _newInviteTime.value,
       location = _newInviteLocation.value
     )
-    inviteRepository.sendInvite(invite, onSuccess = { loadInvites() }, onFailure = {})
+    inviteRepository.sendInvite(invite, onSuccess = {
+      loadInvites()
+      _newInviteTitle.value = ""
+      _newInviteDescription.value = ""
+      _newInviteDate.value = ""
+      _newInviteTime.value = ""
+      _newInviteLocation.value = ""
+      _showError.value = false
+    }, onFailure = {})
   }
 
   fun getFilteredClients() {
