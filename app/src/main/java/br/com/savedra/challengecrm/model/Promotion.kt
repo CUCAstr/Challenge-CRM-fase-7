@@ -6,5 +6,6 @@ data class Promotion(
   val originalValue: String = "",
   val promotionValue: String = "",
   val dateExpiresIn: String = "",
-  val hoursExpiresIn: String = ""
+  val hoursExpiresIn: String = "",
+  val segment: String = ""
 )

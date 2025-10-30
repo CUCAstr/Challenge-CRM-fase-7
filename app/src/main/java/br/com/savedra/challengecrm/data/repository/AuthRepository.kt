@@ -70,6 +70,28 @@ class AuthRepository(
     return document.getString("role")
   }
 
+  suspend fun getCurrentUserData(): User? {
+    val firebaseUser = auth.currentUser ?: return null
+    val document = firestore.collection("users").document(firebaseUser.uid).get().await()
+    return document.let {
+        User(
+            id = it.id,
+            name = it.getString("name") ?: "",
+            company = it.getString("company") ?: "",
+            email = it.getString("email") ?: "",
+            role = it.getString("role") ?: "",
+            segment = it.getString("segment") ?: "",
+            score = (it.getLong("score") ?: 0).toInt(),
+            status = it.getString("status") ?: "",
+            memberSince = it.getDate("memberSince"),
+            notes = it.getString("notes") ?: "",
+            gender = it.getString("gender") ?: "",
+            phone = it.getString("phone") ?: "",
+            category = it.getString("category") ?: ""
+        )
+    }
+  }
+
   suspend fun getUsers(): List<User> {
     val snapshot = firestore.collection("users").get().await()
     return snapshot.documents.map { document ->

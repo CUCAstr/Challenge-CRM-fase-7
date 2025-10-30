@@ -57,6 +57,7 @@ class BannerViewModel : ViewModel() {
   private fun loadBanners() {
     viewModelScope.launch {
       bannerRepository.getBanners(
+        userSegment = null,
         onSuccess = {
           _allBanners.value = it
           filterBanners()
@@ -116,9 +117,24 @@ class BannerViewModel : ViewModel() {
     val banner = Banner(
       title = _newBannerTitle.value,
       description = _newBannerDescription.value,
-      imageUrl = _newBannerImageUrl.value
+      imageUrl = _newBannerImageUrl.value,
+      segment = _segmentFilter.value
     )
-    bannerRepository.sendBanner(banner, onSuccess = { loadBanners() }, onFailure = {})
+    bannerRepository.sendBanner(banner, onSuccess = { 
+        loadBanners()
+        clearNewBannerFields()
+    }, onFailure = {})
+  }
+
+  fun clearNewBannerFields() {
+    _newBannerTitle.value = ""
+    _newBannerDescription.value = ""
+    _newBannerImageUrl.value = ""
+    _segmentFilter.value = "Todos"
+    _statusFilter.value = "Todos"
+    _scoreStartFilter.value = ""
+    _scoreEndFilter.value = ""
+    _filteredClients.value = emptyList()
   }
 
   fun getFilteredClients() {

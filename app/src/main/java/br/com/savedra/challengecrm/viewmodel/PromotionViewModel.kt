@@ -66,6 +66,7 @@ class PromotionViewModel : ViewModel() {
   private fun loadPromotions() {
     viewModelScope.launch {
       promotionRepository.getPromotions(
+        userSegment = null,
         onSuccess = {
           _allPromotions.value = it
           filterPromotions()
@@ -140,9 +141,27 @@ class PromotionViewModel : ViewModel() {
       originalValue = _newPromotionOriginalValue.value,
       promotionValue = _newPromotionPromotionValue.value,
       dateExpiresIn = _newPromotionDateExpiresIn.value,
-      hoursExpiresIn = _newPromotionHoursExpiresIn.value
+      hoursExpiresIn = _newPromotionHoursExpiresIn.value,
+      segment = _segmentFilter.value
     )
-    promotionRepository.sendPromotion(promotion, onSuccess = { loadPromotions() }, onFailure = {})
+    promotionRepository.sendPromotion(promotion, onSuccess = { 
+        loadPromotions()
+        clearNewPromotionFields()
+    }, onFailure = {})
+  }
+
+  fun clearNewPromotionFields() {
+    _newPromotionTitle.value = ""
+    _newPromotionDescription.value = ""
+    _newPromotionOriginalValue.value = ""
+    _newPromotionPromotionValue.value = ""
+    _newPromotionDateExpiresIn.value = ""
+    _newPromotionHoursExpiresIn.value = ""
+    _segmentFilter.value = "Todos"
+    _statusFilter.value = "Todos"
+    _scoreStartFilter.value = ""
+    _scoreEndFilter.value = ""
+    _filteredClients.value = emptyList()
   }
 
   fun getFilteredClients() {

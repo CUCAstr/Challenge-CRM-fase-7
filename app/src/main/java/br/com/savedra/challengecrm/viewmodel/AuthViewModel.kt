@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+import br.com.savedra.challengecrm.model.User
+
 sealed class AuthUIState {
   object Idle : AuthUIState()
   object Loading : AuthUIState()
-  data class Success(val role: String?) : AuthUIState()
+  data class Success(val user: User?) : AuthUIState()
   data class Error(val message: String) : AuthUIState()
 }
 
@@ -33,6 +35,9 @@ class AuthViewModel : ViewModel() {
   private val _authUiState = MutableStateFlow<AuthUIState>(AuthUIState.Idle)
 
   val authUiState = _authUiState
+
+  private val _currentUser = MutableStateFlow<User?>(null)
+  val currentUser = _currentUser.asStateFlow()
 
   private val _email = MutableStateFlow("")
   val email = _email.asStateFlow()
@@ -96,9 +101,9 @@ class AuthViewModel : ViewModel() {
     viewModelScope.launch {
       try {
         authRepository.login(email, password)
-        val user = authRepository.getCurrentUser()
-        val role = user?.let { authRepository.getUserRole(it.uid) }
-        _authUiState.value = AuthUIState.Success(role)
+        val user = authRepository.getCurrentUserData()
+        _currentUser.value = user
+        _authUiState.value = AuthUIState.Success(user)
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
       }
@@ -126,7 +131,9 @@ class AuthViewModel : ViewModel() {
     viewModelScope.launch {
       try {
         authRepository.register(email, password, name, company, role, segment, gender, phone, category)
-        _authUiState.value = AuthUIState.Success(role)
+        val user = authRepository.getCurrentUserData()
+        _currentUser.value = user
+        _authUiState.value = AuthUIState.Success(user)
         Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
@@ -155,7 +162,9 @@ class AuthViewModel : ViewModel() {
     viewModelScope.launch {
       try {
         authRepository.register(email, password, name, company, role, segment, "", "", "Basico")
-        _authUiState.value = AuthUIState.Success(role)
+        val user = authRepository.getCurrentUserData()
+        _currentUser.value = user
+        _authUiState.value = AuthUIState.Success(user)
         Log.d("AuthViewModel", "authUiState: ${_authUiState.value}")
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")

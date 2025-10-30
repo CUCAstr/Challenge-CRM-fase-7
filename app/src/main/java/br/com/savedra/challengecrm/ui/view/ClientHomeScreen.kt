@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,6 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.savedra.challengecrm.model.Message
 import br.com.savedra.challengecrm.ui.theme.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.savedra.challengecrm.ui.view.dialogs.NotificationDialog
+import br.com.savedra.challengecrm.viewmodel.NotificationViewModel
+import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -35,7 +40,25 @@ fun ClientHomeScreen(
   onEventsCenterClick: () -> Unit,
   onBusinessClubClick: () -> Unit,
   onSheratonHotelClick: () -> Unit,
+  notificationViewModel: NotificationViewModel = viewModel(),
+  authViewModel: AuthViewModel = viewModel()
 ) {
+  val showNotification by notificationViewModel.showNotification.collectAsState()
+  val notificationMessage by notificationViewModel.notificationMessage.collectAsState()
+  val currentUser by authViewModel.currentUser.collectAsState()
+
+  LaunchedEffect(currentUser) {
+    currentUser?.segment?.let {
+      notificationViewModel.fetchNotificationCounts(it)
+    }
+  }
+
+  if (showNotification) {
+    NotificationDialog(
+      message = notificationMessage,
+      onDismiss = { notificationViewModel.dismissNotification() }
+    )
+  }
   var selectedFilter by remember { mutableStateOf("Convites") }
   var expanded by remember { mutableStateOf(false) }
   val options = listOf("Selecione", "Lidas", "Não lidas")
@@ -68,42 +91,20 @@ fun ClientHomeScreen(
       }
 
       // Filter Tabs
-      Row(
+      val filters = listOf("Campanhas", "Banners", "Convites", "Promoções")
+      LazyRow(
         modifier = Modifier
           .fillMaxWidth()
           .padding(horizontal = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
       ) {
-        FilterTab(
-          text = "Campanhas",
-          isSelected = selectedFilter == "Campanhas",
-          onClick = { selectedFilter = "Campanhas" }
-        )
-        FilterTab(
-          text = "Banners",
-          isSelected = selectedFilter == "Banners",
-          onClick = { selectedFilter = "Banners" }
-        )
-      }
-
-      Spacer(modifier = Modifier.height(8.dp))
-
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-        FilterTab(
-          text = "Convites",
-          isSelected = selectedFilter == "Convites",
-          onClick = { selectedFilter = "Convites" }
-        )
-        FilterTab(
-          text = "Promoções",
-          isSelected = selectedFilter == "Promoções",
-          onClick = { selectedFilter = "Promoções" }
-        )
+        items(filters) { filter ->
+          FilterTab(
+            text = filter,
+            isSelected = selectedFilter == filter,
+            onClick = { selectedFilter = filter }
+          )
+        }
       }
 
       Spacer(modifier = Modifier.height(16.dp))

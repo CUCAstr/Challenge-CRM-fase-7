@@ -17,9 +17,13 @@ class PromotionRepository {
       }
   }
 
-  fun getPromotions(onSuccess: (List<Promotion>) -> Unit, onFailure: (Exception) -> Unit) {
-    firestore.collection("promotions")
-      .get()
+  fun getPromotions(userSegment: String? = null, onSuccess: (List<Promotion>) -> Unit, onFailure: (Exception) -> Unit) {
+    val query = if (userSegment != null) {
+        firestore.collection("promotions").whereIn("segment", listOf(userSegment, "Todos"))
+    } else {
+        firestore.collection("promotions")
+    }
+    query.get()
       .addOnSuccessListener { result ->
         val promotions = result.map { document ->
           document.toObject(Promotion::class.java)

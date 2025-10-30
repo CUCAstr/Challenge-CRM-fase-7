@@ -64,6 +64,7 @@ class InviteViewModel : ViewModel() {
   private fun loadInvites() {
     viewModelScope.launch {
       inviteRepository.getInvites(
+        userSegment = null,
         onSuccess = {
           _allInvites.value = it
           filterInvites()
@@ -133,9 +134,26 @@ class InviteViewModel : ViewModel() {
       description = _newInviteDescription.value,
       date = _newInviteDate.value,
       time = _newInviteTime.value,
-      location = _newInviteLocation.value
+      location = _newInviteLocation.value,
+      segment = _segmentFilter.value
     )
-    inviteRepository.sendInvite(invite, onSuccess = { loadInvites() }, onFailure = {})
+    inviteRepository.sendInvite(invite, onSuccess = { 
+        loadInvites()
+        clearNewInviteFields()
+    }, onFailure = {})
+  }
+
+  fun clearNewInviteFields() {
+    _newInviteTitle.value = ""
+    _newInviteDescription.value = ""
+    _newInviteDate.value = ""
+    _newInviteLocation.value = ""
+    _newInviteTime.value = ""
+    _segmentFilter.value = "Todos"
+    _statusFilter.value = "Todos"
+    _scoreStartFilter.value = ""
+    _scoreEndFilter.value = ""
+    _filteredClients.value = emptyList()
   }
 
   fun getFilteredClients() {

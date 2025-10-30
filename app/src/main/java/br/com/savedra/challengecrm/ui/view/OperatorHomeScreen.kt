@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Campaign
@@ -34,8 +34,10 @@ import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.PhotoCameraBack
 import br.com.savedra.challengecrm.ui.view.modals.CustomerDetailsModal
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("DEPRECATION")
 @Composable
 fun OperatorHomeScreen(
   onCustomerClick: (User) -> Unit = {},
@@ -51,9 +53,12 @@ fun OperatorHomeScreen(
   var showCustomerDetails by remember { mutableStateOf(false) }
   var selectedCustomer by remember { mutableStateOf<User?>(null) }
 
+  val focusManager = LocalFocusManager.current
+
   LaunchedEffect(Unit) {
     viewModel.updateSegmentFilter("Todos")
     viewModel.updateStatusFilter("Todos")
+    focusManager.clearFocus()
   }
 
   Box(modifier = Modifier.fillMaxSize()) {
@@ -508,7 +513,7 @@ fun ScrollableBottomNavigation(
                     modifier = Modifier.clickable { onLogoutClick() }.width(80.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ExitToApp,
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                         contentDescription = "Sair",
                         tint = slate400,
                         modifier = Modifier.size(24.dp)

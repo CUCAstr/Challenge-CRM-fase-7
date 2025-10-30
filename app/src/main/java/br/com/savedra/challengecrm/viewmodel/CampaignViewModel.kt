@@ -60,6 +60,7 @@ class CampaignViewModel : ViewModel() {
   private fun loadCampaigns() {
     viewModelScope.launch {
       campaignRepository.getCampaigns(
+        userSegment = null,
         onSuccess = {
           _allCampaigns.value = it
           filterCampaigns()
@@ -124,9 +125,25 @@ class CampaignViewModel : ViewModel() {
       title = _newCampaignTitle.value,
       description = _newCampaignDescription.value,
       startDate = _newCampaignStartDate.value,
-      endDate = _newCampaignEndDate.value
+      endDate = _newCampaignEndDate.value,
+      segment = _segmentFilter.value
     )
-    campaignRepository.sendCampaign(campaign, onSuccess = { loadCampaigns() }, onFailure = {})
+    campaignRepository.sendCampaign(campaign, onSuccess = { 
+        loadCampaigns()
+        clearNewCampaignFields()
+    }, onFailure = {})
+  }
+
+  fun clearNewCampaignFields() {
+    _newCampaignTitle.value = ""
+    _newCampaignDescription.value = ""
+    _newCampaignStartDate.value = ""
+    _newCampaignEndDate.value = ""
+    _segmentFilter.value = "Todos"
+    _statusFilter.value = "Todos"
+    _scoreStartFilter.value = ""
+    _scoreEndFilter.value = ""
+    _filteredClients.value = emptyList()
   }
 
   fun getFilteredClients() {

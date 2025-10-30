@@ -17,9 +17,13 @@ class BannerRepository {
       }
   }
 
-  fun getBanners(onSuccess: (List<Banner>) -> Unit, onFailure: (Exception) -> Unit) {
-    firestore.collection("banners")
-      .get()
+  fun getBanners(userSegment: String? = null, onSuccess: (List<Banner>) -> Unit, onFailure: (Exception) -> Unit) {
+    val query = if (userSegment != null) {
+        firestore.collection("banners").whereIn("segment", listOf(userSegment, "Todos"))
+    } else {
+        firestore.collection("banners")
+    }
+    query.get()
       .addOnSuccessListener { result ->
         val banners = result.map { document ->
           document.toObject(Banner::class.java)

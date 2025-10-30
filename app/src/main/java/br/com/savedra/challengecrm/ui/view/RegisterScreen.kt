@@ -340,9 +340,9 @@ fun RegisterScreen(
         }
 
         is AuthUIState.Success -> {
-          LaunchedEffect(state.role) {
-            if (!state.role.isNullOrEmpty()) {
-              when (state.role) {
+          LaunchedEffect(state.user) {
+            state.user?.let { user ->
+              when (user.role) {
                 "Cliente" -> navController.navigate(AppRoutes.CLIENT_HOME) {
                   popUpTo(AppRoutes.REGISTER) { inclusive = true }
                 }
