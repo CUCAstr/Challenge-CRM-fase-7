@@ -1,6 +1,6 @@
 package br.com.savedra.challengecrm.navigation
 
-import NewChatScreen
+import ChatScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +31,7 @@ object AppRoutes {
     const val EVENTS_CENTER = "eventsCenter"
     const val BUSINESS_CLUB = "businessClub"
     const val SHERATON_HOTEL = "sheratonHotel"
+    const val OPERATOR_LIST = "operatorList"
 }
 
 @Composable
@@ -62,9 +63,7 @@ fun AppNavigation() {
                 onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) },
                 onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) },
                 onChatClick = {
-                    val currentUser = FirebaseAuth.getInstance().currentUser
-                    // TODO: Precisa arrumar o ID do operador
-                    navController.navigate("${AppRoutes.CHAT}/${currentUser?.uid}/userId")
+                    navController.navigate(AppRoutes.OPERATOR_LIST)
                 }
             )
         }
@@ -109,17 +108,29 @@ fun AppNavigation() {
             val operator = users.find { it.id == operatorId }
             val user = users.find { it.id == userId }
             val currentSenderId = FirebaseAuth.getInstance().currentUser?.uid
+            val currentUser = users.find { it.id == currentSenderId }
+            val currentUserRole = currentUser?.role
 
-            if (operator != null && user != null && currentSenderId != null) {
-                NewChatScreen(
+            if (operator != null && user != null && currentSenderId != null && currentUserRole != null) {
+                ChatScreen(
                     viewModel = chatViewModel,
                     operator = operator,
                     user = user,
-                    currentSenderId = currentSenderId
+                    currentSenderId = currentSenderId,
+                    currentUserRole = currentUserRole
                 )
             } else {
                 // Handle user not found
             }
+        }
+        composable(AppRoutes.OPERATOR_LIST) {
+            OperatorListScreen(
+                usersViewModel = usersViewModel,
+                onOperatorClick = { operator ->
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+                    navController.navigate("${AppRoutes.CHAT}/${operator.id}/${currentUser?.uid}")
+                }
+            )
         }
         composable(AppRoutes.INVITES) {
             InvitesScreen(

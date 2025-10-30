@@ -15,11 +15,12 @@ import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.viewmodel.ChatViewModel
 
 @Composable
-fun NewChatScreen(
+fun ChatScreen(
   viewModel: ChatViewModel,
-  operator: User, //TODO: Talvez de erro
+  operator: User,
   user: User,
-  currentSenderId: String
+  currentSenderId: String,
+  currentUserRole: String
 ) {
   LaunchedEffect(Unit) {
     viewModel.loadMessages(operator.id, user.id)
@@ -43,9 +44,14 @@ fun NewChatScreen(
       verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
       items(messages) { message ->
+        val isFromCurrentUser = if (currentUserRole == "Cliente") {
+            message.senderId != currentSenderId
+        } else {
+            message.senderId == currentSenderId
+        }
         MessageBubble(
           message = message,
-          isFromCurrentUser = message.senderId == currentSenderId
+          isFromCurrentUser = isFromCurrentUser
         )
       }
     }

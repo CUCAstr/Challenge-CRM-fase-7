@@ -38,7 +38,6 @@ import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientHomeScreen(
-  onMessageClick: (Message) -> Unit = {},
   onLogoutClick: () -> Unit = {},
   onEventsCenterClick: () -> Unit,
   onBusinessClubClick: () -> Unit,
@@ -78,7 +77,7 @@ fun ClientHomeScreen(
                         color = slate800
                     )
                     Button(
-                        onClick = { },
+                        onClick = onChatClick,
                         colors = ButtonDefaults.buttonColors(containerColor = purple500)
                     ) {
                         Text(text = "Chat")
