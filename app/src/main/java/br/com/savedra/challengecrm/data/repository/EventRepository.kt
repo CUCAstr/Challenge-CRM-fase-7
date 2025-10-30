@@ -1,18 +1,18 @@
 package br.com.savedra.challengecrm.data.repository
 
-import br.com.savedra.challengecrm.model.Event
+import br.com.savedra.challengecrm.model.EventsCenter
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class EventRepository(
-    private val firestore: FirebaseFirestore
+  private val firestore: FirebaseFirestore
 ) {
-    suspend fun saveEvent(event: Event) {
-        firestore.collection("eventsCenter").add(event).await()
+  suspend fun saveEvent(event: EventsCenter) {
+    firestore.collection("eventsCenter").add(event).await()
     }
 
-    suspend fun getEvents(): List<Event> {
+    suspend fun getEvents(): List<EventsCenter> {
         val snapshot = firestore.collection("eventsCenter").get().await()
-        return snapshot.toObjects(Event::class.java)
+        return snapshot.toObjects(EventsCenter::class.java)
     }
 }

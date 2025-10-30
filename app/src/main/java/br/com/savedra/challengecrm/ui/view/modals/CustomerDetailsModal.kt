@@ -40,15 +40,15 @@ fun CustomerDetailsModal(
   ) {
     Card(
       modifier = Modifier
-          .fillMaxSize()
-          .padding(16.dp),
+        .fillMaxSize()
+        .padding(16.dp),
       shape = RoundedCornerShape(16.dp),
       colors = CardDefaults.cardColors(containerColor = white)
     ) {
       Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
+          .fillMaxSize()
+          .padding(24.dp)
       ) {
         // Header
         Row(
@@ -66,8 +66,8 @@ fun CustomerDetailsModal(
             imageVector = Icons.Default.Close,
             contentDescription = "Fechar",
             modifier = Modifier
-                .size(24.dp)
-                .clickable { onDismiss() },
+              .size(24.dp)
+              .clickable { onDismiss() },
             tint = slate400
           )
         }

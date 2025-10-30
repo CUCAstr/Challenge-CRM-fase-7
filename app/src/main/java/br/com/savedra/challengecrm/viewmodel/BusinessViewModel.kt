@@ -29,6 +29,11 @@ class BusinessClubViewModel : ViewModel() {
   val businessUiState = _businessUiState
 
   fun saveBusinessClub(businessClub: BusinessClub) {
+    if (businessClub.reason.isBlank()) {
+      _businessUiState.value = BusinessClubUIState.Error("O campo de motivo deve ser preenchido.")
+      return
+    }
+
     _businessUiState.value = BusinessClubUIState.Loading
     viewModelScope.launch {
       try {

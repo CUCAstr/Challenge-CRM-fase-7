@@ -35,6 +35,7 @@ import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 
 @Composable
 fun LoginScreen(
@@ -50,6 +51,11 @@ fun LoginScreen(
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
   val context = LocalContext.current
+  val focusManager = LocalFocusManager.current
+
+  LaunchedEffect(Unit) {
+    focusManager.clearFocus()
+  }
 
   Box(
     modifier = Modifier

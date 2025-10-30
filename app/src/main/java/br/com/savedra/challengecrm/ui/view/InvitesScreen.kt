@@ -30,6 +30,7 @@ import br.com.savedra.challengecrm.model.Invite
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.InviteDetailsModal
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +39,7 @@ fun InvitesScreen(
   onPromotionsClick: () -> Unit = {},
   onCampaignsClick: () -> Unit = {},
   onBannersClick: () -> Unit = {},
+  onChatsClick: () -> Unit = {},
   onLogoutClick: () -> Unit = {},
   viewModel: InviteViewModel = viewModel()
 ) {
@@ -47,6 +49,11 @@ fun InvitesScreen(
   var selectedInvite by remember { mutableStateOf<Invite?>(null) }
 
   var showCreateInviteModal by remember { mutableStateOf(false) }
+  val focusManager = LocalFocusManager.current
+
+  LaunchedEffect(Unit) {
+    focusManager.clearFocus()
+  }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -165,6 +172,7 @@ fun InvitesScreen(
       onPromotionsClick = onPromotionsClick,
       onCampaignsClick = onCampaignsClick,
       onBannersClick = onBannersClick,
+      onChatsClick = onChatsClick,
       onLogoutClick = onLogoutClick,
       isInvitesActive = true,
       modifier = Modifier.align(Alignment.BottomCenter)

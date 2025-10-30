@@ -1,19 +1,24 @@
 package br.com.savedra.challengecrm.ui.view
 
-import CreateInviteModal
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCameraBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.setValue
@@ -29,17 +34,30 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.savedra.challengecrm.ui.view.dialogs.NotificationDialog
 import br.com.savedra.challengecrm.viewmodel.NotificationViewModel
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
-import java.text.SimpleDateFormat
-import java.util.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.draw.clip
+import androidx.lifecycle.viewmodel.compose.viewModel
+import br.com.savedra.challengecrm.model.Banner
+import br.com.savedra.challengecrm.model.Campaign
+import br.com.savedra.challengecrm.model.Invite
+import br.com.savedra.challengecrm.model.Promotion
+import br.com.savedra.challengecrm.viewmodel.BannerViewModel
+import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
+import br.com.savedra.challengecrm.viewmodel.InviteViewModel
+import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientHomeScreen(
-  onMessageClick: (Message) -> Unit = {},
   onLogoutClick: () -> Unit = {},
   onEventsCenterClick: () -> Unit,
   onBusinessClubClick: () -> Unit,
   onSheratonHotelClick: () -> Unit,
+  campaignViewModel: CampaignViewModel = viewModel(),
+  bannerViewModel: BannerViewModel = viewModel(),
+  inviteViewModel: InviteViewModel = viewModel(),
+  promotionViewModel: PromotionViewModel = viewModel(),
+  onChatClick: () -> Unit
   notificationViewModel: NotificationViewModel = viewModel(),
   authViewModel: AuthViewModel = viewModel()
 ) {
@@ -60,9 +78,10 @@ fun ClientHomeScreen(
     )
   }
   var selectedFilter by remember { mutableStateOf("Convites") }
-  var expanded by remember { mutableStateOf(false) }
-  val options = listOf("Selecione", "Lidas", "Não lidas")
-  var selectedOptionText by remember { mutableStateOf(options[0]) }
+  val campaigns by campaignViewModel.filteredCampaigns.collectAsState()
+  val banners by bannerViewModel.filteredBanners.collectAsState()
+  val invites by inviteViewModel.filteredInvites.collectAsState()
+  val promotions by promotionViewModel.filteredPromotions.collectAsState()
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -70,18 +89,29 @@ fun ClientHomeScreen(
         .fillMaxSize()
         .background(slate50)
     ) {
-      // Header
       Column(
         modifier = Modifier
           .fillMaxWidth()
           .padding(24.dp)
       ) {
-        Text(
-          text = "Caixa de Entrada",
-          fontSize = 28.sp,
-          fontWeight = FontWeight.Bold,
-          color = slate800
-        )
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = "Caixa de Entrada",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = slate800
+          )
+          Button(
+            onClick = onChatClick,
+            colors = ButtonDefaults.buttonColors(containerColor = purple500)
+          ) {
+            Text(text = "Chat")
+          }
+        }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
           text = "Suas comunicações recentes",
@@ -115,9 +145,87 @@ fun ClientHomeScreen(
           .weight(1f)
           .padding(horizontal = 24.dp)
       ) {
-        //TODO: Lista do Firebase dependendo do filtro
+        when (selectedFilter) {
+          "Campanhas" -> {
+            if (campaigns.isEmpty()) {
+              item {
+                Box(
+                  modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text("Não há nada para listar.")
+                }
+              }
+            } else {
+              items(campaigns) { campaign ->
+                CampaignItem(campaign)
+              }
+            }
+          }
+
+          "Banners" -> {
+            if (banners.isEmpty()) {
+              item {
+                Box(
+                  modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text("Não há nada para listar.")
+                }
+              }
+            } else {
+              items(banners) { banner ->
+                BannerItem(banner)
+              }
+            }
+          }
+
+          "Convites" -> {
+            if (invites.isEmpty()) {
+              item {
+                Box(
+                  modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text("Não há nada para listar.")
+                }
+              }
+            } else {
+              items(invites) { invite ->
+                InviteItem(invite)
+              }
+            }
+          }
+
+          "Promoções" -> {
+            if (promotions.isEmpty()) {
+              item {
+                Box(
+                  modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text("Não há nada para listar.")
+                }
+              }
+            } else {
+              items(promotions) { promotion ->
+                PromotionItem(promotion)
+              }
+            }
+          }
+        }
       }
     }
+
+    Spacer(modifier = Modifier.height(80.dp))
 
     BottomNavigationClient(
       onInboxClick = { },
@@ -132,6 +240,202 @@ fun ClientHomeScreen(
       onSheratonHotelClick = onSheratonHotelClick
     )
   }
+}
+
+@Composable
+fun CampaignItem(campaign: Campaign) {
+  Card(
+    modifier = Modifier
+      .fillMaxWidth(),
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.Campaign, contentDescription = "Criar Convite")
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = campaign.title,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = campaign.description,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
+    }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
+}
+
+@Composable
+fun BannerItem(banner: Banner) {
+  Card(
+    modifier = Modifier
+      .fillMaxWidth(),
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.PhotoCameraBack, contentDescription = "Criar Convite")
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = banner.title,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = banner.description,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
+    }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
+}
+
+@Composable
+fun InviteItem(invite: Invite) {
+  Card(
+    modifier = Modifier
+      .fillMaxWidth(),
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.Mail, contentDescription = "Criar Convite")
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = invite.name,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = invite.description,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
+    }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
+}
+
+@Composable
+fun PromotionItem(promotion: Promotion) {
+  Card(
+    modifier = Modifier
+      .fillMaxWidth(),
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Box(
+        modifier = Modifier
+          .size(48.dp)
+          .clip(CircleShape)
+          .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.CardGiftcard, contentDescription = "Criar Convite")
+      }
+
+      Spacer(modifier = Modifier.width(16.dp))
+
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = promotion.title,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = promotion.description,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
+    }
+  }
+
+  Spacer(modifier = Modifier.height(12.dp))
 }
 
 @Composable
@@ -287,18 +591,5 @@ fun BottomNavigationClient(
         )
       }
     }
-  }
-}
-
-private fun formatTimestamp(timestamp: Date): String {
-  val now = Date()
-  val diff = now.time - timestamp.time
-  val days = diff / (24 * 60 * 60 * 1000)
-
-  return when {
-    days == 0L -> "Hoje"
-    days == 1L -> "Ontem"
-    days < 7L -> "${days} dias atrás"
-    else -> SimpleDateFormat("dd/MM", Locale.getDefault()).format(timestamp)
   }
 }

@@ -1,195 +1,171 @@
-package br.com.savedra.challengecrm.ui.view
-
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import br.com.savedra.challengecrm.ui.theme.*
+import br.com.savedra.challengecrm.model.Message
+import br.com.savedra.challengecrm.model.User
+import br.com.savedra.challengecrm.ui.theme.slate200
+import br.com.savedra.challengecrm.ui.theme.slate500
+import br.com.savedra.challengecrm.ui.theme.slate800
+import br.com.savedra.challengecrm.viewmodel.ChatViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+import androidx.compose.ui.platform.LocalFocusManager
+import br.com.savedra.challengecrm.ui.theme.purple100
+
 @Composable
 fun ChatScreen(
-  userId: String,
-  userName: String,
-  onBackClick: () -> Unit = {},
+  viewModel: ChatViewModel,
+  operator: User,
+  user: User,
+  currentSenderId: String,
+  currentUserRole: String
 ) {
-  var messageText by remember { mutableStateOf("") }
+  val focusManager = LocalFocusManager.current
+  LaunchedEffect(Unit) {
+    viewModel.loadMessages(operator.id, user.id)
+    focusManager.clearFocus()
+  }
+
+  val messages by viewModel.messages.collectAsState()
   val listState = rememberLazyListState()
 
-  Column(
-    modifier = Modifier
-        .fillMaxSize()
-        .background(slate50)
-  ) {
-    // Header
-    Card(
-      modifier = Modifier.fillMaxWidth(),
-      colors = CardDefaults.cardColors(containerColor = white),
-      elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-      Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-          contentDescription = "Voltar",
-          modifier = Modifier
-              .size(24.dp)
-              .clickable { onBackClick() },
-          tint = slate600
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Avatar
-        Box(
-          modifier = Modifier
-              .size(40.dp)
-              .background(slate200, CircleShape),
-          contentAlignment = Alignment.Center
-        ) {
-          Text(
-            text = userName.first().toString().uppercase(),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = slate600
-          )
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column {
-          Text(
-            text = userName,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = slate800
-          )
-          Text(
-            text = "Online",
-            fontSize = 12.sp,
-            color = green500
-          )
-        }
-      }
+  LaunchedEffect(messages.size) {
+    if (messages.isNotEmpty()) {
+      listState.animateScrollToItem(messages.size - 1)
     }
+  }
 
-    // Messages List
+  var text by remember { mutableStateOf("") }
+
+  val otherUser = if (currentUserRole == "Cliente") operator else user
+
+  Column(modifier = Modifier.fillMaxSize()) {
+    ChatHeader(operatorName = otherUser.name, operatorEmail = otherUser.email)
     LazyColumn(
       state = listState,
       modifier = Modifier
-          .fillMaxWidth()
-          .weight(1f)
-          .padding(horizontal = 16.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-      contentPadding = PaddingValues(vertical = 16.dp)
+        .weight(1f)
+        .padding(8.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-
+      items(messages) { message ->
+        val isFromCurrentUser = message.senderId == currentSenderId
+        MessageBubble(
+          message = message,
+          isFromCurrentUser = isFromCurrentUser
+        )
+      }
     }
 
-    // Message Input
-    Card(
-      modifier = Modifier.fillMaxWidth(),
-      colors = CardDefaults.cardColors(containerColor = white),
-      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-      Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        TextField(
-          value = messageText,
-          onValueChange = { messageText = it },
-          placeholder = { Text("Digite uma mensagem...", color = slate400) },
-          modifier = Modifier.weight(1f),
-          colors = TextFieldDefaults.colors(
-            focusedContainerColor = slate100,
-            unfocusedContainerColor = slate100,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-          ),
-          keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Unspecified,
-            autoCorrectEnabled = true,
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Unspecified
-          ),
-          shape = RoundedCornerShape(20.dp)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        FloatingActionButton(
-          onClick = {
-            if (messageText.isNotBlank()) {
-              messageText = ""
-            }
-          },
-          modifier = Modifier.size(48.dp),
-          containerColor = purple500,
-          contentColor = white
-        ) {
-          Icon(
-            imageVector = Icons.AutoMirrored.Filled.Send,
-            contentDescription = "Enviar",
-            modifier = Modifier.size(20.dp)
-          )
-        }
+    MessageInputRow(
+      text = text,
+      onTextChange = { text = it },
+      onSendClick = {
+        viewModel.sendMessage(text, currentSenderId, operator, user)
+        text = ""
       }
+    )
+  }
+}
+
+@Composable
+fun ChatHeader(operatorName: String, operatorEmail: String) {
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .background(slate200)
+      .padding(16.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Icon(
+      imageVector = Icons.Default.Person,
+      contentDescription = "Foto do Operador",
+      modifier = Modifier
+        .size(40.dp)
+        .clip(CircleShape)
+    )
+    Spacer(modifier = Modifier.width(16.dp))
+    Column {
+      Text(
+        text = operatorName,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        color = slate800
+      )
+      Text(
+        text = operatorEmail,
+        fontSize = 14.sp,
+        color = slate500
+      )
     }
   }
 }
 
 @Composable
-fun ChatBubble(
-  isFromUser: Boolean
-) {
-  Row(
+fun MessageBubble(message: Message, isFromCurrentUser: Boolean) {
+  val alignment = if (isFromCurrentUser) Alignment.CenterEnd else Alignment.CenterStart
+  val bubbleColor = if (isFromCurrentUser) purple100 else slate200
+  val shape = RoundedCornerShape(
+    topStart = 16.dp,
+    topEnd = 16.dp,
+    bottomStart = if (isFromCurrentUser) 16.dp else 0.dp,
+    bottomEnd = if (isFromCurrentUser) 0.dp else 16.dp
+  )
+
+  Box(
     modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = if (isFromUser) Arrangement.End else Arrangement.Start
+    contentAlignment = alignment
   ) {
-    Card(
-      modifier = Modifier.widthIn(max = 280.dp),
-      shape = RoundedCornerShape(
-        topStart = 16.dp,
-        topEnd = 16.dp,
-        bottomStart = if (isFromUser) 16.dp else 4.dp,
-        bottomEnd = if (isFromUser) 4.dp else 16.dp
-      ),
-      colors = CardDefaults.cardColors(
-        containerColor = if (isFromUser) purple500 else white
-      ),
-      elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    Surface(
+      shape = shape,
+      color = bubbleColor,
+      modifier = Modifier.padding(4.dp)
     ) {
       Text(
-        text = "",
-        modifier = Modifier.padding(16.dp),
-        color = if (isFromUser) white else slate800,
-        fontSize = 14.sp
+        text = message.text,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
       )
+    }
+  }
+}
+
+@Composable
+fun MessageInputRow(
+  text: String,
+  onTextChange: (String) -> Unit,
+  onSendClick: () -> Unit
+) {
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(8.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    OutlinedTextField(
+      value = text,
+      onValueChange = onTextChange,
+      modifier = Modifier.weight(1f),
+      placeholder = { Text("Digite uma mensagem...") },
+      shape = RoundedCornerShape(24.dp)
+    )
+    Spacer(modifier = Modifier.width(8.dp))
+    IconButton(onClick = onSendClick, enabled = text.isNotBlank()) {
+      Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar")
     }
   }
 }

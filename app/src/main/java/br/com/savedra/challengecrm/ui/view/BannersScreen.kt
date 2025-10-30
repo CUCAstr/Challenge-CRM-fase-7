@@ -30,6 +30,7 @@ import br.com.savedra.challengecrm.model.Banner
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.CreateBannerModal
 import br.com.savedra.challengecrm.viewmodel.BannerViewModel
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +39,7 @@ fun BannersScreen(
   onInvitesClick: () -> Unit = {},
   onPromotionsClick: () -> Unit = {},
   onCampaignsClick: () -> Unit = {},
+  onChatsClick: () -> Unit = {},
   onLogoutClick: () -> Unit = {},
   viewModel: BannerViewModel = viewModel()
 ) {
@@ -47,6 +49,11 @@ fun BannersScreen(
   var selectedBanner by remember { mutableStateOf<Banner?>(null) }
 
   var showCreateBannerModal by remember { mutableStateOf(false) }
+  val focusManager = LocalFocusManager.current
+
+  LaunchedEffect(Unit) {
+    focusManager.clearFocus()
+  }
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -165,6 +172,7 @@ fun BannersScreen(
       onPromotionsClick = onPromotionsClick,
       onCampaignsClick = onCampaignsClick,
       onBannersClick = { /* Already on banners screen */ },
+      onChatsClick = onChatsClick,
       onLogoutClick = onLogoutClick,
       isBannersActive = true,
       modifier = Modifier.align(Alignment.BottomCenter)
