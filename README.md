@@ -34,91 +34,93 @@ O projeto segue a arquitetura **MVVM (Model-View-ViewModel)**, que promove uma s
 - **ViewModel:** Atua como uma ponte entre o Model e a View, expondo os dados para a UI e tratando as interações do usuário. Os ViewModels estão em `app/src/main/java/br/com/savedra/challengecrm/viewmodel/`.
 
 ## Estrutura de Diretórios
-\---br
-    \---com
-        \---savedra
-            \---challengecrm
-                |   MainActivity.kt
-                |   
-                +---data
-                |   \---repository
-                |           AuthRepository.kt
-                |           BannerRepository.kt
-                |           BusinessClubRepository.kt
-                |           CampaignRepository.kt
-                |           ChatRepository.kt
-                |           EventRepository.kt
-                |           InviteRepository.kt
-                |           PromotionRepository.kt
-                |           SheratonHotelRepository.kt
-                |           
-                +---di
-                +---model
-                |       Banner.kt
-                |       BusinessClub.kt
-                |       Campaign.kt
-                |       Chat.kt
-                |       EventsCenter.kt
-                |       Invite.kt
-                |       Promotion.kt
-                |       SheratonHotel.kt
-                |       User.kt
-                |       
-                +---navigation
-                |       AppNavigation.kt
-                |       
-                +---ui
-                |   +---theme
-                |   |       Color.kt
-                |   |       TextSnippets.kt
-                |   |       Theme.kt
-                |   |       Type.kt
-                |   |       
-                |   \---view
-                |       |   BannersScreen.kt
-                |       |   BusinessClubScreen.kt
-                |       |   CampaignsScreen.kt
-                |       |   ChatListScreen.kt
-                |       |   ChatScreen.kt
-                |       |   ClientHomeScreen.kt
-                |       |   EventsCenterScreen.kt
-                |       |   GroupChatScreen.kt
-                |       |   InvitesScreen.kt
-                |       |   LandingScreen.kt
-                |       |   LoginScreen.kt
-                |       |   OperatorHomeScreen.kt
-                |       |   OperatorListScreen.kt
-                |       |   PromotionsScreen.kt
-                |       |   RegisterScreen.kt
-                |       |   SegmentChatsScreen.kt
-                |       |   SheratonHotelScreen.kt
-                |       |   SplashScreen.kt
-                |       |   
-                |       +---dialogs
-                |       |       DataPickerDialog.kt
-                |       |       FilteredClientsDialog.kt
-                |       |       TimePickerDialog.kt
-                |       |       
-                |       \---modals
-                |               CreateBannerModal.kt
-                |               CreateCampaignModal.kt
-                |               CreateInviteModal.kt
-                |               CreatePromotionModal.kt
-                |               CustomerDetailsModal.kt
-                |               InviteDetailsModal.kt
-                |               
-                \---viewmodel
-                    AuthViewModel.kt
-                    BannerViewModel.kt
-                    BusinessViewModel.kt
-                    CampaignViewModel.kt
-                    ChatViewModel.kt
-                    EventsCenterViewModel.kt
-                    InviteViewModel.kt
-                    OperatorViewModel.kt
-                    PromotionViewModel.kt
-                    SheratonHotelViewModel.kt
-                    UsersViewModel.kt
+<p>
+  \---br </br>
+    \---com </br>
+        \---savedra </br>
+            \---challengecrm </br>
+                |   MainActivity.kt </br>
+                |   </br>
+                +---data </br>
+                |   \---repository </br>
+                |           AuthRepository.kt </br>
+                |           BannerRepository.kt </br>
+                |           BusinessClubRepository.kt </br>
+                |           CampaignRepository.kt </br>
+                |           ChatRepository.kt </br>
+                |           EventRepository.kt </br>
+                |           InviteRepository.kt </br>
+                |           PromotionRepository.kt </br>
+                |           SheratonHotelRepository.kt </br>
+                |           </br>
+                +---di </br>
+                +---model </br>
+                |       Banner.kt </br>
+                |       BusinessClub.kt </br>
+                |       Campaign.kt </br>
+                |       Chat.kt </br>
+                |       EventsCenter.kt </br>
+                |       Invite.kt </br> 
+                |       Promotion.kt </br> 
+                |       SheratonHotel.kt </br>
+                |       User.kt </br>
+                |       </br>
+                +---navigation </br>
+                |       AppNavigation.kt </br>
+                |       </br>
+                +---ui </br>
+                |   +---theme </br>
+                |   |       Color.kt </br>
+                |   |       TextSnippets.kt </br>
+                |   |       Theme.kt </br>
+                |   |       Type.kt </br>
+                |   |        </br>
+                |   \---view </br>
+                |       |   BannersScreen.kt </br>
+                |       |   BusinessClubScreen.kt </br>
+                |       |   CampaignsScreen.kt </br>
+                |       |   ChatListScreen.kt </br>
+                |       |   ChatScreen.kt </br>
+                |       |   ClientHomeScreen.kt </br>
+                |       |   EventsCenterScreen.kt </br>
+                |       |   GroupChatScreen.kt </br>
+                |       |   InvitesScreen.kt </br>
+                |       |   LandingScreen.kt </br>
+                |       |   LoginScreen.kt </br>
+                |       |   OperatorHomeScreen.kt </br>
+                |       |   OperatorListScreen.kt </br>
+                |       |   PromotionsScreen.kt </br>
+                |       |   RegisterScreen.kt </br>
+                |       |   SegmentChatsScreen.kt </br>
+                |       |   SheratonHotelScreen.kt </br>
+                |       |   SplashScreen.kt </br>
+                |       |    </br>
+                |       +---dialogs </br> 
+                |       |       DataPickerDialog.kt </br>
+                |       |       FilteredClientsDialog.kt </br>
+                |       |       TimePickerDialog.kt </br>
+                |       |        </br>
+                |       \---modals </br>
+                |               CreateBannerModal.kt </br>
+                |               CreateCampaignModal.kt </br>
+                |               CreateInviteModal.kt </br>
+                |               CreatePromotionModal.kt </br>
+                |               CustomerDetailsModal.kt </br>
+                |               InviteDetailsModal.kt </br>
+                |               </br>
+                \---viewmodel </br>
+                    AuthViewModel.kt </br>
+                    BannerViewModel.kt </br>
+                    BusinessViewModel.kt </br>
+                    CampaignViewModel.kt </br>
+                    ChatViewModel.kt </br>
+                    EventsCenterViewModel.kt </br>
+                    InviteViewModel.kt </br>
+                    OperatorViewModel.kt </br>
+                    PromotionViewModel.kt </br>
+                    SheratonHotelViewModel.kt </br>
+                    UsersViewModel.kt </br>
+</p>
 
 ## Tecnologias Utilizadas
 
