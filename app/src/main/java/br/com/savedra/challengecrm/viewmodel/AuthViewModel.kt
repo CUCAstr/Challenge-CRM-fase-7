@@ -176,4 +176,23 @@ class AuthViewModel : ViewModel() {
   fun resetUiState() {
     _authUiState.value = AuthUIState.Idle
   }
+
+  fun logout() {
+    viewModelScope.launch {
+      try {
+        // Efetua o logout no repositório (que chama o Firebase Auth)
+        authRepository.logout()
+        // Limpa o estado do usuário atual na ViewModel
+        _currentUser.value = null
+        // Reseta o estado da UI para o estado inicial
+        _authUiState.value = AuthUIState.Idle
+        Log.d("AuthViewModel", "Usuário deslogado com sucesso.")
+      } catch (e: Exception) {
+        Log.e("AuthViewModel", "Erro ao fazer logout", e)
+        // Mesmo em caso de erro, tenta limpar o estado local
+        _currentUser.value = null
+        _authUiState.value = AuthUIState.Error(e.message ?: "Erro ao deslogar")
+      }
+    }
+  }
 }
