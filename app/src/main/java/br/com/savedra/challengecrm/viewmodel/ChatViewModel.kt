@@ -21,6 +21,7 @@ class ChatViewModel : ViewModel() {
   private val _messages = MutableStateFlow<List<Message>>(emptyList())
   val messages: StateFlow<List<Message>> = _messages.asStateFlow()
 
+
   private var currentChatRoomId: String? = null
 
   fun loadChatRooms(participantId: String) {
@@ -44,6 +45,7 @@ class ChatViewModel : ViewModel() {
 
   fun loadGroupMessages(segment: String) {
     viewModelScope.launch {
+      currentChatRoomId = segment
       repository.getGroupMessages(segment).collect { messageList ->
         _messages.value = messageList
       }
@@ -67,7 +69,7 @@ class ChatViewModel : ViewModel() {
   fun sendMessage(
     text: String,
     senderId: String,
-    currentOperator: User, //TODO: Talvez de erro
+    currentOperator: User,
     currentUser: User
   ) {
     val chatRoomId = currentChatRoomId ?: return
@@ -90,4 +92,24 @@ class ChatViewModel : ViewModel() {
       repository.sendMessage(chatRoomId, message, roomInfo)
     }
   }
+
+  fun markMessageAsImportant(messageId: String, isImportant: Boolean) {
+
+    val chatRoomId = currentChatRoomId ?: return
+
+    viewModelScope.launch {
+      repository.updateMessageImportance(chatRoomId, messageId, isImportant)
+    }
+  }
+
+
+  fun deleteMessage(messageId: String) {
+
+    val chatRoomId = currentChatRoomId ?: return
+
+    viewModelScope.launch {
+      repository.deleteMessage(chatRoomId, messageId)
+    }
+  }
 }
+

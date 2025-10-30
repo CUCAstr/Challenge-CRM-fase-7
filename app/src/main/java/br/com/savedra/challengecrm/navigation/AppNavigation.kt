@@ -1,6 +1,7 @@
 package br.com.savedra.challengecrm.navigation
 
-import ChatScreen
+
+import br.com.savedra.challengecrm.ui.view.ChatScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -314,7 +315,7 @@ fun AppNavigation() {
           currentSenderId = currentSenderId
         )
       } else {
-        // Handle error
+
       }
     }
   }

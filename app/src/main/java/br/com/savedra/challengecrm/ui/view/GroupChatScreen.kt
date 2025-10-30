@@ -1,7 +1,6 @@
 package br.com.savedra.challengecrm.ui.view
 
-import MessageBubble
-import MessageInputRow
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -82,9 +81,11 @@ fun GroupChatScreen(
         ) {
             items(messages) { message ->
                 val isFromCurrentUser = message.senderId == currentSenderId
+
                 MessageBubble(
                     message = message,
-                    isFromCurrentUser = isFromCurrentUser
+                    isFromCurrentUser = isFromCurrentUser,
+                    isImportant = message.isImportant
                 )
             }
         }
