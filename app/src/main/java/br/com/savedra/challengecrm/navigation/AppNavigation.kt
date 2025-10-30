@@ -35,6 +35,9 @@ object AppRoutes {
   const val OPERATOR_LIST = "operatorList"
   const val SEGMENT_CHATS = "segmentChats"
   const val GROUP_CHAT = "groupChat"
+  const val CLIENT_CHAT_ENTRY = "clientChatEntry"
+  const val CLIENT_SEGMENT_CHATS = "clientSegmentChats"
+  const val GROUP_CHAT_READONLY = "groupChatReadonly"
 }
 
 @Composable
@@ -69,9 +72,12 @@ fun AppNavigation() {
         onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) },
         onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) },
         onChatClick = {
-          navController.navigate(AppRoutes.OPERATOR_LIST)
+          navController.navigate(AppRoutes.CLIENT_CHAT_ENTRY)
         }
       )
+    }
+    composable(AppRoutes.CLIENT_CHAT_ENTRY) {
+      ClientChatEntryScreen(navController)
     }
     composable(AppRoutes.OPERATOR_HOME) {
       OperatorHomeScreen(
@@ -293,6 +299,9 @@ fun AppNavigation() {
     composable(AppRoutes.SEGMENT_CHATS) {
       SegmentChatsScreen(navController = navController)
     }
+    composable(AppRoutes.CLIENT_SEGMENT_CHATS) {
+      ClientSegmentChatsScreen(navController = navController)
+    }
     composable(
       route = "${AppRoutes.GROUP_CHAT}/{segment}",
       arguments = listOf(
@@ -305,6 +314,26 @@ fun AppNavigation() {
 
       if (segment != null && currentSenderId != null) {
         GroupChatScreen(
+          viewModel = chatViewModel,
+          segment = segment,
+          currentSenderId = currentSenderId
+        )
+      } else {
+        // Handle error
+      }
+    }
+    composable(
+      route = "${AppRoutes.GROUP_CHAT_READONLY}/{segment}",
+      arguments = listOf(
+        navArgument("segment") { type = NavType.StringType }
+      )
+    ) { backStackEntry ->
+      val segment = backStackEntry.arguments?.getString("segment")
+      val chatViewModel: ChatViewModel = viewModel()
+      val currentSenderId = FirebaseAuth.getInstance().currentUser?.uid
+
+      if (segment != null && currentSenderId != null) {
+        GroupChatReadOnlyScreen(
           viewModel = chatViewModel,
           segment = segment,
           currentSenderId = currentSenderId

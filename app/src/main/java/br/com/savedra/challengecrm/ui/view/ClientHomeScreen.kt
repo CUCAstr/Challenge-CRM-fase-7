@@ -106,12 +106,14 @@ fun ClientHomeScreen(
         FilterTab(
           text = "Campanhas",
           isSelected = selectedFilter == "Campanhas",
-          onClick = { selectedFilter = "Campanhas" }
+          onClick = { selectedFilter = "Campanhas" },
+          modifier = Modifier.weight(1f)
         )
         FilterTab(
           text = "Banners",
           isSelected = selectedFilter == "Banners",
-          onClick = { selectedFilter = "Banners" }
+          onClick = { selectedFilter = "Banners" },
+          modifier = Modifier.weight(1f)
         )
       }
 
@@ -126,12 +128,14 @@ fun ClientHomeScreen(
         FilterTab(
           text = "Convites",
           isSelected = selectedFilter == "Convites",
-          onClick = { selectedFilter = "Convites" }
+          onClick = { selectedFilter = "Convites" },
+          modifier = Modifier.weight(1f)
         )
         FilterTab(
           text = "Promoções",
           isSelected = selectedFilter == "Promoções",
-          onClick = { selectedFilter = "Promoções" }
+          onClick = { selectedFilter = "Promoções" },
+          modifier = Modifier.weight(1f)
         )
       }
 
@@ -440,10 +444,11 @@ fun PromotionItem(promotion: Promotion) {
 fun FilterTab(
   text: String,
   isSelected: Boolean,
-  onClick: () -> Unit
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   Card(
-    modifier = Modifier.clickable { onClick() },
+    modifier = modifier.clickable { onClick() },
     shape = RoundedCornerShape(20.dp),
     colors = CardDefaults.cardColors(
       containerColor = if (isSelected) purple500 else slate200
