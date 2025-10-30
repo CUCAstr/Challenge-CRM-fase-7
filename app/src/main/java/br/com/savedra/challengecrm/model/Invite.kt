@@ -5,5 +5,6 @@ data class Invite(
   val description: String = "",
   val date: String = "",
   val time: String = "",
-  val location: String = ""
+  val location: String = "",
+  val segment: String = ""
 )

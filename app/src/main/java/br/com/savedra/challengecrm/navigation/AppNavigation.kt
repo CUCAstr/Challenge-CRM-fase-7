@@ -15,6 +15,7 @@ import br.com.savedra.challengecrm.viewmodel.OperatorViewModel
 import androidx.compose.runtime.*
 
 import br.com.savedra.challengecrm.viewmodel.UsersViewModel
+import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 object AppRoutes {
@@ -42,6 +43,7 @@ fun AppNavigation() {
   val navController = rememberNavController()
   val customerViewModel: OperatorViewModel = viewModel()
   val usersViewModel: UsersViewModel = viewModel()
+  val authViewModel: AuthViewModel = viewModel()
 
   NavHost(navController = navController, startDestination = AppRoutes.SPLASH) {
     composable(AppRoutes.SPLASH) {
@@ -60,7 +62,9 @@ fun AppNavigation() {
     }
     composable(AppRoutes.CLIENT_HOME) {
       ClientHomeScreen(
+        authViewModel = authViewModel,
         onLogoutClick = {
+          authViewModel.logout()
           navController.navigate(AppRoutes.LOGIN) {
             popUpTo(AppRoutes.LOGIN) { inclusive = true }
           }

@@ -9,5 +9,10 @@ class EventRepository(
 ) {
   suspend fun saveEvent(event: EventsCenter) {
     firestore.collection("eventsCenter").add(event).await()
-  }
+    }
+
+    suspend fun getEvents(): List<EventsCenter> {
+        val snapshot = firestore.collection("eventsCenter").get().await()
+        return snapshot.toObjects(EventsCenter::class.java)
+    }
 }
