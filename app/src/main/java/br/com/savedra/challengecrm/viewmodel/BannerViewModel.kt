@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 class BannerViewModel : ViewModel() {
 
   private val bannerRepository = BannerRepository()
-  private val authRepository = AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val authRepository =
+    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()

@@ -45,93 +45,95 @@ import br.com.savedra.challengecrm.viewmodel.UsersViewModel
 
 @Composable
 fun OperatorListScreen(
-    usersViewModel: UsersViewModel = viewModel(),
-    onOperatorClick: (User) -> Unit
+  usersViewModel: UsersViewModel = viewModel(),
+  onOperatorClick: (User) -> Unit
 ) {
-    val users by usersViewModel.users.collectAsState()
-    val operators = users.filter { it.role == "Operador" }
+  val users by usersViewModel.users.collectAsState()
+  val operators = users.filter { it.role == "Operador" }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(slate200)
-            .padding(16.dp)
+  Box(
+    modifier = Modifier
+        .fillMaxSize()
+        .background(slate200)
+        .padding(16.dp)
+  ) {
+    LazyColumn(
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(12.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                Text(
-                    text = "Lista de Operadores",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            items(operators) { operator ->
-                OperatorCard(operator = operator, onClick = { onOperatorClick(operator) })
-            }
-        }
+      item {
+        Text(
+          text = "Lista de Operadores",
+          fontSize = 28.sp,
+          fontWeight = FontWeight.Bold,
+        )
+      }
+      items(operators) { operator ->
+        OperatorCard(operator = operator, onClick = { onOperatorClick(operator) })
+      }
     }
+  }
 }
 
 @Composable
 fun OperatorCard(operator: User, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = white),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  Card(
+    modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick() },
+    shape = RoundedCornerShape(12.dp),
+    colors = CardDefaults.cardColors(containerColor = white),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+          .fillMaxWidth()
+          .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(slate200),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Person, contentDescription = "Criar Convite")
-            }
+      Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
+        Icon(Icons.Default.Person, contentDescription = "Criar Convite")
+      }
 
-            Spacer(modifier = Modifier.width(16.dp))
+      Spacer(modifier = Modifier.width(16.dp))
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = operator.name,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = slate800
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = operator.email,
-                    fontSize = 14.sp,
-                    color = slate600
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = operator.segment,
-                    fontSize = 14.sp,
-                    color = slate600
-                )
-            }
+      Column(
+        modifier = Modifier.weight(1f)
+      ) {
+        Text(
+          text = operator.name,
+          fontSize = 16.sp,
+          fontWeight = FontWeight.Bold,
+          color = slate800
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = operator.email,
+          fontSize = 14.sp,
+          color = slate600
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+          text = operator.segment,
+          fontSize = 14.sp,
+          color = slate600
+        )
+      }
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Chat,
-                contentDescription = "Enviar mensagem",
-                tint = slate400,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+      Icon(
+        imageVector = Icons.AutoMirrored.Filled.Chat,
+        contentDescription = "Enviar mensagem",
+        tint = slate400,
+        modifier = Modifier.size(20.dp)
+      )
     }
+  }
 }

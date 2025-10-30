@@ -56,7 +56,7 @@ fun ChatRoomItem(
   lastMessage: String,
   onClick: () -> Unit
 ) {
-  Card (
+  Card(
     modifier = Modifier
       .fillMaxWidth()
       .padding(horizontal = 8.dp, vertical = 4.dp)

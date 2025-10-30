@@ -54,135 +54,138 @@ fun ClientHomeScreen(
   promotionViewModel: PromotionViewModel = viewModel(),
   onChatClick: () -> Unit
 ) {
-    var selectedFilter by remember { mutableStateOf("Convites") }
-    val campaigns by campaignViewModel.filteredCampaigns.collectAsState()
-    val banners by bannerViewModel.filteredBanners.collectAsState()
-    val invites by inviteViewModel.filteredInvites.collectAsState()
-    val promotions by promotionViewModel.filteredPromotions.collectAsState()
+  var selectedFilter by remember { mutableStateOf("Convites") }
+  val campaigns by campaignViewModel.filteredCampaigns.collectAsState()
+  val banners by bannerViewModel.filteredBanners.collectAsState()
+  val invites by inviteViewModel.filteredInvites.collectAsState()
+  val promotions by promotionViewModel.filteredPromotions.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-              .fillMaxSize()
-              .background(slate50)
+  Box(modifier = Modifier.fillMaxSize()) {
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .background(slate50)
+    ) {
+      Column(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(24.dp)
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(24.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Caixa de Entrada",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = slate800
-                    )
-                    Button(
-                        onClick = onChatClick,
-                        colors = ButtonDefaults.buttonColors(containerColor = purple500)
-                    ) {
-                        Text(text = "Chat")
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Suas comunicações recentes",
-                    fontSize = 16.sp,
-                    color = slate600
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterTab(
-                    text = "Campanhas",
-                    isSelected = selectedFilter == "Campanhas",
-                    onClick = { selectedFilter = "Campanhas" }
-                )
-                FilterTab(
-                    text = "Banners",
-                    isSelected = selectedFilter == "Banners",
-                    onClick = { selectedFilter = "Banners" }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterTab(
-                    text = "Convites",
-                    isSelected = selectedFilter == "Convites",
-                    onClick = { selectedFilter = "Convites" }
-                )
-                FilterTab(
-                    text = "Promoções",
-                    isSelected = selectedFilter == "Promoções",
-                    onClick = { selectedFilter = "Promoções" }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .weight(1f)
-                  .padding(horizontal = 24.dp)
-            ) {
-                when (selectedFilter) {
-                    "Campanhas" -> {
-                        items(campaigns) { campaign ->
-                            CampaignItem(campaign)
-                        }
-                    }
-                    "Banners" -> {
-                        items(banners) { banner ->
-                            BannerItem(banner)
-                        }
-                    }
-                    "Convites" -> {
-                        items(invites) { invite ->
-                            InviteItem(invite)
-                        }
-                    }
-                    "Promoções" -> {
-                        items(promotions) { promotion ->
-                            PromotionItem(promotion)
-                        }
-                    }
-                }
-            }
+          Text(
+            text = "Caixa de Entrada",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = slate800
+          )
+          Button(
+            onClick = onChatClick,
+            colors = ButtonDefaults.buttonColors(containerColor = purple500)
+          ) {
+            Text(text = "Chat")
+          }
         }
-
-        Spacer(modifier = Modifier.height(80.dp))
-
-        BottomNavigationClient(
-            onInboxClick = { },
-            onLogoutClick = onLogoutClick,
-            isInboxActive = true,
-            isEventsCenterActive = false,
-            isBusinessClubActive = false,
-            isSheratonHotelActive = false,
-            modifier = Modifier.align(Alignment.BottomCenter),
-            onEventsCenterClick = onEventsCenterClick,
-            onBusinessClubClick = onBusinessClubClick,
-            onSheratonHotelClick = onSheratonHotelClick
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = "Suas comunicações recentes",
+          fontSize = 16.sp,
+          color = slate600
         )
+      }
+
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        FilterTab(
+          text = "Campanhas",
+          isSelected = selectedFilter == "Campanhas",
+          onClick = { selectedFilter = "Campanhas" }
+        )
+        FilterTab(
+          text = "Banners",
+          isSelected = selectedFilter == "Banners",
+          onClick = { selectedFilter = "Banners" }
+        )
+      }
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        FilterTab(
+          text = "Convites",
+          isSelected = selectedFilter == "Convites",
+          onClick = { selectedFilter = "Convites" }
+        )
+        FilterTab(
+          text = "Promoções",
+          isSelected = selectedFilter == "Promoções",
+          onClick = { selectedFilter = "Promoções" }
+        )
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+
+      LazyColumn(
+        modifier = Modifier
+          .fillMaxWidth()
+          .weight(1f)
+          .padding(horizontal = 24.dp)
+      ) {
+        when (selectedFilter) {
+          "Campanhas" -> {
+            items(campaigns) { campaign ->
+              CampaignItem(campaign)
+            }
+          }
+
+          "Banners" -> {
+            items(banners) { banner ->
+              BannerItem(banner)
+            }
+          }
+
+          "Convites" -> {
+            items(invites) { invite ->
+              InviteItem(invite)
+            }
+          }
+
+          "Promoções" -> {
+            items(promotions) { promotion ->
+              PromotionItem(promotion)
+            }
+          }
+        }
+      }
     }
+
+    Spacer(modifier = Modifier.height(80.dp))
+
+    BottomNavigationClient(
+      onInboxClick = { },
+      onLogoutClick = onLogoutClick,
+      isInboxActive = true,
+      isEventsCenterActive = false,
+      isBusinessClubActive = false,
+      isSheratonHotelActive = false,
+      modifier = Modifier.align(Alignment.BottomCenter),
+      onEventsCenterClick = onEventsCenterClick,
+      onBusinessClubClick = onBusinessClubClick,
+      onSheratonHotelClick = onSheratonHotelClick
+    )
+  }
 }
 
 @Composable

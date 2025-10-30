@@ -55,14 +55,16 @@ fun ChatScreen(
     ChatHeader(operatorName = operator.name, operatorEmail = operator.email)
     LazyColumn(
       state = listState,
-      modifier = Modifier.weight(1f).padding(8.dp),
+      modifier = Modifier
+        .weight(1f)
+        .padding(8.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
       items(messages) { message ->
         val isFromCurrentUser = if (currentUserRole == "Cliente") {
-            message.senderId != currentSenderId
+          message.senderId != currentSenderId
         } else {
-            message.senderId == currentSenderId
+          message.senderId == currentSenderId
         }
         MessageBubble(
           message = message,
@@ -84,35 +86,35 @@ fun ChatScreen(
 
 @Composable
 fun ChatHeader(operatorName: String, operatorEmail: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(slate200)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.Person,
-            contentDescription = "Foto do Operador",
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-            Text(
-                text = operatorName,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = slate800
-            )
-            Text(
-                text = operatorEmail,
-                fontSize = 14.sp,
-                color = slate500
-            )
-        }
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .background(slate200)
+      .padding(16.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Icon(
+      imageVector = Icons.Default.Person,
+      contentDescription = "Foto do Operador",
+      modifier = Modifier
+        .size(40.dp)
+        .clip(CircleShape)
+    )
+    Spacer(modifier = Modifier.width(16.dp))
+    Column {
+      Text(
+        text = operatorName,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        color = slate800
+      )
+      Text(
+        text = operatorEmail,
+        fontSize = 14.sp,
+        color = slate500
+      )
     }
+  }
 }
 
 @Composable

@@ -54,7 +54,7 @@ fun LoginScreen(
   val focusManager = LocalFocusManager.current
 
   LaunchedEffect(Unit) {
-      focusManager.clearFocus()
+    focusManager.clearFocus()
   }
 
   Box(

@@ -51,7 +51,7 @@ fun CampaignsScreen(
   val focusManager = LocalFocusManager.current
 
   LaunchedEffect(Unit) {
-      focusManager.clearFocus()
+    focusManager.clearFocus()
   }
 
   Box(modifier = Modifier.fillMaxSize()) {

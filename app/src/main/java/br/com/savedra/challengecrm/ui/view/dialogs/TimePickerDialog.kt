@@ -20,67 +20,68 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerField(
-    label: String,
-    timeString: String,
-    onTimeSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+  label: String,
+  timeString: String,
+  onTimeSelected: (String) -> Unit,
+  modifier: Modifier = Modifier
 ) {
-    var showDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
+  var showDialog by remember { mutableStateOf(false) }
+  val context = LocalContext.current
+  val calendar = Calendar.getInstance()
 
-    val initialHour = if (timeString.isNotBlank()) {
-        timeString.split(":")[0].toInt()
-    } else {
-        calendar.get(Calendar.HOUR_OF_DAY)
-    }
+  val initialHour = if (timeString.isNotBlank()) {
+    timeString.split(":")[0].toInt()
+  } else {
+    calendar.get(Calendar.HOUR_OF_DAY)
+  }
 
-    val initialMinute = if (timeString.isNotBlank()) {
-        timeString.split(":")[1].toInt()
-    } else {
-        calendar.get(Calendar.MINUTE)
-    }
+  val initialMinute = if (timeString.isNotBlank()) {
+    timeString.split(":")[1].toInt()
+  } else {
+    calendar.get(Calendar.MINUTE)
+  }
 
-    Box(modifier = modifier) {
-        OutlinedTextField(
-            value = timeString,
-            onValueChange = { },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true,
-            label = { Text(label) },
-            trailingIcon = {
-                Icon(
-                    imageVector = Icons.Default.AccessTime,
-                    contentDescription = "Abrir seletor de tempo"
-                )
-            }
+  Box(modifier = modifier) {
+    OutlinedTextField(
+      value = timeString,
+      onValueChange = { },
+      modifier = Modifier.fillMaxWidth(),
+      readOnly = true,
+      label = { Text(label) },
+      trailingIcon = {
+        Icon(
+          imageVector = Icons.Default.AccessTime,
+          contentDescription = "Abrir seletor de tempo"
         )
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = { showDialog = true }
-                )
-        )
-    }
+      }
+    )
+    Box(
+      modifier = Modifier
+          .matchParentSize()
+          .clickable(
+              interactionSource = remember { MutableInteractionSource() },
+              indication = null,
+              onClick = { showDialog = true }
+          )
+    )
+  }
 
-    if (showDialog) {
-        val timeSetListener = TimePickerDialog.OnTimeSetListener { _: TimePicker, hour: Int, minute: Int ->
-            onTimeSelected(String.format("%02d:%02d", hour, minute))
-            showDialog = false
-        }
+  if (showDialog) {
+    val timeSetListener =
+      TimePickerDialog.OnTimeSetListener { _: TimePicker, hour: Int, minute: Int ->
+        onTimeSelected(String.format("%02d:%02d", hour, minute))
+        showDialog = false
+      }
 
-        TimePickerDialog(
-            context,
-            timeSetListener,
-            initialHour,
-            initialMinute,
-            true
-        ).apply {
-            setOnDismissListener { showDialog = false }
-            show()
-        }
+    TimePickerDialog(
+      context,
+      timeSetListener,
+      initialHour,
+      initialMinute,
+      true
+    ).apply {
+      setOnDismissListener { showDialog = false }
+      show()
     }
+  }
 }

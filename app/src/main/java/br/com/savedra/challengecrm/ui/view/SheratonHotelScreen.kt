@@ -25,175 +25,179 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SheratonHotelScreen(
-    navController: NavController,
-    onLogoutClick: () -> Unit,
-    onInboxClick: () -> Unit,
-    onEventsCenterClick: () -> Unit,
-    onBusinessClubClick: () -> Unit,
-    sheratonHotelViewModel: SheratonHotelViewModel = viewModel()
+  navController: NavController,
+  onLogoutClick: () -> Unit,
+  onInboxClick: () -> Unit,
+  onEventsCenterClick: () -> Unit,
+  onBusinessClubClick: () -> Unit,
+  sheratonHotelViewModel: SheratonHotelViewModel = viewModel()
 ) {
-    var checkInDateMillis by remember { mutableStateOf("") }
-    var checkOutDateMillis by remember { mutableStateOf("") }
-    var guests by remember { mutableStateOf("") }
-    var roomType by remember { mutableStateOf("Standard") }
-    var specialRequests by remember { mutableStateOf("") }
-    var showConfirmationDialog by remember { mutableStateOf(false) }
+  var checkInDateMillis by remember { mutableStateOf("") }
+  var checkOutDateMillis by remember { mutableStateOf("") }
+  var guests by remember { mutableStateOf("") }
+  var roomType by remember { mutableStateOf("Standard") }
+  var specialRequests by remember { mutableStateOf("") }
+  var showConfirmationDialog by remember { mutableStateOf(false) }
 
-    val sheratonHotelUiState by sheratonHotelViewModel.sheratonUiState.collectAsState()
-    val context = LocalContext.current
+  val sheratonHotelUiState by sheratonHotelViewModel.sheratonUiState.collectAsState()
+  val context = LocalContext.current
 
-    val focusManager = LocalFocusManager.current
+  val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(Unit) {
-        focusManager.clearFocus()
-    }
+  LaunchedEffect(Unit) {
+    focusManager.clearFocus()
+  }
 
-    LaunchedEffect(sheratonHotelUiState) {
-        when (sheratonHotelUiState) {
-            is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Success -> {
-                Toast.makeText(context, "Pedido de reserva enviada com sucesso!", Toast.LENGTH_LONG).show()
-                navController.navigate(AppRoutes.CLIENT_HOME) {
-                    popUpTo(AppRoutes.CLIENT_HOME) { inclusive = true }
-                }
-                sheratonHotelViewModel.resetUiState()
-            }
-            else -> {}
+  LaunchedEffect(sheratonHotelUiState) {
+    when (sheratonHotelUiState) {
+      is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Success -> {
+        Toast.makeText(context, "Pedido de reserva enviada com sucesso!", Toast.LENGTH_LONG).show()
+        navController.navigate(AppRoutes.CLIENT_HOME) {
+          popUpTo(AppRoutes.CLIENT_HOME) { inclusive = true }
         }
-    }
+        sheratonHotelViewModel.resetUiState()
+      }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(slate50)
+      else -> {}
+    }
+  }
+
+  Box(
+    modifier = Modifier
+        .fillMaxSize()
+        .background(slate50)
+  ) {
+    Column(
+      modifier = Modifier
+          .fillMaxSize()
+          .padding(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Sheraton Hotel Reservation",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+      Text(
+        text = "Sheraton Hotel Reservation",
+        style = MaterialTheme.typography.headlineMedium,
+        modifier = Modifier.padding(bottom = 16.dp)
+      )
 
-            DatePickerField(
-                label = "Check-in",
-                dateString = checkInDateMillis,
-                onDateSelected = { checkInDateMillis = convertMillisToDateString(it) },
-                dateValidator = { date ->
-                    val today = Calendar.getInstance()
-                    today.set(Calendar.HOUR_OF_DAY, 0)
-                    today.set(Calendar.MINUTE, 0)
-                    today.set(Calendar.SECOND, 0)
-                    today.set(Calendar.MILLISECOND, 0)
-                    val sevenDaysFromNow = Calendar.getInstance()
-                    sevenDaysFromNow.add(Calendar.DAY_OF_YEAR, 7)
-                    date >= today.timeInMillis && date <= sevenDaysFromNow.timeInMillis
-                },
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            DatePickerField(
-                label = "Check-out",
-                dateString = checkOutDateMillis,
-                onDateSelected = { checkOutDateMillis = convertMillisToDateString(it) },
-                dateValidator = { date ->
-                    val today = Calendar.getInstance()
-                    today.set(Calendar.HOUR_OF_DAY, 0)
-                    today.set(Calendar.MINUTE, 0)
-                    today.set(Calendar.SECOND, 0)
-                    today.set(Calendar.MILLISECOND, 0)
-                    val sevenDaysFromNow = Calendar.getInstance()
-                    sevenDaysFromNow.add(Calendar.DAY_OF_YEAR, 7)
-                    date >= today.timeInMillis && date <= sevenDaysFromNow.timeInMillis
-                },
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = guests,
-                onValueChange = { guests = it },
-                label = { Text("Hóspedes") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            RoomTypeSelector(
-                selectedType = roomType,
-                onTypeSelected = { roomType = it }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = specialRequests,
-                onValueChange = { specialRequests = it },
-                label = { Text("Solicitações especiais") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Button(
-                onClick = {
-                    val event = SheratonHotel(
-                        checkInDate = checkInDateMillis,
-                        checkOutDate = checkOutDateMillis,
-                        guests = guests,
-                        roomType = roomType,
-                        specialRequests = specialRequests
-                    )
-                    sheratonHotelViewModel.saveSheratonHotel(event)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("PEDIR RESERVA")
-            }
+      DatePickerField(
+        label = "Check-in",
+        dateString = checkInDateMillis,
+        onDateSelected = { checkInDateMillis = convertMillisToDateString(it) },
+        dateValidator = { date ->
+          val today = Calendar.getInstance()
+          today.set(Calendar.HOUR_OF_DAY, 0)
+          today.set(Calendar.MINUTE, 0)
+          today.set(Calendar.SECOND, 0)
+          today.set(Calendar.MILLISECOND, 0)
+          val sevenDaysFromNow = Calendar.getInstance()
+          sevenDaysFromNow.add(Calendar.DAY_OF_YEAR, 7)
+          date >= today.timeInMillis && date <= sevenDaysFromNow.timeInMillis
+        },
+      )
+      Spacer(modifier = Modifier.height(16.dp))
+      DatePickerField(
+        label = "Check-out",
+        dateString = checkOutDateMillis,
+        onDateSelected = { checkOutDateMillis = convertMillisToDateString(it) },
+        dateValidator = { date ->
+          val today = Calendar.getInstance()
+          today.set(Calendar.HOUR_OF_DAY, 0)
+          today.set(Calendar.MINUTE, 0)
+          today.set(Calendar.SECOND, 0)
+          today.set(Calendar.MILLISECOND, 0)
+          val sevenDaysFromNow = Calendar.getInstance()
+          sevenDaysFromNow.add(Calendar.DAY_OF_YEAR, 7)
+          date >= today.timeInMillis && date <= sevenDaysFromNow.timeInMillis
+        },
+      )
+      Spacer(modifier = Modifier.height(16.dp))
+      OutlinedTextField(
+        value = guests,
+        onValueChange = { guests = it },
+        label = { Text("Hóspedes") },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = Modifier.fillMaxWidth()
+      )
+      Spacer(modifier = Modifier.height(16.dp))
+      RoomTypeSelector(
+        selectedType = roomType,
+        onTypeSelected = { roomType = it }
+      )
+      Spacer(modifier = Modifier.height(16.dp))
+      OutlinedTextField(
+        value = specialRequests,
+        onValueChange = { specialRequests = it },
+        label = { Text("Solicitações especiais") },
+        modifier = Modifier.fillMaxWidth()
+      )
+      Spacer(modifier = Modifier.height(32.dp))
+      Button(
+        onClick = {
+          val event = SheratonHotel(
+            checkInDate = checkInDateMillis,
+            checkOutDate = checkOutDateMillis,
+            guests = guests,
+            roomType = roomType,
+            specialRequests = specialRequests
+          )
+          sheratonHotelViewModel.saveSheratonHotel(event)
+        },
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        Text("PEDIR RESERVA")
+      }
 
-            when (sheratonHotelUiState) {
-                is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
-                is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Error -> {
-                    val errorMessage = (sheratonHotelUiState as br.com.savedra.challengecrm.viewmodel.EventUIState.Error).message
-                    Text(errorMessage, color = MaterialTheme.colorScheme.error)
-                }
-                else -> {}
-            }
-
-            Spacer(modifier = Modifier.height(80.dp))
+      when (sheratonHotelUiState) {
+        is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Loading -> {
+          CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
 
-        BottomNavigationClient(
-            onInboxClick = onInboxClick,
-            onLogoutClick = onLogoutClick,
-            isInboxActive = false,
-            isEventsCenterActive = false,
-            isBusinessClubActive = false,
-            isSheratonHotelActive = true,
-            modifier = Modifier.align(Alignment.BottomCenter),
-            onEventsCenterClick = onEventsCenterClick,
-            onBusinessClubClick = onBusinessClubClick,
-            onSheratonHotelClick = { }
-        )
+        is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Error -> {
+          val errorMessage =
+            (sheratonHotelUiState as br.com.savedra.challengecrm.viewmodel.EventUIState.Error).message
+          Text(errorMessage, color = MaterialTheme.colorScheme.error)
+        }
+
+        else -> {}
+      }
+
+      Spacer(modifier = Modifier.height(80.dp))
     }
+
+    BottomNavigationClient(
+      onInboxClick = onInboxClick,
+      onLogoutClick = onLogoutClick,
+      isInboxActive = false,
+      isEventsCenterActive = false,
+      isBusinessClubActive = false,
+      isSheratonHotelActive = true,
+      modifier = Modifier.align(Alignment.BottomCenter),
+      onEventsCenterClick = onEventsCenterClick,
+      onBusinessClubClick = onBusinessClubClick,
+      onSheratonHotelClick = { }
+    )
+  }
 }
 
 @Composable
 fun RoomTypeSelector(selectedType: String, onTypeSelected: (String) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text("Tipo de quarto:", modifier = Modifier.weight(1f))
-        Row(modifier = Modifier.weight(2f)) {
-            RadioButton(
-                selected = selectedType == "Standard",
-                onClick = { onTypeSelected("Standard") }
-            )
-            Text("Standard", modifier = Modifier.align(Alignment.CenterVertically))
-            Spacer(modifier = Modifier.width(16.dp))
-            RadioButton(
-                selected = selectedType == "Deluxe",
-                onClick = { onTypeSelected("Deluxe") }
-            )
-            Text("Deluxe", modifier = Modifier.align(Alignment.CenterVertically))
-        }
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Text("Tipo de quarto:", modifier = Modifier.weight(1f))
+    Row(modifier = Modifier.weight(2f)) {
+      RadioButton(
+        selected = selectedType == "Standard",
+        onClick = { onTypeSelected("Standard") }
+      )
+      Text("Standard", modifier = Modifier.align(Alignment.CenterVertically))
+      Spacer(modifier = Modifier.width(16.dp))
+      RadioButton(
+        selected = selectedType == "Deluxe",
+        onClick = { onTypeSelected("Deluxe") }
+      )
+      Text("Deluxe", modifier = Modifier.align(Alignment.CenterVertically))
     }
+  }
 }
