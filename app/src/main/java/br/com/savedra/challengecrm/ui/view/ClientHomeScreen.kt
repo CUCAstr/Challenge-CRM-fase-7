@@ -145,26 +145,78 @@ fun ClientHomeScreen(
       ) {
         when (selectedFilter) {
           "Campanhas" -> {
-            items(campaigns) { campaign ->
-              CampaignItem(campaign)
+            if (campaigns.isEmpty()) {
+              item {
+                Box(
+                  modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text("Não há nada para listar.")
+                }
+              }
+            } else {
+              items(campaigns) { campaign ->
+                CampaignItem(campaign)
+              }
             }
           }
 
           "Banners" -> {
-            items(banners) { banner ->
-              BannerItem(banner)
+            if (banners.isEmpty()) {
+              item {
+                Box(
+                  modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text("Não há nada para listar.")
+                }
+              }
+            } else {
+              items(banners) { banner ->
+                BannerItem(banner)
+              }
             }
           }
 
           "Convites" -> {
-            items(invites) { invite ->
-              InviteItem(invite)
+            if (invites.isEmpty()) {
+              item {
+                Box(
+                  modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text("Não há nada para listar.")
+                }
+              }
+            } else {
+              items(invites) { invite ->
+                InviteItem(invite)
+              }
             }
           }
 
           "Promoções" -> {
-            items(promotions) { promotion ->
-              PromotionItem(promotion)
+            if (promotions.isEmpty()) {
+              item {
+                Box(
+                  modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Text("Não há nada para listar.")
+                }
+              }
+            } else {
+              items(promotions) { promotion ->
+                PromotionItem(promotion)
+              }
             }
           }
         }
