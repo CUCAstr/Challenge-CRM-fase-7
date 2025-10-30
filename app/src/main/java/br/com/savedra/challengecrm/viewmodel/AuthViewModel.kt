@@ -40,28 +40,30 @@ class AuthViewModel : ViewModel() {
   private val _currentUser = MutableStateFlow<User?>(null)
   val currentUser = _currentUser.asStateFlow()
 
-  init {
-    Log.d("AuthDebug", "Second 'init' block: Calling checkCurrentUser().")
-    // Verifica o estado de autenticação na inicialização do ViewModel
-    checkCurrentUser()
-  }
+  fun performInitialAuthCheck() {
+    // Se um usuário já foi carregado, não faz nada
+    if (_currentUser.value != null) {
+        Log.d("AuthDebug", "performInitialAuthCheck() - Check skipped, user already loaded.")
+        return
+    }
 
-  private fun checkCurrentUser() {
     viewModelScope.launch {
       try {
         // Tenta obter os dados do usuário que já pode estar logado
-        Log.d("AuthDebug", "checkCurrentUser() - Attempting to get current user data.")
+        Log.d("AuthDebug", "performInitialAuthCheck() - Attempting to get current user data.")
         val user = authRepository.getCurrentUserData()
         if (user != null) {
           _currentUser.value = user
-          _authUiState.value = AuthUIState.Success(user) // Opcional: atualizar o estado da UI
-          Log.d("AuthDebug", "checkCurrentUser() - User found and loaded: ${user.email}")
+          _authUiState.value = AuthUIState.Success(user)
+          Log.d("AuthDebug", "performInitialAuthCheck() - User found and loaded: ${user.email}")
         } else {
-          Log.d("AuthDebug", "checkCurrentUser() - No authenticated user found.")
+          _authUiState.value = AuthUIState.Idle // Garante que o estado seja Idle se não houver usuário
+          Log.d("AuthDebug", "performInitialAuthCheck() - No authenticated user found.")
         }
       } catch (e: Exception) {
         // Erro ao buscar dados do usuário, pode ser que não esteja logado
-        Log.e("AuthDebug", "checkCurrentUser() - Error checking current user", e)
+        Log.e("AuthDebug", "performInitialAuthCheck() - Error checking current user", e)
+        _authUiState.value = AuthUIState.Error(e.message ?: "Erro ao checar usuário")
       }
     }
   }
