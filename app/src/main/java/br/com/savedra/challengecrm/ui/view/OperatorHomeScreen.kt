@@ -55,8 +55,6 @@ fun OperatorHomeScreen(
   var selectedCustomer by remember { mutableStateOf<User?>(null) }
   val focusManager = LocalFocusManager.current
 
-  val focusManager = LocalFocusManager.current
-
   LaunchedEffect(Unit) {
     viewModel.updateSegmentFilter("Todos")
     viewModel.updateStatusFilter("Todos")

@@ -245,7 +245,8 @@ fun CreateBannerModal(
           Spacer(modifier = Modifier.height(16.dp))
           Button(
             onClick = {
-              viewModel.sendBanner(onDismiss)
+              viewModel.sendBanner()
+              onDismiss()
             },
             modifier = Modifier.fillMaxWidth()
           ) {
