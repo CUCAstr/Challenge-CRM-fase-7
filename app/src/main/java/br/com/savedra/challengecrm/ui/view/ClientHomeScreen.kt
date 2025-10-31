@@ -41,12 +41,15 @@ import br.com.savedra.challengecrm.model.Banner
 import br.com.savedra.challengecrm.model.Campaign
 import br.com.savedra.challengecrm.model.Invite
 import br.com.savedra.challengecrm.model.Promotion
+import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.viewmodel.BannerViewModel
 import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
 
 import android.util.Log
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +64,8 @@ fun ClientHomeScreen(
   promotionViewModel: PromotionViewModel = viewModel(),
   onChatClick: () -> Unit,
   notificationViewModel: NotificationViewModel = viewModel(),
-  authViewModel: AuthViewModel = viewModel()
+  authViewModel: AuthViewModel = viewModel(),
+  navController: NavController
 ) {
   val showNotification by notificationViewModel.showNotification.collectAsState()
   val notificationMessage by notificationViewModel.notificationMessage.collectAsState()
@@ -139,7 +143,7 @@ fun ClientHomeScreen(
         }
 
         // Abas de filtro
-        val filters = listOf("Campanhas", "Banners", "Convites", "Promoções")
+        val filters = listOf("Campanhas", "Banners", "Convites", "Promoções", "Segmentos")
         LazyRow(
           modifier = Modifier
             .fillMaxWidth()
@@ -237,6 +241,16 @@ fun ClientHomeScreen(
               } else {
                 items(promotions) { promotion ->
                   PromotionItem(promotion)
+                }
+              }
+            }
+            "Segmentos" -> {
+              val segments = listOf(
+                "ED","IT","Retail & Financial","GRC","HR","Smart Spends","Health","CSC","Field Marketing","Finance","ESG","CX"
+              )
+              items(segments) { segment ->
+                ClientSegmentChatCard(segment = segment) {
+                  navController.navigate("${AppRoutes.GROUP_CHAT_READONLY}/$segment")
                 }
               }
             }

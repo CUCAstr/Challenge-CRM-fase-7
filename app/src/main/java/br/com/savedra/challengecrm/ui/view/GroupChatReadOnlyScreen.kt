@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.ui.view
 
+import MessageBubble
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,8 +43,7 @@ fun GroupChatReadOnlyScreen(
         val isFromCurrentUser = message.senderId == currentSenderId
         MessageBubble(
           message = message,
-          isFromCurrentUser = isFromCurrentUser,
-          isImportant = false
+          isFromCurrentUser = isFromCurrentUser
         )
       }
     }
