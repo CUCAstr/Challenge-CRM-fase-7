@@ -3,6 +3,7 @@ package br.com.savedra.challengecrm.ui.view
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,23 +47,38 @@ fun SegmentChatsScreen(
         "CX"
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Chats por Segmento",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(segments) { segment ->
-                SegmentChatCard(segment = segment) {
-                    navController.navigate("${AppRoutes.GROUP_CHAT}/$segment")
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Chats por Segmento",
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(segments) { segment ->
+                    SegmentChatCard(segment = segment) {
+                        navController.navigate("${AppRoutes.GROUP_CHAT}/$segment")
+                    }
                 }
             }
         }
+
+        ScrollableBottomNavigation(
+            onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) },
+            onChatsClick = { /* já está na aba Chats */ },
+            onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
+            onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
+            onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
+            onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
+            onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } },
+            isClientsActive = false,
+            isChatsActive = true,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 

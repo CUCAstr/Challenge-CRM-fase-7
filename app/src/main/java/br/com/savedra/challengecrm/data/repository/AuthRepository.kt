@@ -113,6 +113,41 @@ class AuthRepository(
     }
   }
 
+  suspend fun getOperators(): List<User> {
+    // Tenta por role em PT/EN. Se vazio, faz fallback trazendo todos e filtrando != Cliente
+    val ptEnRoles = listOf("Operador", "Operator")
+    val query = firestore.collection("users")
+      .whereIn("role", ptEnRoles)
+    val snapshot = try {
+      query.get().await()
+    } catch (_: Exception) {
+      null
+    }
+
+    val docs = snapshot?.documents?.takeIf { it.isNotEmpty() } ?: run {
+      val all = firestore.collection("users").get().await()
+      all.documents.filter { (it.getString("role") ?: "") != "Cliente" }
+    }
+
+    return docs.map { document ->
+      User(
+        id = document.id,
+        name = document.getString("name") ?: "",
+        company = document.getString("company") ?: "",
+        email = document.getString("email") ?: "",
+        role = document.getString("role") ?: "",
+        segment = document.getString("segment") ?: "",
+        score = (document.getLong("score") ?: 0).toInt(),
+        status = document.getString("status") ?: "",
+        memberSince = document.getTimestamp("memberSince")?.toDate(),
+        notes = document.getString("notes") ?: "",
+        gender = document.getString("gender") ?: "",
+        phone = document.getString("phone") ?: "",
+        category = document.getString("category") ?: ""
+      )
+    }
+  }
+
   suspend fun updateUserNotes(userId: String, notes: String) {
     firestore.collection("users").document(userId)
       .update("notes", notes)
