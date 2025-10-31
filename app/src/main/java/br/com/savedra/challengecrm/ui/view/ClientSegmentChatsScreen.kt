@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import br.com.savedra.challengecrm.navigation.AppRoutes
+import AppRoutes
 
 @Composable
 fun ClientSegmentChatsScreen(

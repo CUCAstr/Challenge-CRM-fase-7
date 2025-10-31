@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import br.com.savedra.challengecrm.data.repository.AuthRepository
-import br.com.savedra.challengecrm.navigation.AppRoutes
+import AppRoutes
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
@@ -18,7 +18,7 @@ import br.com.savedra.challengecrm.model.User
 sealed class AuthUIState {
   object Idle : AuthUIState()
   object Loading : AuthUIState()
-  data class Success(val user: User?) : AuthUIState()
+  data class Success(val user: User?, val role: String?) : AuthUIState()
   data class Error(val message: String) : AuthUIState()
 }
 
@@ -54,7 +54,7 @@ class AuthViewModel : ViewModel() {
         val user = authRepository.getCurrentUserData()
         if (user != null) {
           _currentUser.value = user
-          _authUiState.value = AuthUIState.Success(user)
+          _authUiState.value = AuthUIState.Success(user, user.role)
           Log.d("AuthDebug", "performInitialAuthCheck() - User found and loaded: ${user.email}")
         } else {
           _authUiState.value = AuthUIState.Idle // Garante que o estado seja Idle se não houver usuário
@@ -137,7 +137,7 @@ class AuthViewModel : ViewModel() {
         _currentUser.value = user
         Log.d("AuthDebug", "login() - _currentUser state updated.")
 
-        _authUiState.value = AuthUIState.Success(user)
+        _authUiState.value = AuthUIState.Success(user, user?.role)
         Log.d("AuthDebug", "login() - _authUiState updated to Success.")
 
       } catch (e: Exception) {
@@ -181,7 +181,7 @@ class AuthViewModel : ViewModel() {
         )
         val user = authRepository.getCurrentUserData()
         _currentUser.value = user
-        _authUiState.value = AuthUIState.Success(user)
+        _authUiState.value = AuthUIState.Success(user, user?.role)
       } catch (e: Exception) {
         _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
       }

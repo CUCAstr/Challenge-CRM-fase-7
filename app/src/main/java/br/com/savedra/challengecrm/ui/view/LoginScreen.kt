@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import br.com.savedra.challengecrm.navigation.AppRoutes
+import AppRoutes
 import br.com.savedra.challengecrm.ui.theme.ChallengeCRMTheme
 import br.com.savedra.challengecrm.ui.theme.indigo500
 import br.com.savedra.challengecrm.ui.theme.interFamily

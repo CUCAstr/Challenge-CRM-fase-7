@@ -17,7 +17,6 @@ import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 object AppRoutes {
-  const val SPLASH = "splash"
   const val LANDING = "landing"
   const val LOGIN = "login"
   const val REGISTER = "register"
@@ -45,10 +44,7 @@ fun AppNavigation() {
   val usersViewModel: UsersViewModel = viewModel()
   val authViewModel: AuthViewModel = viewModel()
 
-  NavHost(navController = navController, startDestination = AppRoutes.SPLASH) {
-    composable(AppRoutes.SPLASH) {
-      SplashScreen(navController = navController)
-    }
+  NavHost(navController = navController, startDestination = AppRoutes.LOGIN) {
     composable(AppRoutes.LANDING) {
       LandingScreen(onAccessSystemClick = {
         navController.navigate(AppRoutes.LOGIN)

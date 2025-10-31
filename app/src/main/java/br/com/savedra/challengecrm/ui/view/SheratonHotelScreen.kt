@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.SheratonHotel
-import br.com.savedra.challengecrm.navigation.AppRoutes
+import AppRoutes
 import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
 import br.com.savedra.challengecrm.ui.view.dialogs.convertDateStringToMillis
