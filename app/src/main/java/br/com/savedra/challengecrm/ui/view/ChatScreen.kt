@@ -274,7 +274,7 @@ fun MessageInputRow(
       value = text,
       onValueChange = onTextChange,
       modifier = Modifier.weight(1f),
-      placeholder = { Text("Digite / para comandos...") },
+      placeholder = { Text("Digite sua mensagem...") },
       shape = RoundedCornerShape(24.dp)
     )
     Spacer(modifier = Modifier.width(8.dp))
