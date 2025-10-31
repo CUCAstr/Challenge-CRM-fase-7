@@ -106,6 +106,7 @@ fun AppNavigation() {
           navController.navigate(AppRoutes.BANNERS)
         },
         onLogoutClick = {
+          authViewModel.logout()
           navController.navigate(AppRoutes.LOGIN) {
             popUpTo(AppRoutes.LOGIN) { inclusive = true }
           }
@@ -168,6 +169,7 @@ fun AppNavigation() {
           navController.navigate(AppRoutes.BANNERS)
         },
         onLogoutClick = {
+          authViewModel.logout()
           navController.navigate(AppRoutes.LOGIN) {
             popUpTo(AppRoutes.LOGIN) { inclusive = true }
           }
@@ -191,6 +193,7 @@ fun AppNavigation() {
           navController.navigate(AppRoutes.BANNERS)
         },
         onLogoutClick = {
+          authViewModel.logout()
           navController.navigate(AppRoutes.LOGIN) {
             popUpTo(AppRoutes.LOGIN) { inclusive = true }
           }
@@ -237,6 +240,7 @@ fun AppNavigation() {
           navController.navigate(AppRoutes.CAMPAIGNS)
         },
         onLogoutClick = {
+          authViewModel.logout()
           navController.navigate(AppRoutes.LOGIN) {
             popUpTo(AppRoutes.LOGIN) { inclusive = true }
           }
