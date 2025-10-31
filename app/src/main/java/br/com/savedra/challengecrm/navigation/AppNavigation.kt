@@ -1,5 +1,3 @@
-package br.com.savedra.challengecrm.navigation
-
 import ChatScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState

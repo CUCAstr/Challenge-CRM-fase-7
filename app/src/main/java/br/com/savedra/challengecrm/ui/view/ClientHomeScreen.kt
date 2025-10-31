@@ -41,7 +41,6 @@ import br.com.savedra.challengecrm.model.Banner
 import br.com.savedra.challengecrm.model.Campaign
 import br.com.savedra.challengecrm.model.Invite
 import br.com.savedra.challengecrm.model.Promotion
-import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.viewmodel.BannerViewModel
 import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
