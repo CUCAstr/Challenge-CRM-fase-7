@@ -70,8 +70,7 @@ fun AppNavigation() {
         onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) },
         onChatClick = {
           navController.navigate(AppRoutes.OPERATOR_LIST)
-        },
-        navController = navController
+        }
       )
     }
     composable(AppRoutes.OPERATOR_HOME) {
@@ -140,7 +139,8 @@ fun AppNavigation() {
         onOperatorClick = { operator ->
           val currentUser = FirebaseAuth.getInstance().currentUser
           navController.navigate("${AppRoutes.CHAT}/${operator.id}/${currentUser?.uid}")
-        }
+        },
+        navController = navController
       )
     }
     composable(AppRoutes.INVITES) {

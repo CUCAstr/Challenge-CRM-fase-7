@@ -43,13 +43,22 @@ import br.com.savedra.challengecrm.ui.theme.slate800
 import br.com.savedra.challengecrm.ui.theme.white
 import br.com.savedra.challengecrm.viewmodel.UsersViewModel
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.navigation.NavController
+import AppRoutes
+
 @Composable
 fun OperatorListScreen(
   usersViewModel: UsersViewModel = viewModel(),
-  onOperatorClick: (User) -> Unit
+  onOperatorClick: (User) -> Unit,
+  navController: NavController
 ) {
   val users by usersViewModel.users.collectAsState()
   val operators = users.filter { it.role == "Operador" }
+  val segments = listOf(
+    "ED","IT","Retail & Financial","GRC","HR","Smart Spends","Health","CSC","Field Marketing","Finance","ESG","CX"
+  )
 
   Box(
     modifier = Modifier
@@ -73,6 +82,51 @@ fun OperatorListScreen(
       items(operators) { operator ->
         OperatorCard(operator = operator, onClick = { onOperatorClick(operator) })
       }
+      item {
+        Spacer(modifier = Modifier.height(16.dp))
+      }
+      item {
+        Text(
+          text = "Chats por Segmento",
+          fontSize = 28.sp,
+          fontWeight = FontWeight.Bold,
+        )
+      }
+      items(segments) { segment ->
+        SegmentCard(segment = segment) {
+          navController.navigate("${AppRoutes.GROUP_CHAT_READONLY}/$segment")
+        }
+      }
+    }
+  }
+}
+
+@Composable
+fun SegmentCard(
+  segment: String,
+  onClick: () -> Unit
+) {
+  Card(
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable { onClick() },
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+      Text(
+        text = segment,
+        style = MaterialTheme.typography.bodyLarge
+      )
+      Icon(
+        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+        contentDescription = "Abrir histórico"
+      )
     }
   }
 }
