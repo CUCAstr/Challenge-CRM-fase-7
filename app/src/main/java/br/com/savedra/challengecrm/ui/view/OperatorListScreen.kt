@@ -48,7 +48,8 @@ fun OperatorListScreen(
   usersViewModel: UsersViewModel = viewModel(),
   onOperatorClick: (User) -> Unit
 ) {
-  val operators by usersViewModel.operators.collectAsState()
+  val users by usersViewModel.users.collectAsState()
+  val operators = users.filter { it.role == "Operador" }
 
   Box(
     modifier = Modifier
