@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.data.repository
 
+import android.util.Log
 import br.com.savedra.challengecrm.model.ChatRoom
 import br.com.savedra.challengecrm.model.Message
 import com.google.firebase.Firebase
@@ -31,14 +32,23 @@ class ChatRepository {
 
     val registration = messageCollection.addSnapshotListener { snapshot, error ->
       if (error != null) {
+        Log.e("ChatRepository", "Erro em getMessages", error)
         close(error)
         return@addSnapshotListener
       }
       if (snapshot != null) {
-        val messages = snapshot.toObjects(Message::class.java).mapIndexed { index, message ->
-          message.copy(snapshot.documents[index].id)
-        }
 
+        val messages = snapshot.documents.mapNotNull { doc ->
+          try {
+
+            doc.toObject(Message::class.java)?.apply {
+              id = doc.id // Atribui o ID do documento ao 'var id'
+            }
+          } catch (e: Exception) {
+            Log.e("ChatRepository", "Erro ao converter mensagem ${doc.id}", e)
+            null
+          }
+        }
         trySend(messages)
       }
     }
@@ -53,14 +63,22 @@ class ChatRepository {
 
     val registration = messageCollection.addSnapshotListener { snapshot, error ->
       if (error != null) {
+        Log.e("ChatRepository", "Erro em getGroupMessages", error)
         close(error)
         return@addSnapshotListener
       }
       if (snapshot != null) {
-        val messages = snapshot.toObjects(Message::class.java).mapIndexed { index, message ->
-          message.copy(snapshot.documents[index].id)
+        // --- CORRIGIDO: Mapeamento do ID ---
+        val messages = snapshot.documents.mapNotNull { doc ->
+          try {
+            doc.toObject(Message::class.java)?.apply {
+              id = doc.id
+            }
+          } catch (e: Exception) {
+            Log.e("ChatRepository", "Erro ao converter mensagem de grupo ${doc.id}", e)
+            null
+          }
         }
-
         trySend(messages)
       }
     }
@@ -110,17 +128,54 @@ class ChatRepository {
 
     val registration = query.addSnapshotListener { snapshot, e ->
       if (e != null) {
+        Log.e("ChatRepository", "Erro em getChatRooms", e)
         close(e)
         return@addSnapshotListener
       }
       if (snapshot != null) {
-        val rooms = snapshot.toObjects(ChatRoom::class.java).mapIndexed { index, room ->
-          room.copy(id = snapshot.documents[index].id)
+        // --- CORRIGIDO: Mapeamento do ID (assumindo que ChatRoom também tem 'var id') ---
+        val rooms = snapshot.documents.mapNotNull { doc ->
+          try {
+            doc.toObject(ChatRoom::class.java)?.apply {
+              id = doc.id
+            }
+          } catch (e: Exception) {
+            Log.e("ChatRepository", "Erro ao converter chat room ${doc.id}", e)
+            null
+          }
         }
         trySend(rooms)
       }
     }
 
     awaitClose { registration.remove() }
+  }
+
+  suspend fun updateMessageImportance(chatRoomId: String, messageId: String, isImportant: Boolean) {
+    try {
+      val messageRef = chatCollection.document(chatRoomId)
+        .collection("messages").document(messageId)
+
+
+      messageRef.update("isImportant", isImportant).await()
+      Log.d("ChatRepository", "Mensagem $messageId atualizada: isImportant=$isImportant")
+
+    } catch (e: Exception) {
+      Log.e("ChatRepository", "Erro ao atualizar mensagem", e)
+    }
+  }
+
+
+  suspend fun deleteMessage(chatRoomId: String, messageId: String) {
+    try {
+      val messageRef = chatCollection.document(chatRoomId)
+        .collection("messages").document(messageId)
+
+      messageRef.delete().await()
+      Log.d("ChatRepository", "Mensagem $messageId apagada")
+
+    } catch (e: Exception) {
+      Log.e("ChatRepository", "Erro ao apagar mensagem", e)
+    }
   }
 }
