@@ -1,15 +1,30 @@
+# IDEs
+.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
+*.iws
+*.ipr
+.vscode/
+
+# Gradle
+.gradle/
+build/
+*/build/
+bin/
+
+# Android
+local.properties
+capture/
 .externalNativeBuild
 .cxx
-local.properties
+*.apk
+*.aar
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+ChallengeCRM/local.properties
+ChallengeBackend/.gradle/
+ChallengeBackend/build/
+apk/
