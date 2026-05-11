@@ -63,6 +63,18 @@ The source code is located in `app/src/main/java/br/com/savedra/challengecrm/` a
     - Repositories: `[Name]Repository.kt`
 - **Resources:** Use the Material 3 theme defined in `ui/theme/`.
 
+## Integrated Development Environment
+
+The project is structured as a monorepo with two main components:
+- **`ChallengeBackend`**: Spring Boot application. Best managed in IntelliJ IDEA or VS Code.
+- **`ChallengeCRM`**: Native Android application. Must be opened as a standalone project in Android Studio for full functionality (Sync, Run, Layout Preview).
+
+### Emulator Troubleshooting
+If the Android Emulator (e.g., Pixel 8) terminates immediately:
+1. **Disable Vulkan:** Create/Update `~/.android/advancedFeatures.ini` with `Vulkan = off` and `GLDirectMem = on`.
+2. **Graphics Mode:** In Device Manager, set Graphics to `Software - GLES 2.0` if hardware acceleration fails on AMD Radeon GPUs.
+3. **Lock Files:** Ensure no `.lock` files exist in the `.avd` directory before launching.
+
 ## Sprint 2: Roadmap & Objectives
 
 The focus of Sprint 2 is to replace existing mocks and direct Firebase interactions with a robust, custom backend and integrate advanced communication features.
