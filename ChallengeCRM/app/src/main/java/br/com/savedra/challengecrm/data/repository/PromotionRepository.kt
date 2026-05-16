@@ -1,25 +1,20 @@
 package br.com.savedra.challengecrm.data.repository
 
+import br.com.savedra.challengecrm.data.api.PromotionApi
 import br.com.savedra.challengecrm.model.Promotion
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 
-class PromotionRepository {
-  private val firestore = FirebaseFirestore.getInstance()
+class PromotionRepository(private val promotionApi: PromotionApi) {
 
   suspend fun sendPromotion(promotion: Promotion) {
-    firestore.collection("promotions").add(promotion).await()
+    promotionApi.createPromotion(promotion)
   }
 
   suspend fun getPromotions(userSegment: String? = null): List<Promotion> {
-    val query = if (userSegment != null) {
-        firestore.collection("promotions").whereIn("segment", listOf(userSegment, "Todos"))
+    val response = promotionApi.getPromotions(userSegment)
+    return if (response.isSuccessful) {
+        response.body() ?: emptyList()
     } else {
-        firestore.collection("promotions")
-    }
-    val result = query.get().await()
-    return result.map { document ->
-        document.toObject(Promotion::class.java)
+        emptyList()
     }
   }
 }

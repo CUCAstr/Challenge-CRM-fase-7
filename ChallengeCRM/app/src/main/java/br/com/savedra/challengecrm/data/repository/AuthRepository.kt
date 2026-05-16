@@ -1,21 +1,34 @@
 package br.com.savedra.challengecrm.data.repository
 
 import android.util.Log
+import br.com.savedra.challengecrm.data.api.AuthApi
+import br.com.savedra.challengecrm.data.api.AuthenticationRequest
+import br.com.savedra.challengecrm.data.api.RegisterRequest
+import br.com.savedra.challengecrm.data.local.TokenManager
 import br.com.savedra.challengecrm.model.User
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.userProfileChangeRequest
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class AuthRepository(
-  private val auth: FirebaseAuth,
-  private val firestore: FirebaseFirestore
+    private val authApi: AuthApi,
+    private val tokenManager: TokenManager,
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) {
   fun getCurrentUser() = auth.currentUser
 
   suspend fun login(email: String, password: String) {
-    auth.signInWithEmailAndPassword(email, password).await()
+    val response = authApi.authenticate(AuthenticationRequest(email, password))
+    if (response.isSuccessful) {
+        response.body()?.token?.let { token ->
+            tokenManager.saveToken(token)
+            // Still sync with Firebase for now if needed, or remove
+            // auth.signInWithEmailAndPassword(email, password).await()
+        }
+    } else {
+        throw Exception("Falha na autenticação: ${response.message()}")
+    }
   }
 
   suspend fun register(
@@ -29,40 +42,15 @@ class AuthRepository(
     phone: String,
     category: String
   ) {
-    val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-    val firebaseUser = authResult.user
-      ?: throw Exception("Usuário não encontrado após o cadasdtro.")
-
-    val profileUpdates = userProfileChangeRequest {
-      displayName = name
+    val request = RegisterRequest(name, email, password, role)
+    val response = authApi.register(request)
+    if (response.isSuccessful) {
+        response.body()?.token?.let { token ->
+            tokenManager.saveToken(token)
+        }
+    } else {
+        throw Exception("Falha no cadastro: ${response.message()}")
     }
-
-    firebaseUser.updateProfile(profileUpdates).await()
-
-    val userData = hashMapOf(
-      "uid" to firebaseUser.uid,
-      "email" to email,
-      "name" to name,
-      "company" to company,
-      "role" to role,
-      "segment" to segment,
-      "gender" to gender,
-      "phone" to phone,
-      "category" to category,
-      "memberSince" to FieldValue.serverTimestamp(),
-      "notes" to ""
-    )
-
-    if (role == "Cliente") {
-      userData["score"] = 0
-      userData["status"] = "Ativo"
-    }
-
-    Log.d("AuthRepository", "userData: $userData")
-
-    firestore.collection("users").document(firebaseUser.uid)
-      .set(userData)
-      .await()
   }
 
   suspend fun getUserRole(uid: String): String? {

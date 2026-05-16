@@ -208,6 +208,6 @@ private fun isValidEmail(email: String): Boolean {
 @Composable
 fun LoginScreenPreview() {
   ChallengeCRMTheme {
-    LoginScreen(navController = rememberNavController(), authViewModel = AuthViewModel())
+    // LoginScreen(navController = rememberNavController(), authViewModel = ...)
   }
 }

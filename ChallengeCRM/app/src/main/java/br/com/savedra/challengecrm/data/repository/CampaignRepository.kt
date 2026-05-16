@@ -1,25 +1,20 @@
 package br.com.savedra.challengecrm.data.repository
 
+import br.com.savedra.challengecrm.data.api.CampaignApi
 import br.com.savedra.challengecrm.model.Campaign
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
 
-class CampaignRepository {
-  private val firestore = FirebaseFirestore.getInstance()
+class CampaignRepository(private val campaignApi: CampaignApi) {
 
   suspend fun sendCampaign(campaign: Campaign) {
-    firestore.collection("campaigns").add(campaign).await()
+    campaignApi.createCampaign(campaign)
   }
 
   suspend fun getCampaigns(userSegment: String? = null): List<Campaign> {
-    val query = if (userSegment != null) {
-        firestore.collection("campaigns").whereIn("segment", listOf(userSegment, "Todos"))
+    val response = campaignApi.getCampaigns(userSegment)
+    return if (response.isSuccessful) {
+        response.body() ?: emptyList()
     } else {
-        firestore.collection("campaigns")
-    }
-    val result = query.get().await()
-    return result.map { document ->
-        document.toObject(Campaign::class.java)
+        emptyList()
     }
   }
 }

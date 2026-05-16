@@ -391,7 +391,7 @@ fun InviteItem(invite: Invite) {
         modifier = Modifier.weight(1f)
       ) {
         Text(
-          text = invite.name,
+          text = invite.title,
           fontSize = 16.sp,
           fontWeight = FontWeight.Bold,
           color = slate800

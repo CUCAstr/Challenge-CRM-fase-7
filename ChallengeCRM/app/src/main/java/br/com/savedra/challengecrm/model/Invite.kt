@@ -1,7 +1,7 @@
 package br.com.savedra.challengecrm.model
 
 data class Invite(
-  val name: String = "",
+  val title: String = "",
   val description: String = "",
   val date: String = "",
   val time: String = "",

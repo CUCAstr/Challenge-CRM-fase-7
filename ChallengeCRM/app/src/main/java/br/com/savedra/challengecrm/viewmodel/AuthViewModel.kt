@@ -1,19 +1,15 @@
 package br.com.savedra.challengecrm.viewmodel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import br.com.savedra.challengecrm.data.repository.AuthRepository
-import AppRoutes
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.firebase.firestore.firestore
+import br.com.savedra.challengecrm.di.RepositoryProvider
+import br.com.savedra.challengecrm.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
-import br.com.savedra.challengecrm.model.User
 
 sealed class AuthUIState {
   object Idle : AuthUIState()
@@ -22,15 +18,12 @@ sealed class AuthUIState {
   data class Error(val message: String) : AuthUIState()
 }
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
   private val authRepository: AuthRepository
 
   init {
     Log.d("AuthDebug", "AuthViewModel 'init' block called. Instance created.")
-    val auth = Firebase.auth
-    val firestore = Firebase.firestore
-
-    authRepository = AuthRepository(auth, firestore)
+    authRepository = RepositoryProvider.getAuthRepository(application)
   }
 
   private val _authUiState = MutableStateFlow<AuthUIState>(AuthUIState.Idle)

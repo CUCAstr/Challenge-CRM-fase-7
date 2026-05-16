@@ -1,7 +1,9 @@
 package br.com.savedra.challengecrm.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import br.com.savedra.challengecrm.data.repository.ChatRepository
+import br.com.savedra.challengecrm.di.RepositoryProvider
 import br.com.savedra.challengecrm.model.ChatRoom
 import br.com.savedra.challengecrm.model.Message
 import br.com.savedra.challengecrm.model.User
@@ -12,8 +14,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import java.util.Date
 
-class ChatViewModel : ViewModel() {
-  private val repository: ChatRepository = ChatRepository()
+class ChatViewModel(application: Application) : AndroidViewModel(application) {
+  private val repository: ChatRepository = RepositoryProvider.getChatRepository(application)
 
   private val _chatRooms = MutableStateFlow<List<ChatRoom>>(emptyList())
   val chatRooms: StateFlow<List<ChatRoom>> = _chatRooms.asStateFlow()
@@ -93,23 +95,9 @@ class ChatViewModel : ViewModel() {
     }
   }
 
-  fun markMessageAsImportant(messageId: String, isImportant: Boolean) {
-
-    val chatRoomId = currentChatRoomId ?: return
-
+  fun updateMessageStatus(messageId: String, status: String) {
     viewModelScope.launch {
-      repository.updateMessageImportance(chatRoomId, messageId, isImportant)
-    }
-  }
-
-
-  fun deleteMessage(messageId: String) {
-
-    val chatRoomId = currentChatRoomId ?: return
-
-    viewModelScope.launch {
-      repository.deleteMessage(chatRoomId, messageId)
+      repository.updateMessageStatus(messageId, status)
     }
   }
 }
-

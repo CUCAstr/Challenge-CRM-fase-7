@@ -1,18 +1,18 @@
 package br.com.savedra.challengecrm.model
 
-import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
 data class Message(
   var id: String = "",
+  var chatRoomId: String = "",
   val senderId: String = "",
   val text: String = "",
-  @ServerTimestamp
   val timestamp: Date? = null,
-  var isImportant: Boolean = false
+  var isImportant: Boolean = false,
+  var status: String = "SENT" // SENT, DELIVERED, READ, FAILED
 ) {
 
-  constructor() : this("", "", "", null, false)
+  constructor() : this("", "", "", "", null, false, "SENT")
 }
 
 data class ChatRoom(
@@ -23,10 +23,8 @@ data class ChatRoom(
   val userName: String = "",
   val participants: List<String> = emptyList(),
   val lastMessageText: String = "",
-  @ServerTimestamp
   val lastMessageTimestamp: Date? = null
 ) {
 
   constructor() : this("", "", "", "", "", emptyList(), "", null)
 }
-

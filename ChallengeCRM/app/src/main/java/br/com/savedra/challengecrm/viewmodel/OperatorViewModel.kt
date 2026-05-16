@@ -1,19 +1,18 @@
 package br.com.savedra.challengecrm.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.savedra.challengecrm.data.repository.AuthRepository
+import br.com.savedra.challengecrm.data.repository.CustomerRepository
+import br.com.savedra.challengecrm.di.RepositoryProvider
 import br.com.savedra.challengecrm.model.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class OperatorViewModel : ViewModel() {
-  private val authRepository =
-    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+class OperatorViewModel(application: Application) : AndroidViewModel(application) {
+  private val customerRepository = RepositoryProvider.getCustomerRepository(application)
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -35,8 +34,7 @@ class OperatorViewModel : ViewModel() {
 
   private fun loadCustomers() {
     viewModelScope.launch {
-      val users = authRepository.getUsers()
-      val customers = users.filter { it.role == "Cliente" }
+      val customers = customerRepository.getCustomers()
       _allCustomers.value = customers
       filterCustomers()
     }
@@ -83,9 +81,11 @@ class OperatorViewModel : ViewModel() {
 
   fun saveNotes(userId: String, notes: String) {
     viewModelScope.launch {
-      authRepository.updateUserNotes(userId, notes)
-      loadCustomers()
+      val customer = customerRepository.getCustomerById(userId)
+      if (customer != null) {
+          customerRepository.updateCustomer(userId, customer.copy(notes = notes))
+          loadCustomers()
+      }
     }
   }
-
 }

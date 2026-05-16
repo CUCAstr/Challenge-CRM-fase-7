@@ -1,23 +1,22 @@
 package br.com.savedra.challengecrm.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.savedra.challengecrm.data.repository.AuthRepository
 import br.com.savedra.challengecrm.data.repository.InviteRepository
+import br.com.savedra.challengecrm.di.RepositoryProvider
 import br.com.savedra.challengecrm.model.Invite
 import br.com.savedra.challengecrm.model.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class InviteViewModel : ViewModel() {
+class InviteViewModel(application: Application) : AndroidViewModel(application) {
 
-  private val inviteRepository = InviteRepository()
-  private val authRepository =
-    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val inviteRepository = RepositoryProvider.getInviteRepository(application)
+  private val authRepository = RepositoryProvider.getAuthRepository(application)
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -77,7 +76,7 @@ class InviteViewModel : ViewModel() {
     val query = _searchQuery.value.lowercase()
 
     val filtered = _allInvites.value.filter { invite ->
-      val nameMatches = invite.name.lowercase().contains(query)
+      val nameMatches = invite.title.lowercase().contains(query)
       nameMatches
     }
 
@@ -137,7 +136,7 @@ class InviteViewModel : ViewModel() {
 
     viewModelScope.launch {
         val invite = Invite(
-          name = _newInviteTitle.value,
+          title = _newInviteTitle.value,
           description = _newInviteDescription.value,
           date = _newInviteDate.value,
           time = _newInviteTime.value,

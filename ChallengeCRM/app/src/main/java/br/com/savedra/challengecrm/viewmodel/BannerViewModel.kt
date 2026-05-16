@@ -1,23 +1,22 @@
 package br.com.savedra.challengecrm.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.savedra.challengecrm.data.repository.AuthRepository
 import br.com.savedra.challengecrm.data.repository.BannerRepository
+import br.com.savedra.challengecrm.di.RepositoryProvider
 import br.com.savedra.challengecrm.model.Banner
 import br.com.savedra.challengecrm.model.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class BannerViewModel : ViewModel() {
+class BannerViewModel(application: Application) : AndroidViewModel(application) {
 
-  private val bannerRepository = BannerRepository()
-  private val authRepository =
-    AuthRepository(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+  private val bannerRepository = RepositoryProvider.getBannerRepository(application)
+  private val authRepository = RepositoryProvider.getAuthRepository(application)
 
   private val _searchQuery = MutableStateFlow("")
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()

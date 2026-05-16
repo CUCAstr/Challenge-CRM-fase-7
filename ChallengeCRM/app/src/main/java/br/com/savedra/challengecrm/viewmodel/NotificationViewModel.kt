@@ -1,20 +1,21 @@
 package br.com.savedra.challengecrm.viewmodel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.savedra.challengecrm.data.repository.*
-import com.google.firebase.firestore.FirebaseFirestore
+import br.com.savedra.challengecrm.di.RepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class NotificationViewModel(
-    private val bannerRepository: BannerRepository = BannerRepository(),
-    private val campaignRepository: CampaignRepository = CampaignRepository(),
-    private val inviteRepository: InviteRepository = InviteRepository(),
-    private val promotionRepository: PromotionRepository = PromotionRepository()
-) : ViewModel() {
+class NotificationViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val bannerRepository = RepositoryProvider.getBannerRepository(application)
+    private val campaignRepository = RepositoryProvider.getCampaignRepository(application)
+    private val inviteRepository = RepositoryProvider.getInviteRepository(application)
+    private val promotionRepository = RepositoryProvider.getPromotionRepository(application)
 
     private val _notificationMessage = MutableStateFlow("")
     val notificationMessage: StateFlow<String> = _notificationMessage

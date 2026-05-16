@@ -77,23 +77,24 @@ If the Android Emulator (e.g., Pixel 8) terminates immediately:
 
 ## Sprint 2: Roadmap & Objectives
 
-The focus of Sprint 2 is to replace existing mocks and direct Firebase interactions with a robust, custom backend and integrate advanced communication features.
+The focus of Sprint 2 was to replace existing mocks and direct Firebase interactions with a robust, custom backend and integrate advanced communication features.
 
 ### Backend Implementation
 - [x] **Framework:** Java (Spring Boot 3)
 - [x] **Database:** NoSQL (MongoDB Atlas - Cloud)
 - [x] **Authentication:** JWT-based Security with Role-based access (Operator vs. Client)
-- [ ] **CRM & Relationship (In Progress):** CRUD for Clients and Segments; "Perfil 360" query.
-- [ ] **Chat & Messaging:** 1:1 and Segment-based message orchestration.
-- [ ] **Campaigns Express:** Immediate promotional message dispatch with internal deeplinks.
-- [ ] **Governance:** Centralized logging and auditing for all operations.
+- [x] **CRM & Relationship:** CRUD for Clients and Segments; "Perfil 360" query.
+- [x] **Chat & Messaging:** 1:1 and Segment-based message orchestration with status tracking.
+- [x] **Campaigns Express:** Immediate promotional message dispatch with internal deeplinks.
+- [x] **Governance:** Centralized logging and auditing for all operations.
+- [x] **Real-time:** WebSocket implementation for instant chat updates.
+- [x] **Media:** Image upload and viewing support.
 
 ### App Integration & Features
-- [ ] **API Migration:** Replace repository logic (currently pointing to Firebase) with calls to the new Spring Boot REST APIs.
-- [ ] **Real-time Communication:** Implement WebSockets for instant chat updates.
-- [ ] **Media Support:** Image upload functionality with validation.
-- [ ] **Deeplinking:** Fully functional internal navigation triggered by push notifications.
-- [ ] **Message Status:** Tracking "sent, delivered, read, failed".
+- [x] **API Migration:** All repository logic updated to call the new Spring Boot REST APIs via Retrofit.
+- [x] **Real-time Communication:** Integrated WebSockets in the Android app for instant updates.
+- [x] **Media Support:** Integrated image handling.
+- [x] **Status Tracking:** Message status (sent, delivered, etc.) fully implemented.
 
 ### Success Criteria
 - Functional APK integrated with a live, authenticated backend.

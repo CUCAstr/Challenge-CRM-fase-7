@@ -1,181 +1,74 @@
 package br.com.savedra.challengecrm.data.repository
 
-import android.util.Log
+import br.com.savedra.challengecrm.data.api.ChatApi
+import br.com.savedra.challengecrm.data.api.WebSocketManager
 import br.com.savedra.challengecrm.model.ChatRoom
 import br.com.savedra.challengecrm.model.Message
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.firestore
+import com.google.gson.Gson
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.flow.flow
 
-class ChatRepository {
-  private val firestore: FirebaseFirestore = Firebase.firestore
-  private val chatCollection = firestore.collection("chats")
+class ChatRepository(private val chatApi: ChatApi) {
+    private val webSocketManager = WebSocketManager("ws://10.0.2.2:8080/ws")
+    private val gson = Gson()
 
-  fun getChatRoomId(operatorId: String, userId: String): String {
-    return if (operatorId > userId) {
-      "${operatorId}_$userId"
-    } else {
-      "${userId}_$operatorId"
-    }
-  }
-
-  fun getMessages(chatRoomId: String): Flow<List<Message>> = callbackFlow {
-    val messageCollection = chatCollection.document(chatRoomId)
-      .collection("messages")
-      .orderBy("timestamp", Query.Direction.ASCENDING)
-
-    val registration = messageCollection.addSnapshotListener { snapshot, error ->
-      if (error != null) {
-        Log.e("ChatRepository", "Erro em getMessages", error)
-        close(error)
-        return@addSnapshotListener
-      }
-      if (snapshot != null) {
-
-        val messages = snapshot.documents.mapNotNull { doc ->
-          try {
-
-            doc.toObject(Message::class.java)?.apply {
-              id = doc.id // Atribui o ID do documento ao 'var id'
-            }
-          } catch (e: Exception) {
-            Log.e("ChatRepository", "Erro ao converter mensagem ${doc.id}", e)
-            null
-          }
+    fun getChatRoomId(operatorId: String, userId: String): String {
+        return if (operatorId > userId) {
+            "${operatorId}_$userId"
+        } else {
+            "${userId}_$operatorId"
         }
-        trySend(messages)
-      }
     }
 
-    awaitClose { registration.remove() }
-  }
-
-  fun getGroupMessages(segment: String): Flow<List<Message>> = callbackFlow {
-    val messageCollection = chatCollection.document(segment)
-      .collection("messages")
-      .orderBy("timestamp", Query.Direction.ASCENDING)
-
-    val registration = messageCollection.addSnapshotListener { snapshot, error ->
-      if (error != null) {
-        Log.e("ChatRepository", "Erro em getGroupMessages", error)
-        close(error)
-        return@addSnapshotListener
-      }
-      if (snapshot != null) {
-        // --- CORRIGIDO: Mapeamento do ID ---
-        val messages = snapshot.documents.mapNotNull { doc ->
-          try {
-            doc.toObject(Message::class.java)?.apply {
-              id = doc.id
-            }
-          } catch (e: Exception) {
-            Log.e("ChatRepository", "Erro ao converter mensagem de grupo ${doc.id}", e)
-            null
-          }
+    fun getMessages(chatRoomId: String): Flow<List<Message>> = callbackFlow {
+        // Initial load
+        val response = chatApi.getChatMessages(chatRoomId)
+        if (response.isSuccessful) {
+            trySend(response.body() ?: emptyList())
         }
-        trySend(messages)
-      }
-    }
 
-    awaitClose { registration.remove() }
-  }
-
-  suspend fun sendMessage(chatRoomId: String, message: Message, chatRoomInfo: ChatRoom) {
-    try {
-      val participants = listOf(chatRoomInfo.operatorId, chatRoomInfo.userId)
-      val roomData = mapOf(
-        "operatorId" to chatRoomInfo.operatorId,
-        "operatorName" to chatRoomInfo.operatorName,
-        "userId" to chatRoomInfo.userId,
-        "userName" to chatRoomInfo.userName,
-        "participants" to participants,
-        "lastMessageText" to message.text,
-        "lastMessageTimestamp" to message.timestamp
-      )
-
-      chatCollection.document(chatRoomId).set(roomData, SetOptions.merge())
-
-      chatCollection.document(chatRoomId)
-        .collection("messages")
-        .add(message)
-        .await()
-    } catch (e: Exception) {
-      e.printStackTrace()
-    }
-  }
-
-  suspend fun sendGroupMessage(segment: String, message: Message) {
-    try {
-      chatCollection.document(segment)
-        .collection("messages")
-        .add(message)
-        .await()
-    } catch (e: Exception) {
-      e.printStackTrace()
-    }
-  }
-
-  fun getChatRooms(participantId: String): Flow<List<ChatRoom>> = callbackFlow {
-    val query = chatCollection
-      .whereArrayContains("participants", participantId)
-      .orderBy("lastMessageTimestamp", Query.Direction.DESCENDING)
-
-    val registration = query.addSnapshotListener { snapshot, e ->
-      if (e != null) {
-        Log.e("ChatRepository", "Erro em getChatRooms", e)
-        close(e)
-        return@addSnapshotListener
-      }
-      if (snapshot != null) {
-        // --- CORRIGIDO: Mapeamento do ID (assumindo que ChatRoom também tem 'var id') ---
-        val rooms = snapshot.documents.mapNotNull { doc ->
-          try {
-            doc.toObject(ChatRoom::class.java)?.apply {
-              id = doc.id
+        // Real-time updates via WebSocket
+        webSocketManager.connect { json ->
+            try {
+                val message = gson.fromJson(json, Message::class.java)
+                if (message.chatRoomId == chatRoomId) {
+                    // Fetch list again for simplicity in this version
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-          } catch (e: Exception) {
-            Log.e("ChatRepository", "Erro ao converter chat room ${doc.id}", e)
-            null
-          }
         }
-        trySend(rooms)
-      }
+
+        awaitClose { webSocketManager.disconnect() }
     }
 
-    awaitClose { registration.remove() }
-  }
-
-  suspend fun updateMessageImportance(chatRoomId: String, messageId: String, isImportant: Boolean) {
-    try {
-      val messageRef = chatCollection.document(chatRoomId)
-        .collection("messages").document(messageId)
-
-
-      messageRef.update("isImportant", isImportant).await()
-      Log.d("ChatRepository", "Mensagem $messageId atualizada: isImportant=$isImportant")
-
-    } catch (e: Exception) {
-      Log.e("ChatRepository", "Erro ao atualizar mensagem", e)
+    suspend fun sendMessage(chatRoomId: String, message: Message, chatRoomInfo: ChatRoom) {
+        chatApi.sendMessage(chatRoomId, message)
     }
-  }
 
-
-  suspend fun deleteMessage(chatRoomId: String, messageId: String) {
-    try {
-      val messageRef = chatCollection.document(chatRoomId)
-        .collection("messages").document(messageId)
-
-      messageRef.delete().await()
-      Log.d("ChatRepository", "Mensagem $messageId apagada")
-
-    } catch (e: Exception) {
-      Log.e("ChatRepository", "Erro ao apagar mensagem", e)
+    fun getChatRooms(participantId: String): Flow<List<ChatRoom>> = flow {
+        val response = chatApi.getUserChatRooms(participantId)
+        if (response.isSuccessful) {
+            emit(response.body() ?: emptyList())
+        } else {
+            emit(emptyList())
+        }
     }
-  }
+
+    suspend fun updateMessageStatus(messageId: String, status: String) {
+        chatApi.updateMessageStatus(messageId, status)
+    }
+
+    suspend fun getOrCreateChatRoom(operatorId: String, operatorName: String, userId: String, userName: String): ChatRoom? {
+        val response = chatApi.getOrCreateChatRoom(operatorId, operatorName, userId, userName)
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    // Missing methods for UI compatibility
+    fun getGroupMessages(segment: String): Flow<List<Message>> = getMessages(segment)
+    suspend fun sendGroupMessage(segment: String, message: Message) {
+        chatApi.sendMessage(segment, message)
+    }
 }

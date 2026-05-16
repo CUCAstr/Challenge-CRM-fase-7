@@ -28,4 +28,5 @@ public class User {
     private String gender;
     private String phone;
     private String category;
+    private java.util.List<String> tags;
 }

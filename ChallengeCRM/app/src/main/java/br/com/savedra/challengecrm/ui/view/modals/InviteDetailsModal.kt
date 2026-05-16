@@ -31,7 +31,7 @@ fun InviteDetailsModal(
         modifier = Modifier.padding(16.dp)
       ) {
         Text(
-          text = invite.name,
+          text = invite.title,
           fontSize = 20.sp,
           fontWeight = FontWeight.Bold,
           color = slate800
