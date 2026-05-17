@@ -1,5 +1,6 @@
-import ChatScreen
-import androidx.compose.runtime.Composable
+package br.com.savedra.challengecrm.navigation
+
+import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -8,97 +9,57 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import br.com.savedra.challengecrm.ui.view.*
-import br.com.savedra.challengecrm.viewmodel.ChatViewModel
-import br.com.savedra.challengecrm.viewmodel.OperatorViewModel
-import androidx.compose.runtime.*
+import br.com.savedra.challengecrm.viewmodel.*
 
-import br.com.savedra.challengecrm.viewmodel.UsersViewModel
-import br.com.savedra.challengecrm.viewmodel.AuthViewModel
-import com.google.firebase.auth.FirebaseAuth
-
-object AppRoutes {
-  const val LANDING = "landing"
-  const val LOGIN = "login"
-  const val REGISTER = "register"
-  const val CLIENT_HOME = "clientHome"
-  const val OPERATOR_HOME = "operatorHome"
-  const val CHAT = "chat"
-  const val INVITES = "invites"
-  const val PROMOTIONS = "promotions"
-  const val CAMPAIGNS = "campaigns"
-  const val BANNERS = "banners"
-  const val EVENTS_CENTER = "eventsCenter"
-  const val BUSINESS_CLUB = "businessClub"
-  const val SHERATON_HOTEL = "sheratonHotel"
-  const val OPERATOR_LIST = "operatorList"
-  const val SEGMENT_CHATS = "segmentChats"
-  const val GROUP_CHAT = "groupChat"
-  const val CLIENT_SEGMENT_CHATS = "client_segment_chats"
-  const val GROUP_CHAT_READONLY = "group_chat_reado"
-}
-
+/**
+ * Gerenciador de Navegação Central.
+ */
 @Composable
 fun AppNavigation() {
   val navController = rememberNavController()
   val customerViewModel: OperatorViewModel = viewModel()
   val usersViewModel: UsersViewModel = viewModel()
   val authViewModel: AuthViewModel = viewModel()
+  val currentUser by authViewModel.currentUser.collectAsState()
 
   NavHost(navController = navController, startDestination = AppRoutes.LOGIN) {
     composable(AppRoutes.LANDING) {
-      LandingScreen(onAccessSystemClick = {
-        navController.navigate(AppRoutes.LOGIN)
-      })
+      LandingScreen(onAccessSystemClick = { navController.navigate(AppRoutes.LOGIN) })
     }
     composable(AppRoutes.LOGIN) {
       LoginScreen(navController = navController, authViewModel = authViewModel)
     }
     composable(AppRoutes.REGISTER) {
-      RegisterScreen(navController = navController)
+      RegisterScreen(navController = navController, viewModel = authViewModel)
     }
     composable(AppRoutes.CLIENT_HOME) {
       ClientHomeScreen(
         authViewModel = authViewModel,
         onLogoutClick = {
           authViewModel.logout()
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
+          navController.navigate(AppRoutes.LOGIN) { 
+            popUpTo(AppRoutes.LOGIN) { inclusive = true } 
           }
         },
         onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) },
         onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) },
         onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) },
-        onChatClick = {
-          navController.navigate(AppRoutes.OPERATOR_LIST)
-        }
+        onChatClick = { navController.navigate(AppRoutes.OPERATOR_LIST) }
       )
     }
     composable(AppRoutes.OPERATOR_HOME) {
       OperatorHomeScreen(
         viewModel = customerViewModel,
-        onCustomerClick = {
-          val currentUser = FirebaseAuth.getInstance().currentUser
-          navController.navigate("${AppRoutes.CHAT}/${currentUser?.uid}/${it.id}")
-        },
-        onChatsClick = {
-          navController.navigate(AppRoutes.SEGMENT_CHATS)
-        },
-        onInvitesClick = {
-          navController.navigate(AppRoutes.INVITES)
-        },
-        onPromotionsClick = {
-          navController.navigate(AppRoutes.PROMOTIONS)
-        },
-        onCampaignsClick = {
-          navController.navigate(AppRoutes.CAMPAIGNS)
-        },
-        onBannersClick = {
-          navController.navigate(AppRoutes.BANNERS)
-        },
+        onCustomerClick = { navController.navigate("${AppRoutes.CHAT}/${currentUser?.id}/${it.id}") },
+        onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
+        onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
+        onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
+        onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
+        onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
         onLogoutClick = {
           authViewModel.logout()
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
+          navController.navigate(AppRoutes.LOGIN) { 
+            popUpTo(AppRoutes.LOGIN) { inclusive = true } 
           }
         }
       )
@@ -117,8 +78,7 @@ fun AppNavigation() {
 
       val operator = users.find { it.id == operatorId }
       val user = users.find { it.id == userId }
-      val currentSenderId = FirebaseAuth.getInstance().currentUser?.uid
-      val currentUser = users.find { it.id == currentSenderId }
+      val currentSenderId = currentUser?.id
       val currentUserRole = currentUser?.role
 
       if (operator != null && user != null && currentSenderId != null && currentUserRole != null) {
@@ -129,211 +89,88 @@ fun AppNavigation() {
           currentSenderId = currentSenderId,
           currentUserRole = currentUserRole
         )
-      } else {
-        // Handle user not found
       }
     }
     composable(AppRoutes.OPERATOR_LIST) {
       OperatorListScreen(
         usersViewModel = usersViewModel,
+        authViewModel = authViewModel,
         onOperatorClick = { operator ->
-          val currentUser = FirebaseAuth.getInstance().currentUser
-          navController.navigate("${AppRoutes.CHAT}/${operator.id}/${currentUser?.uid}")
+          navController.navigate("${AppRoutes.CHAT}/${operator.id}/${currentUser?.id}")
         },
         navController = navController
       )
     }
     composable(AppRoutes.INVITES) {
       InvitesScreen(
-        onClientsClick = {
-          navController.navigate(AppRoutes.OPERATOR_HOME) {
-            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
-          }
-        },
-        onPromotionsClick = {
-          navController.navigate(AppRoutes.PROMOTIONS)
-        },
-        onCampaignsClick = {
-          navController.navigate(AppRoutes.CAMPAIGNS)
-        },
-        onBannersClick = {
-          navController.navigate(AppRoutes.BANNERS)
-        },
-        onLogoutClick = {
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
-          }
-        }
+        onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
+        onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
+        onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
+        onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
+        onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
+        onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } }
       )
     }
     composable(AppRoutes.PROMOTIONS) {
       PromotionsScreen(
-        onClientsClick = {
-          navController.navigate(AppRoutes.OPERATOR_HOME) {
-            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
-          }
-        },
-        onInvitesClick = {
-          navController.navigate(AppRoutes.INVITES)
-        },
-        onCampaignsClick = {
-          navController.navigate(AppRoutes.CAMPAIGNS)
-        },
-        onBannersClick = {
-          navController.navigate(AppRoutes.BANNERS)
-        },
-        onLogoutClick = {
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
-          }
-        }
+        onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
+        onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
+        onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
+        onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
+        onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
+        onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } }
       )
     }
     composable(AppRoutes.CAMPAIGNS) {
       CampaignsScreen(
-        onClientsClick = {
-          navController.navigate(AppRoutes.OPERATOR_HOME) {
-            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
-          }
-        },
-        onInvitesClick = {
-          navController.navigate(AppRoutes.INVITES)
-        },
-        onPromotionsClick = {
-          navController.navigate(AppRoutes.PROMOTIONS)
-        },
-        onBannersClick = {
-          navController.navigate(AppRoutes.BANNERS)
-        },
-        onLogoutClick = {
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
-          }
-        }
+        onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
+        onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
+        onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
+        onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
+        onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
+        onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } }
       )
     }
     composable(AppRoutes.BANNERS) {
       BannersScreen(
-        onClientsClick = {
-          navController.navigate(AppRoutes.OPERATOR_HOME) {
-            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true }
-          }
-        },
-        onInvitesClick = {
-          navController.navigate(AppRoutes.INVITES)
-        },
-        onPromotionsClick = {
-          navController.navigate(AppRoutes.PROMOTIONS)
-        },
-        onCampaignsClick = {
-          navController.navigate(AppRoutes.CAMPAIGNS)
-        },
-        onLogoutClick = {
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
-          }
-        }
+        onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
+        onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
+        onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
+        onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
+        onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
+        onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } }
       )
     }
     composable(AppRoutes.EVENTS_CENTER) {
-      EventsCenterScreen(
-        navController = navController,
-        onLogoutClick = {
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
-          }
-        },
-        onInboxClick = {
-          navController.navigate(AppRoutes.CLIENT_HOME)
-        },
-        onBusinessClubClick = {
-          navController.navigate(AppRoutes.BUSINESS_CLUB)
-        },
-        onSheratonHotelClick = {
-          navController.navigate(AppRoutes.SHERATON_HOTEL)
-        }
-      )
+        EventsCenterScreen(navController = navController, onLogoutClick = { navController.navigate(AppRoutes.LOGIN) }, onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) }, onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) })
     }
     composable(AppRoutes.BUSINESS_CLUB) {
-      BusinessClubScreen(
-        navController = navController,
-        onLogoutClick = {
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
-          }
-        },
-        onInboxClick = {
-          navController.navigate(AppRoutes.CLIENT_HOME)
-        },
-        onEventsCenterClick = {
-          navController.navigate(AppRoutes.EVENTS_CENTER)
-        },
-        onSheratonHotelClick = {
-          navController.navigate(AppRoutes.SHERATON_HOTEL)
-        }
-      )
+        BusinessClubScreen(navController = navController, onLogoutClick = { navController.navigate(AppRoutes.LOGIN) }, onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) }, onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) })
     }
     composable(AppRoutes.SHERATON_HOTEL) {
-      SheratonHotelScreen(
-        navController = navController,
-        onLogoutClick = {
-          navController.navigate(AppRoutes.LOGIN) {
-            popUpTo(AppRoutes.LOGIN) { inclusive = true }
-          }
-        },
-        onInboxClick = {
-          navController.navigate(AppRoutes.CLIENT_HOME)
-        },
-        onBusinessClubClick = {
-          navController.navigate(AppRoutes.BUSINESS_CLUB)
-        },
-        onEventsCenterClick = {
-          navController.navigate(AppRoutes.EVENTS_CENTER)
-        },
-      )
+        SheratonHotelScreen(navController = navController, onLogoutClick = { navController.navigate(AppRoutes.LOGIN) }, onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) }, onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) })
     }
-    composable(AppRoutes.SEGMENT_CHATS) {
-      SegmentChatsScreen(navController = navController)
-    }
+    composable(AppRoutes.SEGMENT_CHATS) { SegmentChatsScreen(navController = navController) }
     composable(
       route = "${AppRoutes.GROUP_CHAT}/{segment}",
-      arguments = listOf(
-        navArgument("segment") { type = NavType.StringType }
-      )
+      arguments = listOf(navArgument("segment") { type = NavType.StringType })
     ) { backStackEntry ->
       val segment = backStackEntry.arguments?.getString("segment")
       val chatViewModel: ChatViewModel = viewModel()
-      val currentSenderId = FirebaseAuth.getInstance().currentUser?.uid
-
+      val currentSenderId = currentUser?.id
       if (segment != null && currentSenderId != null) {
-        GroupChatScreen(
-          viewModel = chatViewModel,
-          segment = segment,
-          currentSenderId = currentSenderId
-        )
-      } else {
-        // Handle error
+        GroupChatScreen(viewModel = chatViewModel, segment = segment, currentSenderId = currentSenderId)
       }
     }
-
     composable(
       route = "${AppRoutes.GROUP_CHAT_READONLY}/{segment}",
-      arguments = listOf(
-        navArgument("segment") { type = NavType.StringType }
-      )
+      arguments = listOf(navArgument("segment") { type = NavType.StringType })
     ) { backStackEntry ->
       val segment = backStackEntry.arguments?.getString("segment")
       val chatViewModel: ChatViewModel = viewModel()
-      val currentSenderId = FirebaseAuth.getInstance().currentUser?.uid
-
+      val currentSenderId = currentUser?.id
       if (segment != null && currentSenderId != null) {
-        GroupChatReadOnlyScreen(
-          viewModel = chatViewModel,
-          segment = segment,
-          currentSenderId = currentSenderId
-        )
-      } else {
-        // Handle error
+        GroupChatReadOnlyScreen(viewModel = chatViewModel, segment = segment, currentSenderId = currentSenderId)
       }
     }
   }

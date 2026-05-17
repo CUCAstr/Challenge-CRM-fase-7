@@ -3,17 +3,19 @@ package br.com.savedra.challengecrm.ui.view.dialogs
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import br.com.savedra.challengecrm.model.User
+import br.com.savedra.challengecrm.ui.theme.*
 
+/**
+ * Diálogo que exibe a lista de clientes filtrados para uma campanha.
+ */
 @Composable
 fun FilteredClientsDialog(
   clients: List<User>,
@@ -21,33 +23,31 @@ fun FilteredClientsDialog(
 ) {
   Dialog(onDismissRequest = onDismiss) {
     Card(
-      modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(12.dp),
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      colors = CardDefaults.cardColors(containerColor = white)
     ) {
-      Column(
-        modifier = Modifier.padding(16.dp)
-      ) {
-        Text(
-          text = "Clientes Filtrados",
-          fontWeight = FontWeight.Bold,
-        )
+      Column(modifier = Modifier.padding(16.dp)) {
+        Text(text = "Clientes Selecionados", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = slate800)
         Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(
-          modifier = Modifier.fillMaxWidth(),
-          verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        
+        LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
           items(clients) { client ->
-            Text(client.name)
+            // CORREÇÃO: Tratamento de nulo no nome do cliente
+            Text(
+              text = "• ${client.name ?: "Sem Nome"}",
+              modifier = Modifier.padding(vertical = 4.dp),
+              color = slate700
+            )
           }
         }
+        
         Spacer(modifier = Modifier.height(16.dp))
-        Row(
+        Button(
+          onClick = onDismiss,
           modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.End
+          colors = ButtonDefaults.buttonColors(containerColor = indigo500)
         ) {
-          TextButton(onClick = onDismiss) {
-            Text("Fechar")
-          }
+          Text("Entendi")
         }
       }
     }

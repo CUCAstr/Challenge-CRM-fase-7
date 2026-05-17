@@ -14,6 +14,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import java.util.Date
 
+/**
+ * ViewModel para o Chat.
+ * 
+ * CORREÇÃO: Tratamento de nulos em todos os campos de usuário para evitar crashes.
+ */
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
   private val repository: ChatRepository = RepositoryProvider.getChatRepository(application)
 
@@ -23,9 +28,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
   private val _messages = MutableStateFlow<List<Message>>(emptyList())
   val messages: StateFlow<List<Message>> = _messages.asStateFlow()
 
-
   private var currentChatRoomId: String? = null
 
+  /**
+   * Carrega salas de chat do usuário.
+   */
   fun loadChatRooms(participantId: String) {
     viewModelScope.launch {
       repository.getChatRooms(participantId).collect { rooms ->
@@ -34,6 +41,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
   }
 
+  /**
+   * Carrega mensagens entre um operador e um cliente.
+   */
   fun loadMessages(operatorId: String, userId: String) {
     val chatRoomId = repository.getChatRoomId(operatorId, userId)
     currentChatRoomId = chatRoomId
@@ -45,6 +55,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
   }
 
+  /**
+   * Carrega mensagens de um canal de segmento.
+   */
   fun loadGroupMessages(segment: String) {
     viewModelScope.launch {
       currentChatRoomId = segment
@@ -54,20 +67,21 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
   }
 
+  /**
+   * Envia uma mensagem em um canal de segmento.
+   */
   fun sendGroupMessage(text: String, senderId: String, segment: String) {
     if (text.isBlank()) return
-
-    val message = Message(
-      senderId = senderId,
-      text = text,
-      timestamp = Date()
-    )
-
-    viewModelScope.launch {
-      repository.sendGroupMessage(segment, message)
-    }
+    val message = Message(senderId = senderId, text = text, timestamp = Date())
+    viewModelScope.launch { repository.sendGroupMessage(segment, message) }
   }
 
+  /**
+   * Envia uma mensagem no chat 1:1.
+   * 
+   * CORREÇÃO: Usando Elvis operator (?: "") para garantir que campos opcionais do User
+   * não causem erro de tipo ao criar objetos do modelo de Chat.
+   */
   fun sendMessage(
     text: String,
     senderId: String,
@@ -78,16 +92,17 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     if (text.isBlank()) return
 
     val roomInfo = ChatRoom(
-      operatorId = currentOperator.id,
-      operatorName = currentOperator.name,
-      userId = currentUser.id,
-      userName = currentUser.name
+      operatorId = currentOperator.id ?: "",
+      operatorName = currentOperator.name ?: "",
+      userId = currentUser.id ?: "",
+      userName = currentUser.name ?: ""
     )
 
     val message = Message(
       senderId = senderId,
       text = text,
-      timestamp = Date()
+      timestamp = Date(),
+      chatRoomId = chatRoomId
     )
 
     viewModelScope.launch {

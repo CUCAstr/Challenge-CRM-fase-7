@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import AppRoutes
+import br.com.savedra.challengecrm.navigation.AppRoutes
 
 @Composable
 fun ClientChatEntryScreen(

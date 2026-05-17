@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Estados da interface de autenticação.
+ */
 sealed class AuthUIState {
   object Idle : AuthUIState()
   object Loading : AuthUIState()
@@ -18,6 +21,10 @@ sealed class AuthUIState {
   data class Error(val message: String) : AuthUIState()
 }
 
+/**
+ * ViewModel responsável pela lógica de Autenticação e Registro.
+ * Gerencia o estado dos campos de entrada e a comunicação com o repositório.
+ */
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
   private val authRepository: AuthRepository
 
@@ -26,41 +33,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     authRepository = RepositoryProvider.getAuthRepository(application)
   }
 
+  // --- ESTADOS DE UI (UI States) ---
   private val _authUiState = MutableStateFlow<AuthUIState>(AuthUIState.Idle)
-
   val authUiState = _authUiState.asStateFlow()
 
   private val _currentUser = MutableStateFlow<User?>(null)
   val currentUser = _currentUser.asStateFlow()
 
-  fun performInitialAuthCheck() {
-    // Se um usuário já foi carregado, não faz nada
-    if (_currentUser.value != null) {
-        Log.d("AuthDebug", "performInitialAuthCheck() - Check skipped, user already loaded.")
-        return
-    }
-
-    viewModelScope.launch {
-      try {
-        // Tenta obter os dados do usuário que já pode estar logado
-        Log.d("AuthDebug", "performInitialAuthCheck() - Attempting to get current user data.")
-        val user = authRepository.getCurrentUserData()
-        if (user != null) {
-          _currentUser.value = user
-          _authUiState.value = AuthUIState.Success(user, user.role)
-          Log.d("AuthDebug", "performInitialAuthCheck() - User found and loaded: ${user.email}")
-        } else {
-          _authUiState.value = AuthUIState.Idle // Garante que o estado seja Idle se não houver usuário
-          Log.d("AuthDebug", "performInitialAuthCheck() - No authenticated user found.")
-        }
-      } catch (e: Exception) {
-        // Erro ao buscar dados do usuário, pode ser que não esteja logado
-        Log.e("AuthDebug", "performInitialAuthCheck() - Error checking current user", e)
-        _authUiState.value = AuthUIState.Error(e.message ?: "Erro ao checar usuário")
-      }
-    }
-  }
-
+  // --- ESTADOS DE ENTRADA (Input States) ---
+  // Utilizamos MutableStateFlow para manter os dados reativos que o Compose observa.
   private val _email = MutableStateFlow("")
   val email = _email.asStateFlow()
 
@@ -82,125 +63,170 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
   private val _phone = MutableStateFlow("")
   val phone = _phone.asStateFlow()
 
-  fun onEmailChange(newEmail: String) {
-    _email.value = newEmail
-  }
+  private val _role = MutableStateFlow("Cliente")
+  val role = _role.asStateFlow()
 
-  fun onPasswordChange(newPassword: String) {
-    _password.value = newPassword
-  }
-
-  fun onNameChange(newName: String) {
-    _name.value = newName
-  }
-
-  fun onCompanyChange(newCompany: String) {
-    _company.value = newCompany
-  }
-
-  fun onSegmentChange(newSegment: String) {
-    _segment.value = newSegment
-  }
-
-  fun onGenderChange(newGender: String) {
-    _gender.value = newGender
-  }
-
-  fun onPhoneChange(newPhone: String) {
-    _phone.value = newPhone
-  }
-
-  fun login() {
-    val email = _email.value
-    val password = _password.value
-
-    if (email.isBlank() || password.isBlank()) {
-      _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
-      return
-    }
-
-    Log.d("AuthDebug", "login() - Starting login for email: $email")
-    _authUiState.value = AuthUIState.Loading
-    viewModelScope.launch {
-      try {
-        authRepository.login(email, password)
-        val user = authRepository.getCurrentUserData()
-        Log.d("AuthDebug", "login() - User data fetched: $user")
-
-        _currentUser.value = user
-        Log.d("AuthDebug", "login() - _currentUser state updated.")
-
-        _authUiState.value = AuthUIState.Success(user, user?.role)
-        Log.d("AuthDebug", "login() - _authUiState updated to Success.")
-
-      } catch (e: Exception) {
-        Log.e("AuthDebug", "login() - Error during login", e)
-        _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
-      }
-    }
-  }
-
-  fun register() {
-    val name = _name.value
-    val email = _email.value
-    val password = _password.value
-    val company = _company.value
-    val role = "Cliente"
-    val segment = _segment.value
-    val gender = _gender.value
-    val phone = _phone.value
-    val category = "Básico"
-
-    if (email.isBlank() || password.isBlank() || name.isBlank() || company.isBlank() ||
-      segment.isBlank() || gender.isBlank() || phone.isBlank()
-    ) {
-      _authUiState.value = AuthUIState.Error("Preencha todos os campos.")
-      return
-    }
-
-    _authUiState.value = AuthUIState.Loading
-    viewModelScope.launch {
-      try {
-        authRepository.register(
-          email,
-          password,
-          name,
-          company,
-          role,
-          segment,
-          gender,
-          phone,
-          category
-        )
-        val user = authRepository.getCurrentUserData()
-        _currentUser.value = user
-        _authUiState.value = AuthUIState.Success(user, user?.role)
-      } catch (e: Exception) {
-        _authUiState.value = AuthUIState.Error(e.message ?: "Erro desconhecido")
-      }
-    }
-  }
-
+  /**
+   * Reseta todos os campos de entrada e mensagens de erro.
+   * Chamado ao navegar entre Login e Cadastro para limpar dados residuais.
+   */
   fun resetUiState() {
+    Log.d("AuthDebug", "resetUiState() - Limpando campos e erros.")
+    _email.value = ""
+    _password.value = ""
+    _name.value = ""
+    _company.value = ""
+    _segment.value = ""
+    _gender.value = ""
+    _phone.value = ""
+    _role.value = "Cliente"
     _authUiState.value = AuthUIState.Idle
   }
 
-  fun logout() {
-    Log.d("AuthDebug", "logout() - Starting logout process.")
+  // --- MÉTODOS DE ATUALIZAÇÃO (Update Methods) ---
+  fun onEmailChange(newEmail: String) { _email.value = newEmail }
+  fun onPasswordChange(newPassword: String) { _password.value = newPassword }
+  fun onNameChange(newName: String) { _name.value = newName }
+  fun onCompanyChange(newCompany: String) { _company.value = newCompany }
+  fun onSegmentChange(newSegment: String) { _segment.value = newSegment }
+  fun onGenderChange(newGender: String) { _gender.value = newGender }
+  fun onPhoneChange(newPhone: String) { _phone.value = newPhone }
+  fun onRoleChange(newRole: String) { _role.value = newRole }
+
+  /**
+   * Verifica se o usuário já possui uma sessão ativa ao iniciar o app.
+   */
+  fun performInitialAuthCheck() {
+    if (_currentUser.value != null) return
+
     viewModelScope.launch {
       try {
-        // Efetua o logout no repositório (que chama o Firebase Auth)
-        authRepository.logout()
-        // Limpa o estado do usuário atual na ViewModel
-        _currentUser.value = null
-        // Reseta o estado da UI para o estado inicial
-        _authUiState.value = AuthUIState.Idle
-        Log.d("AuthDebug", "logout() - Local state cleared (_currentUser is null, _authUiState is Idle).")
+        val user = authRepository.getCurrentUserData()
+        if (user != null) {
+          val displayRole = if (user.role == "OPERATOR") "Operador" else "Cliente"
+          val updatedUser = user.copy(role = displayRole)
+          _currentUser.value = updatedUser
+          _authUiState.value = AuthUIState.Success(updatedUser, displayRole)
+        } else {
+          _authUiState.value = AuthUIState.Idle
+        }
       } catch (e: Exception) {
-        Log.e("AuthDebug", "logout() - Error during logout", e)
-        // Mesmo em caso de erro, tenta limpar o estado local
+        Log.e("AuthDebug", "Erro no check inicial", e)
+        _authUiState.value = AuthUIState.Idle
+      }
+    }
+  }
+
+  /**
+   * Realiza a autenticação no backend.
+   */
+  fun login() {
+    val emailVal = _email.value
+    val passVal = _password.value
+
+    if (emailVal.isBlank() || passVal.isBlank()) {
+      _authUiState.value = AuthUIState.Error("Email e senha são obrigatórios.")
+      return
+    }
+
+    _authUiState.value = AuthUIState.Loading
+    viewModelScope.launch {
+      try {
+        authRepository.login(emailVal, passVal)
+        val user = authRepository.getCurrentUserData()
+        
+        val displayRole = if (user?.role == "OPERATOR") "Operador" else "Cliente"
+        val updatedUser = user?.copy(role = displayRole)
+
+        _currentUser.value = updatedUser
+        _authUiState.value = AuthUIState.Success(updatedUser, displayRole)
+
+      } catch (e: Exception) {
+        Log.e("AuthDebug", "login() - Erro", e)
+        
+        // --- CORREÇÃO: EXTRAÇÃO DE MENSAGEM ---
+        // Se o servidor retornar um JSON de erro (como o status 500 que vimos),
+        // tentamos extrair apenas a mensagem amigável.
+        val rawMessage = e.message ?: "Falha na autenticação."
+        val friendlyMessage = if (rawMessage.contains("Internal Server Error")) {
+            "Erro interno no servidor. Tente novamente mais tarde."
+        } else if (rawMessage.contains("403")) {
+            "Acesso negado ou credenciais incorretas."
+        } else {
+            rawMessage
+        }
+        
+        _authUiState.value = AuthUIState.Error(friendlyMessage)
+      }
+    }
+  }
+
+  /**
+   * Realiza o cadastro de um novo usuário.
+   */
+  fun register() {
+    val nameVal = _name.value
+    val emailVal = _email.value
+    val passwordVal = _password.value
+    val companyVal = _company.value
+    val roleVal = _role.value
+    val segmentVal = _segment.value
+    val genderVal = _gender.value
+    val phoneVal = _phone.value
+    val categoryVal = "Básico"
+
+    if (emailVal.isBlank() || passwordVal.isBlank() || nameVal.isBlank()) {
+      _authUiState.value = AuthUIState.Error("Preencha Nome, Email e Senha.")
+      return
+    }
+
+    _authUiState.value = AuthUIState.Loading
+    viewModelScope.launch {
+      try {
+        val mappedRole = if (roleVal == "Operador") "OPERATOR" else "CLIENT"
+        authRepository.register(
+          emailVal, passwordVal, nameVal, companyVal, mappedRole, 
+          segmentVal, genderVal, phoneVal, categoryVal
+        )
+        
+        val user = authRepository.getCurrentUserData()
+        val displayRole = if (user?.role == "OPERATOR") "Operador" else "Cliente"
+        val updatedUser = user?.copy(role = displayRole)
+        
+        _currentUser.value = updatedUser
+        _authUiState.value = AuthUIState.Success(updatedUser, displayRole)
+      } catch (e: Exception) {
+        Log.e("AuthDebug", "register() - Erro", e)
+        
+        // --- CORREÇÃO: EXTRAÇÃO DE MENSAGEM ---
+        val rawMessage = e.message ?: "Falha no cadastro."
+        val friendlyMessage = if (rawMessage.contains("Internal Server Error")) {
+            "Erro interno no servidor. Verifique se o email já existe."
+        } else if (rawMessage.contains("403")) {
+            "Acesso negado. Tente outro email."
+        } else {
+            rawMessage
+        }
+        
+        _authUiState.value = AuthUIState.Error(friendlyMessage)
+      }
+    }
+  }
+
+  /**
+   * Encerra a sessão do usuário.
+   */
+  fun logout() {
+    viewModelScope.launch {
+      try {
+        authRepository.logout()
         _currentUser.value = null
-        _authUiState.value = AuthUIState.Error(e.message ?: "Erro ao deslogar")
+        _authUiState.value = AuthUIState.Idle
+        resetUiState()
+      } catch (e: Exception) {
+        Log.e("AuthDebug", "logout() - Erro", e)
+        _currentUser.value = null
+        _authUiState.value = AuthUIState.Idle
       }
     }
   }

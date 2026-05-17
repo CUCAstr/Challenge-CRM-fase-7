@@ -18,9 +18,10 @@ object RepositoryProvider {
     }
 
     fun getAuthRepository(context: Context): AuthRepository {
+        val tm = getTokenManager(context)
         return AuthRepository(
-            ApiClient.getAuthApi(),
-            getTokenManager(context),
+            ApiClient.getAuthApi(tm),
+            tm,
             FirebaseAuth.getInstance(),
             FirebaseFirestore.getInstance()
         )

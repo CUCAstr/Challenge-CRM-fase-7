@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.SheratonHotel
-import AppRoutes
+import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
 import br.com.savedra.challengecrm.ui.view.dialogs.convertDateStringToMillis
@@ -54,7 +54,7 @@ fun SheratonHotelScreen(
       is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Success -> {
         Toast.makeText(context, "Pedido de reserva enviada com sucesso!", Toast.LENGTH_LONG).show()
         navController.navigate(AppRoutes.CLIENT_HOME) {
-          popUpTo(AppRoutes.CLIENT_HOME) { inclusive = true }
+          popUpTo(AppRoutes.CLIENT_HOME) { this.inclusive = true }
         }
         sheratonHotelViewModel.resetUiState()
       }

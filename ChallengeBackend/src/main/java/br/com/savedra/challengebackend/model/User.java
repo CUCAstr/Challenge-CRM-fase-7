@@ -17,6 +17,7 @@ public class User {
     private String id;
     private String name;
     private String company;
+    @org.springframework.data.mongodb.core.index.Indexed(unique = true)
     private String email;
     private String password;
     private String role; // OPERATOR or CLIENT

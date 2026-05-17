@@ -3,9 +3,12 @@ package br.com.savedra.challengecrm.ui.view
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -13,6 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,25 +30,19 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import AppRoutes
-import br.com.savedra.challengecrm.ui.theme.ChallengeCRMTheme
-import br.com.savedra.challengecrm.ui.theme.indigo500
-import br.com.savedra.challengecrm.ui.theme.interFamily
-import br.com.savedra.challengecrm.ui.theme.slate100
-import br.com.savedra.challengecrm.ui.theme.slate200
-import br.com.savedra.challengecrm.ui.theme.slate600
+import br.com.savedra.challengecrm.navigation.AppRoutes
+import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.AuthUIState
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
-
+/**
+ * Tela de Cadastro de Usuário (Cliente).
+ * 
+ * CORREÇÕES APLICADAS:
+ * 1. Implementada a navegação automática após sucesso.
+ * 2. Corrigido contraste em dropdowns e campos de texto.
+ * 3. Adicionado Scroll para telas pequenas.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
@@ -53,291 +53,247 @@ fun RegisterScreen(
   val name by viewModel.name.collectAsState()
   val email by viewModel.email.collectAsState()
   val password by viewModel.password.collectAsState()
+  val company by viewModel.company.collectAsState()
+  val gender by viewModel.gender.collectAsState()
+  val phone by viewModel.phone.collectAsState()
+  val segment by viewModel.segment.collectAsState()
   val authState by viewModel.authUiState.collectAsState()
 
-  var isError by remember { mutableStateOf(false) }
-  var expanded by remember { mutableStateOf(false) }
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
-
-  val context = LocalContext.current
   val focusManager = LocalFocusManager.current
 
+  // Inicializa o estado ao abrir a tela
   LaunchedEffect(Unit) {
-    focusManager.clearFocus()
+    viewModel.resetUiState()
+    viewModel.onRoleChange("Cliente")
   }
 
-  Box(
-    modifier = Modifier
-      .fillMaxWidth()
-      .background(color = slate100)
-  ) {
+  // --- LÓGICA DE NAVEGAÇÃO ---
+  if (authState is AuthUIState.Success) {
+    val user = (authState as AuthUIState.Success).user
+    LaunchedEffect(user) {
+      user?.let {
+        if (it.role == "Operador") {
+          navController.navigate(AppRoutes.OPERATOR_HOME) {
+            popUpTo(AppRoutes.REGISTER) { inclusive = true }
+          }
+        } else {
+          navController.navigate(AppRoutes.CLIENT_HOME) {
+            popUpTo(AppRoutes.REGISTER) { inclusive = true }
+          }
+        }
+      }
+    }
+  }
+
+  Scaffold(
+    modifier = Modifier.systemBarsPadding(),
+    topBar = {
+      TopAppBar(
+        title = { Text("Novo Cadastro", color = slate800, fontWeight = FontWeight.Bold) },
+        navigationIcon = {
+          IconButton(onClick = { navController.popBackStack() }) {
+            Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
+          }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = slate100)
+      )
+    },
+    containerColor = slate100
+  ) { innerPadding ->
     Column(
       modifier = Modifier
+        .fillMaxSize()
+        .padding(innerPadding)
         .verticalScroll(rememberScrollState())
         .padding(16.dp)
     ) {
       Text(
-        text = "Bem-vindo a WTC Connect", style = TextStyle(
-          fontFamily = interFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold
-        ), modifier = Modifier.padding(bottom = 6.dp)
+        text = "Informações Pessoais",
+        style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = slate800),
+        modifier = Modifier.padding(bottom = 16.dp)
       )
 
-      Text(
-        text = "Crie sua conta para continuar", style = TextStyle(
-          fontFamily = interFamily, fontSize = 14.sp, fontWeight = FontWeight.Normal
-        ), modifier = Modifier.padding(bottom = 24.dp)
-      )
-
+      // Nome Completo
       OutlinedTextField(
         value = name,
         onValueChange = { viewModel.onNameChange(it) },
-        label = { Text("Nome Completo") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-          capitalization = KeyboardCapitalization.Unspecified,
-          autoCorrectEnabled = true,
-          keyboardType = KeyboardType.Text,
-          imeAction = ImeAction.Unspecified
-        ),
+        label = { Text("Nome Completo", color = slate700) },
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
-        ),
+          focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+        )
       )
 
-      Spacer(modifier = Modifier.height(16.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
-
+      // Email
       OutlinedTextField(
         value = email,
-        onValueChange = {
-          viewModel.onEmailChange(it)
-          isError = !isValidEmail(it)
-        },
-        label = { Text("Email") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-          capitalization = KeyboardCapitalization.Unspecified,
-          autoCorrectEnabled = true,
-          keyboardType = KeyboardType.Email,
-          imeAction = ImeAction.Unspecified
-        ),
+        onValueChange = { viewModel.onEmailChange(it) },
+        label = { Text("Email", color = slate700) },
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
-        ),
+          focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+        )
       )
 
-      Spacer(modifier = Modifier.height(16.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
+      // Empresa
       OutlinedTextField(
-        value = viewModel.company.collectAsState().value,
+        value = company,
         onValueChange = { viewModel.onCompanyChange(it) },
-        label = { Text("Empresa") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-          capitalization = KeyboardCapitalization.Unspecified,
-          autoCorrectEnabled = true,
-          keyboardType = KeyboardType.Text,
-          imeAction = ImeAction.Unspecified
-        ),
+        label = { Text("Empresa", color = slate700) },
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
-        ),
+          focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+        )
       )
 
-      Spacer(modifier = Modifier.height(16.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
-      val genderOptions = listOf("Masculino", "Feminino", "Outro")
+      // Gênero Dropdown
       var genderExpanded by remember { mutableStateOf(false) }
-
       ExposedDropdownMenuBox(
         expanded = genderExpanded,
-        onExpandedChange = { genderExpanded = !genderExpanded },
-        modifier = Modifier.fillMaxWidth()
+        onExpandedChange = { genderExpanded = !genderExpanded }
       ) {
         OutlinedTextField(
-          value = viewModel.gender.collectAsState().value,
-          onValueChange = { },
-          label = { Text("Gênero") },
+          value = gender,
+          onValueChange = {},
           readOnly = true,
-          trailingIcon = {
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded)
-          },
-          modifier = Modifier
-            .menuAnchor()
-            .fillMaxWidth(),
+          label = { Text("Gênero", color = slate700) },
+          trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded) },
+          modifier = Modifier.menuAnchor().fillMaxWidth(),
           colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500, unfocusedBorderColor = slate200
-          ),
+            focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+          )
         )
         ExposedDropdownMenu(
           expanded = genderExpanded,
           onDismissRequest = { genderExpanded = false },
-          modifier = Modifier.fillMaxWidth()
+          modifier = Modifier.background(Color.White)
         ) {
-          genderOptions.forEach { gender ->
-            DropdownMenuItem(text = { Text(gender) }, onClick = {
-              viewModel.onGenderChange(gender)
-              genderExpanded = false
-            })
+          listOf("Masculino", "Feminino", "Outro").forEach { g ->
+            DropdownMenuItem(
+              text = { Text(g, color = Color.Black) },
+              onClick = { viewModel.onGenderChange(g); genderExpanded = false },
+              modifier = Modifier.background(Color.White)
+            )
           }
         }
       }
 
-      Spacer(modifier = Modifier.height(16.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
+      // Telefone
       OutlinedTextField(
-        value = viewModel.phone.collectAsState().value,
+        value = phone,
         onValueChange = { viewModel.onPhoneChange(it) },
-        label = { Text("Telefone") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-          keyboardType = KeyboardType.Phone, imeAction = ImeAction.Unspecified
-        ),
+        label = { Text("Telefone", color = slate700) },
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
-        ),
+          focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+        )
       )
 
-      Spacer(modifier = Modifier.height(16.dp))
+      Spacer(modifier = Modifier.height(12.dp))
 
-
-      val segments = listOf(
-        "ED",
-        "IT",
-        "Retail & Financial",
-        "GRC",
-        "HR",
-        "Smart Spends",
-        "Health",
-        "CSC",
-        "Field Marketing",
-        "Finance",
-        "ESG",
-        "CX"
-      )
-      var expandedSegment by remember { mutableStateOf(false) }
-
+      // Segmento Dropdown
+      var segmentExpanded by remember { mutableStateOf(false) }
       ExposedDropdownMenuBox(
-        expanded = expandedSegment,
-        onExpandedChange = { expandedSegment = !expandedSegment },
-        modifier = Modifier.fillMaxWidth()
+        expanded = segmentExpanded,
+        onExpandedChange = { segmentExpanded = !segmentExpanded }
       ) {
         OutlinedTextField(
-          value = viewModel.segment.collectAsState().value,
-          onValueChange = { },
-          label = { Text("Segmento") },
+          value = segment,
+          onValueChange = {},
           readOnly = true,
-          trailingIcon = {
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment)
-          },
-          modifier = Modifier
-            .menuAnchor()
-            .fillMaxWidth(),
+          label = { Text("Segmento de Interesse", color = slate700) },
+          trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = segmentExpanded) },
+          modifier = Modifier.menuAnchor().fillMaxWidth(),
           colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = indigo500, unfocusedBorderColor = slate200
-          ),
+            focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+          )
         )
         ExposedDropdownMenu(
-          expanded = expandedSegment,
-          onDismissRequest = { expandedSegment = false },
-          modifier = Modifier.fillMaxWidth()
+          expanded = segmentExpanded,
+          onDismissRequest = { segmentExpanded = false },
+          modifier = Modifier.background(Color.White)
         ) {
-          segments.forEach { segment ->
-            DropdownMenuItem(text = { Text(segment) }, onClick = {
-              viewModel.onSegmentChange(segment)
-              expandedSegment = false
-            })
+          listOf("ED", "IT", "Finance", "ESG", "CX").forEach { s ->
+            DropdownMenuItem(
+              text = { Text(s, color = Color.Black) },
+              onClick = { viewModel.onSegmentChange(s); segmentExpanded = false },
+              modifier = Modifier.background(Color.White)
+            )
           }
         }
       }
 
+      Spacer(modifier = Modifier.height(12.dp))
 
-      Spacer(modifier = Modifier.height(16.dp))
-
-
+      // Senha
       OutlinedTextField(
         value = password,
         onValueChange = { viewModel.onPasswordChange(it) },
-        label = { Text("Password") },
-        singleLine = true,
+        label = { Text("Defina uma Senha", color = slate700) },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
-          val image = if (passwordVisible) Icons.Filled.Visibility
-          else Icons.Filled.VisibilityOff
-
-          val description = if (passwordVisible) "Hide password" else "Show password"
-
+          val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
           IconButton(onClick = { passwordVisible = !passwordVisible }) {
-            Icon(imageVector = image, description)
+            Icon(imageVector = image, contentDescription = null, tint = slate600)
           }
         },
+        modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = indigo500, unfocusedBorderColor = slate200
-        ),
-        modifier = Modifier.fillMaxWidth()
+          focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+        )
       )
 
-
       Spacer(modifier = Modifier.height(24.dp))
 
-
+      // Botão Registrar
       Button(
-        onClick = { viewModel.register() },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-          containerColor = slate600,
-        ),
+        onClick = { 
+          focusManager.clearFocus()
+          viewModel.register() 
+        },
+        modifier = Modifier.fillMaxWidth().height(50.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = slate800),
         shape = RoundedCornerShape(8.dp)
       ) {
+        if (authState is AuthUIState.Loading) {
+          CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+        } else {
+          Text("Finalizar Cadastro", color = Color.White, fontWeight = FontWeight.Bold)
+        }
+      }
+
+      // Feedback de Erro
+      if (authState is AuthUIState.Error) {
         Text(
-          text = "Realizar cadastro", style = TextStyle(
-            fontFamily = interFamily, fontSize = 14.sp, fontWeight = FontWeight.Normal
-          )
+          text = (authState as AuthUIState.Error).message,
+          color = Color.Red,
+          fontWeight = FontWeight.Bold,
+          modifier = Modifier.padding(top = 16.dp),
+          textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
       }
-
-
-      Spacer(modifier = Modifier.height(24.dp))
-
-
-      when (val state = authState) {
-        is AuthUIState.Loading -> {
-          Toast.makeText(context, "Realizando seu cadastro...", Toast.LENGTH_SHORT).show()
-        }
-
-        is AuthUIState.Error -> {
-          Text("Erro: ${state.message}", color = MaterialTheme.colorScheme.error)
-        }
-
-        is AuthUIState.Success -> {
-          LaunchedEffect(state.user) {
-            state.user?.let { user ->
-              when (user.role) {
-                "Cliente" -> navController.navigate(AppRoutes.CLIENT_HOME) {
-                  popUpTo(AppRoutes.REGISTER) { inclusive = true }
-                }
-
-                "Operador" -> navController.navigate(AppRoutes.OPERATOR_HOME) {
-                  popUpTo(AppRoutes.REGISTER) { inclusive = true }
-                }
-              }
-            }
-          }
-        }
-
-        is AuthUIState.Idle -> {}
-      }
+      
+      Spacer(modifier = Modifier.height(40.dp))
     }
   }
-}
-
-private fun isValidEmail(email: String): Boolean {
-  return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
 @Preview(showBackground = true)

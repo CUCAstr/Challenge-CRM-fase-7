@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.BusinessClub
-import AppRoutes
+import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.theme.slate600
 import br.com.savedra.challengecrm.ui.theme.slate800
@@ -69,7 +69,7 @@ fun BusinessClubScreen(
       is br.com.savedra.challengecrm.viewmodel.BusinessClubUIState.Success -> {
         Toast.makeText(context, "Interesse registrado com sucesso!", Toast.LENGTH_LONG).show()
         navController.navigate(AppRoutes.CLIENT_HOME) {
-          popUpTo(AppRoutes.CLIENT_HOME) { inclusive = true }
+          popUpTo(AppRoutes.CLIENT_HOME) { this.inclusive = true }
         }
         businessViewModel.resetUiState()
       }

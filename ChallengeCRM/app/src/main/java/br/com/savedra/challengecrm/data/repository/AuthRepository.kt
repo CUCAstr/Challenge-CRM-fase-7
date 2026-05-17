@@ -19,15 +19,17 @@ class AuthRepository(
   fun getCurrentUser() = auth.currentUser
 
   suspend fun login(email: String, password: String) {
+    Log.d("AuthRepo", "Tentando login para: $email")
     val response = authApi.authenticate(AuthenticationRequest(email, password))
     if (response.isSuccessful) {
+        Log.d("AuthRepo", "Login bem-sucedido via API")
         response.body()?.token?.let { token ->
             tokenManager.saveToken(token)
-            // Still sync with Firebase for now if needed, or remove
-            // auth.signInWithEmailAndPassword(email, password).await()
         }
     } else {
-        throw Exception("Falha na autenticação: ${response.message()}")
+        val errorBody = response.errorBody()?.string()
+        Log.e("AuthRepo", "FALHA NO LOGIN: Código ${response.code()}, Erro: $errorBody")
+        throw Exception("Falha na autenticação: ${errorBody ?: response.message()}")
     }
   }
 
@@ -42,63 +44,36 @@ class AuthRepository(
     phone: String,
     category: String
   ) {
-    val request = RegisterRequest(name, email, password, role)
+    Log.d("AuthRepo", "Tentando registro para: $email")
+    val request = RegisterRequest(name, email, password, role, company, segment, gender, phone, category)
     val response = authApi.register(request)
     if (response.isSuccessful) {
+        Log.d("AuthRepo", "Registro bem-sucedido via API")
         response.body()?.token?.let { token ->
             tokenManager.saveToken(token)
         }
     } else {
-        throw Exception("Falha no cadastro: ${response.message()}")
+        val errorBody = response.errorBody()?.string()
+        Log.e("AuthRepo", "FALHA NO REGISTRO: Código ${response.code()}, Erro: $errorBody")
+        throw Exception("Falha no cadastro: ${errorBody ?: response.message()}")
     }
   }
 
-  suspend fun getUserRole(uid: String): String? {
-    val document = firestore.collection("users").document(uid).get().await()
-    return document.getString("role")
-  }
-
   suspend fun getCurrentUserData(): User? {
-    val firebaseUser = auth.currentUser ?: return null
-    val document = firestore.collection("users").document(firebaseUser.uid).get().await()
-    return document.let {
-        User(
-            id = it.id,
-            name = it.getString("name") ?: "",
-            company = it.getString("company") ?: "",
-            email = it.getString("email") ?: "",
-            role = it.getString("role") ?: "",
-            segment = it.getString("segment") ?: "",
-            score = (it.getLong("score") ?: 0).toInt(),
-            status = it.getString("status") ?: "",
-            memberSince = it.getDate("memberSince"),
-            notes = it.getString("notes") ?: "",
-            gender = it.getString("gender") ?: "",
-            phone = it.getString("phone") ?: "",
-            category = it.getString("category") ?: ""
-        )
+    val token = tokenManager.getToken() ?: return null
+    val response = authApi.getMe()
+    return if (response.isSuccessful) {
+        response.body()
+    } else {
+        null
     }
   }
 
   suspend fun getUsers(): List<User> {
-    val snapshot = firestore.collection("users").get().await()
-    return snapshot.documents.map { document ->
-      User(
-        id = document.id,
-        name = document.getString("name") ?: "",
-        company = document.getString("company") ?: "",
-        email = document.getString("email") ?: "",
-        role = document.getString("role") ?: "",
-        segment = document.getString("segment") ?: "",
-        score = (document.getLong("score") ?: 0).toInt(),
-        status = document.getString("status") ?: "",
-        memberSince = document.getTimestamp("memberSince")?.toDate(),
-        notes = document.getString("notes") ?: "",
-        gender = document.getString("gender") ?: "",
-        phone = document.getString("phone") ?: "",
-        category = document.getString("category") ?: ""
-      )
-    }
+    // For now, if we don't have a specific getUsers endpoint, 
+    // we might need to add one or use the CustomerRepository if it fits.
+    // But since this is AuthRepository, let's assume we want all users.
+    return emptyList() // TODO: Implement REST endpoint for this
   }
 
   suspend fun getOperators(): List<User> {

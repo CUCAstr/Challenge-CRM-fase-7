@@ -22,6 +22,7 @@ import br.com.savedra.challengecrm.R
 import br.com.savedra.challengecrm.ui.theme.purple500
 import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.theme.slate500
+import br.com.savedra.challengecrm.ui.theme.slate800
 import br.com.savedra.challengecrm.ui.theme.white
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,12 +31,13 @@ fun LandingScreen(
   onAccessSystemClick: () -> Unit
 ) {
   Scaffold(
+    modifier = Modifier.systemBarsPadding(),
     containerColor = slate50,
     topBar = {
       TopAppBar(
-        title = { Text("WTC Connect") },
+        title = { Text("WTC Connect", color = slate800) },
         actions = {
-          Button(onClick = onAccessSystemClick) {
+          Button(onClick = onAccessSystemClick, colors = ButtonDefaults.buttonColors(containerColor = purple500)) {
             Text("Acessar sistema")
           }
         },
@@ -74,7 +76,8 @@ fun SobreNosSection() {
     Spacer(modifier = Modifier.height(16.dp))
     Text(
       "Criado há mais de 50 anos pelos irmãos Rockefellers\", o World Trade Center Association (WTC) é a maior associação de empresários e executivos do mundo, presente em mais de 300 cidades e 90 países. Integrante dessa rede desde 2007, o WTC Business Club São Paulo é um clube de negócios focado na prosperidade empresarial. Conectando empresas e executivos a oportunidade estratégicas no Brasil e no mundo promovendo parcerias e um ambiente favorável para o crescimento em um cenário dinâmico e globalizado.",
-      style = MaterialTheme.typography.bodyLarge
+      style = MaterialTheme.typography.bodyLarge,
+      color = slate800
     )
   }
 }
@@ -102,10 +105,10 @@ fun PilarItem(text: String) {
     Icon(
       imageVector = Icons.Default.Done,
       contentDescription = null,
-      tint = MaterialTheme.colorScheme.primary
+      tint = purple500
     )
     Spacer(modifier = Modifier.width(8.dp))
-    Text(text, style = MaterialTheme.typography.bodyLarge)
+    Text(text, style = MaterialTheme.typography.bodyLarge, color = slate800)
   }
 }
 
@@ -128,20 +131,20 @@ fun ClientesDestaqueSection() {
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceAround
     ) {
-      Text("Acer", fontWeight = FontWeight.Bold)
-      Text("BIC", fontWeight = FontWeight.Bold)
-      Text("ESPM", fontWeight = FontWeight.Bold)
-      Text("Lenovo", fontWeight = FontWeight.Bold)
+      Text("Acer", fontWeight = FontWeight.Bold, color = slate800)
+      Text("BIC", fontWeight = FontWeight.Bold, color = slate800)
+      Text("ESPM", fontWeight = FontWeight.Bold, color = slate800)
+      Text("Lenovo", fontWeight = FontWeight.Bold, color = slate800)
     }
     Spacer(modifier = Modifier.height(4.dp))
     Row(
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceAround
     ) {
-      Text("Sem Parar", fontWeight = FontWeight.Bold)
-      Text("Enel", fontWeight = FontWeight.Bold)
-      Text("Sabesp ", fontWeight = FontWeight.Bold)
-      Text("etc...", fontWeight = FontWeight.Bold)
+      Text("Sem Parar", fontWeight = FontWeight.Bold, color = slate800)
+      Text("Enel", fontWeight = FontWeight.Bold, color = slate800)
+      Text("Sabesp ", fontWeight = FontWeight.Bold, color = slate800)
+      Text("etc...", fontWeight = FontWeight.Bold, color = slate800)
     }
   }
 }

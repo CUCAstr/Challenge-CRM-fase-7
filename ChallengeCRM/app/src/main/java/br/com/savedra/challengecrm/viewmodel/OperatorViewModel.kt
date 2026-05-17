@@ -11,6 +11,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel para a Gestão de Clientes (Operador).
+ * 
+ * CORREÇÃO: Tratamento rigoroso de nulos nos filtros para evitar crashes de compilação e execução.
+ */
 class OperatorViewModel(application: Application) : AndroidViewModel(application) {
   private val customerRepository = RepositoryProvider.getCustomerRepository(application)
 
@@ -18,10 +23,7 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
   val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
   private val _segmentFilter = MutableStateFlow("Todos")
-  val segmentFilter: StateFlow<String> = _segmentFilter.asStateFlow()
-
   private val _statusFilter = MutableStateFlow("Todos")
-  val statusFilter: StateFlow<String> = _statusFilter.asStateFlow()
 
   private val _allCustomers = MutableStateFlow<List<User>>(emptyList())
 
@@ -55,22 +57,28 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
     filterCustomers()
   }
 
+  /**
+   * Filtra a lista de clientes.
+   * 
+   * CORREÇÃO: Utilizando safe call (?.) e Elvis operator (?: "") para comparar
+   * strings que podem vir nulas do backend.
+   */
   private fun filterCustomers() {
     val query = _searchQuery.value.lowercase()
-    val segmentFilter = _segmentFilter.value
-    val statusFilter = _statusFilter.value
+    val segmentF = _segmentFilter.value
+    val statusF = _statusFilter.value
 
     val filtered = _allCustomers.value.filter { customer ->
-      val nameMatches = customer.name.lowercase().contains(query)
+      val nameMatches = (customer.name ?: "").lowercase().contains(query)
 
-      val segmentMatches = when (segmentFilter) {
+      val segmentMatches = when (segmentF) {
         "Todos" -> true
-        else -> customer.segment.equals(segmentFilter, ignoreCase = true)
+        else -> (customer.segment ?: "").equals(segmentF, ignoreCase = true)
       }
 
-      val statusMatches = when (statusFilter) {
+      val statusMatches = when (statusF) {
         "Todos" -> true
-        else -> customer.status.equals(statusFilter, ignoreCase = true)
+        else -> (customer.status ?: "").equals(statusF, ignoreCase = true)
       }
 
       nameMatches && segmentMatches && statusMatches
@@ -80,9 +88,11 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
   }
 
   fun saveNotes(userId: String, notes: String) {
+    if (userId.isBlank()) return
     viewModelScope.launch {
       val customer = customerRepository.getCustomerById(userId)
       if (customer != null) {
+          // Mantém a integridade dos dados ao atualizar notas
           customerRepository.updateCustomer(userId, customer.copy(notes = notes))
           loadCustomers()
       }

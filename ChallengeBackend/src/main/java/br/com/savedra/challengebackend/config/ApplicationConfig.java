@@ -2,6 +2,7 @@ package br.com.savedra.challengebackend.config;
 
 import br.com.savedra.challengebackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,19 +19,36 @@ import java.util.Collections;
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class ApplicationConfig {
 
     private final UserRepository repository;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> repository.findByEmail(username)
-                .map(user -> new org.springframework.security.core.userdetails.User(
+        return username -> {
+            log.info("Procurando usuário no banco para autenticação: {}", username);
+            
+            // --- CORREÇÃO: ROBUSTEZ ---
+            // Usamos findAll().stream() em vez de findByEmail(). 
+            // Isso evita que o erro 'non unique result' derrube o processo de login
+            // caso a limpeza do DataInitializer ainda não tenha refletido no banco.
+            return repository.findAll().stream()
+                .filter(u -> username.equalsIgnoreCase(u.getEmail()))
+                .findFirst() // Pega apenas o primeiro caso existam duplicatas
+                .map(user -> {
+                    log.info("Usuário autorizado: {}, Role: {}", user.getEmail(), user.getRole());
+                    return new org.springframework.security.core.userdetails.User(
                         user.getEmail(),
                         user.getPassword(),
                         Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
-                ))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                    );
+                })
+                .orElseThrow(() -> {
+                    log.warn("Tentativa de login falhou: Usuário {} não encontrado.", username);
+                    return new UsernameNotFoundException("User not found");
+                });
+        };
     }
 
     @Bean

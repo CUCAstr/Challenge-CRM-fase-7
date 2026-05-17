@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.EventsCenter
-import AppRoutes
+import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.slate50
 import br.com.savedra.challengecrm.ui.theme.slate600
 import br.com.savedra.challengecrm.ui.theme.slate800
@@ -74,7 +74,7 @@ fun EventsCenterScreen(
       is br.com.savedra.challengecrm.viewmodel.EventUIState.Success -> {
         Toast.makeText(context, "Orçamento solicitado com sucesso!", Toast.LENGTH_LONG).show()
         navController.navigate(AppRoutes.CLIENT_HOME) {
-          popUpTo(AppRoutes.CLIENT_HOME) { inclusive = true }
+          popUpTo(AppRoutes.CLIENT_HOME) { this.inclusive = true }
         }
         eventViewModel.resetUiState()
       }
