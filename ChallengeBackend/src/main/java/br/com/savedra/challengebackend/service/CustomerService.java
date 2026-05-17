@@ -18,6 +18,10 @@ public class CustomerService {
         return userRepository.findByRole("CLIENT");
     }
 
+    public List<User> getEveryUser() {
+        return userRepository.findAll();
+    }
+
     public List<User> getCustomersBySegment(String segment) {
         return userRepository.findByRoleAndSegment("CLIENT", segment);
     }

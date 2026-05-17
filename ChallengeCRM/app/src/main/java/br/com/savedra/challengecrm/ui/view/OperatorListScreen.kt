@@ -25,6 +25,7 @@ import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.UsersViewModel
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.navigation.NavController
@@ -52,8 +53,24 @@ fun OperatorListScreen(
 
   var showCreateOperatorModal by remember { mutableStateOf(false) }
 
+  // --- CORREÇÃO: RECARREGAR DADOS ---
+  LaunchedEffect(Unit) {
+    usersViewModel.loadUsers()
+  }
+
   Scaffold(
     modifier = Modifier.systemBarsPadding(),
+    topBar = {
+        TopAppBar(
+            title = { Text("Operadores e Canais", color = slate800, fontWeight = FontWeight.Bold) },
+            navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = white)
+        )
+    },
     containerColor = slate200,
     floatingActionButton = {
       // Apenas operadores podem criar novos operadores

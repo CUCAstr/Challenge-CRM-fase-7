@@ -22,10 +22,64 @@ import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.TransformedText
+
+/**
+ * Máscara para Data (DD/MM/AAAA)
+ */
+class DateTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val out = StringBuilder()
+        for (i in text.indices) {
+            out.append(text[i])
+            if (i == 1 || i == 3) out.append("/")
+        }
+        val numberOffsetTranslator = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                if (offset <= 1) return offset
+                if (offset <= 3) return offset + 1
+                return offset + 2
+            }
+            override fun transformedToOriginal(offset: Int): Int {
+                if (offset <= 2) return offset
+                if (offset <= 5) return offset - 1
+                return offset - 2
+            }
+        }
+        return TransformedText(AnnotatedString(out.toString()), numberOffsetTranslator)
+    }
+}
+
+/**
+ * Máscara para Hora (HH:MM)
+ */
+class TimeTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val out = StringBuilder()
+        for (i in text.indices) {
+            out.append(text[i])
+            if (i == 1) out.append(":")
+        }
+        val numberOffsetTranslator = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                if (offset <= 1) return offset
+                return offset + 1
+            }
+            override fun transformedToOriginal(offset: Int): Int {
+                if (offset <= 2) return offset
+                if (offset > 2) return offset - 1
+                return offset
+            }
+        }
+        return TransformedText(AnnotatedString(out.toString()), numberOffsetTranslator)
+    }
+}
+
 /**
  * Modal para criação de novos convites.
- * 
- * CORREÇÃO: Adicionado o cabeçalho 'package' faltante para que o projeto reconheça o arquivo.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,8 +94,6 @@ fun CreateInviteModal(
   val newInviteTime by viewModel.newInviteTime.collectAsState()
 
   val segmentFilter by viewModel.segmentFilter.collectAsState()
-  val filteredClients by viewModel.filteredClients.collectAsState()
-
   val showError by viewModel.showError.collectAsState()
 
   Dialog(onDismissRequest = onDismiss) {
@@ -75,7 +127,7 @@ fun CreateInviteModal(
             OutlinedTextField(
               value = newInviteTitle,
               onValueChange = { viewModel.onNewInviteTitleChange(it) },
-              label = { Text("Título") },
+              label = { Text("Nome do Evento") },
               modifier = Modifier.fillMaxWidth(),
               colors = OutlinedTextFieldDefaults.colors(
                   focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
@@ -87,7 +139,7 @@ fun CreateInviteModal(
             OutlinedTextField(
               value = newInviteDescription,
               onValueChange = { viewModel.onNewInviteDescriptionChange(it) },
-              label = { Text("Descrição") },
+              label = { Text("Descrição Detalhada") },
               modifier = Modifier.fillMaxWidth(),
               colors = OutlinedTextFieldDefaults.colors(
                   focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
@@ -98,8 +150,10 @@ fun CreateInviteModal(
           item {
             OutlinedTextField(
               value = newInviteDate,
-              onValueChange = { viewModel.onNewInviteDateChange(it) },
-              label = { Text("Data (Ex: 30/10)") },
+              onValueChange = { if (it.length <= 8) viewModel.onNewInviteDateChange(it) },
+              label = { Text("Data do Evento (DDMMYYYY)") },
+              visualTransformation = DateTransformation(),
+              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
               modifier = Modifier.fillMaxWidth(),
               colors = OutlinedTextFieldDefaults.colors(
                   focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
@@ -110,8 +164,10 @@ fun CreateInviteModal(
           item {
             OutlinedTextField(
               value = newInviteTime,
-              onValueChange = { viewModel.onNewInviteTimeChange(it) },
-              label = { Text("Hora") },
+              onValueChange = { if (it.length <= 4) viewModel.onNewInviteTimeChange(it) },
+              label = { Text("Hora do Evento (HHMM)") },
+              visualTransformation = TimeTransformation(),
+              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
               modifier = Modifier.fillMaxWidth(),
               colors = OutlinedTextFieldDefaults.colors(
                   focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
@@ -123,7 +179,7 @@ fun CreateInviteModal(
             OutlinedTextField(
               value = newInviteLocation,
               onValueChange = { viewModel.onNewInviteLocationChange(it) },
-              label = { Text("Local") },
+              label = { Text("Localização") },
               modifier = Modifier.fillMaxWidth(),
               colors = OutlinedTextFieldDefaults.colors(
                   focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
@@ -155,7 +211,7 @@ fun CreateInviteModal(
               )
               ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 segments.forEach { seg ->
-                  DropdownMenuItem(text = { Text(seg) }, onClick = {
+                  DropdownMenuItem(text = { Text(seg, color = Color.Black) }, onClick = {
                     viewModel.onSegmentFilterChange(seg)
                     expanded = false
                   })

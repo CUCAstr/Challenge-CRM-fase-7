@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -49,21 +50,15 @@ fun TimePickerField(
       readOnly = true,
       label = { Text(label) },
       trailingIcon = {
-        Icon(
-          imageVector = Icons.Default.AccessTime,
-          contentDescription = "Abrir seletor de tempo"
-        )
+        IconButton(onClick = { showDialog = true }) { // CORREÇÃO: Gatilho apenas no ícone
+          Icon(
+            imageVector = Icons.Default.AccessTime,
+            contentDescription = "Abrir seletor de tempo"
+          )
+        }
       }
     )
-    Box(
-      modifier = Modifier
-          .matchParentSize()
-          .clickable(
-              interactionSource = remember { MutableInteractionSource() },
-              indication = null,
-              onClick = { showDialog = true }
-          )
-    )
+    // REMOVIDO: O Box que cobria todo o campo.
   }
 
   if (showDialog) {

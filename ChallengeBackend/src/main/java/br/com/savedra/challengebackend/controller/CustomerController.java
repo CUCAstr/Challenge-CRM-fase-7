@@ -15,6 +15,11 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getEveryUser() {
+        return ResponseEntity.ok(customerService.getEveryUser());
+    }
+
     @GetMapping
     public ResponseEntity<List<User>> getAllCustomers(
             @RequestParam(required = false) String segment

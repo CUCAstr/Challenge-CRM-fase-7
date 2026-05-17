@@ -20,7 +20,11 @@ class UsersViewModel(application: Application) : AndroidViewModel(application) {
     loadUsers()
   }
 
-  private fun loadUsers() {
+  /**
+   * Carrega todos os usuários do sistema via repositório.
+   * Tornada pública para permitir recarregamento manual pela UI.
+   */
+  fun loadUsers() {
     viewModelScope.launch {
       _users.value = authRepository.getUsers()
     }

@@ -5,6 +5,9 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface CustomerApi {
+    @GET("api/v1/customers/all")
+    suspend fun getAllUsers(): Response<List<User>>
+
     @GET("api/v1/customers")
     suspend fun getAllCustomers(@Query("segment") segment: String? = null): Response<List<User>>
 

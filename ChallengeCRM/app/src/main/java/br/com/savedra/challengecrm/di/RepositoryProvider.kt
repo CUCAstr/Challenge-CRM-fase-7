@@ -21,9 +21,8 @@ object RepositoryProvider {
         val tm = getTokenManager(context)
         return AuthRepository(
             ApiClient.getAuthApi(tm),
-            tm,
-            FirebaseAuth.getInstance(),
-            FirebaseFirestore.getInstance()
+            ApiClient.getApi(CustomerApi::class.java, tm), // Injeta a API de Clientes para busca de usuários
+            tm
         )
     }
 

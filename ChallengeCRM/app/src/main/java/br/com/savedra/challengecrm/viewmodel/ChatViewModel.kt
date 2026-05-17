@@ -1,6 +1,7 @@
 package br.com.savedra.challengecrm.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import br.com.savedra.challengecrm.data.repository.ChatRepository
 import br.com.savedra.challengecrm.di.RepositoryProvider
@@ -72,8 +73,16 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
    */
   fun sendGroupMessage(text: String, senderId: String, segment: String) {
     if (text.isBlank()) return
-    val message = Message(senderId = senderId, text = text, timestamp = Date())
-    viewModelScope.launch { repository.sendGroupMessage(segment, message) }
+    val message = Message(senderId = senderId, text = text, timestamp = Date(), chatRoomId = segment)
+    viewModelScope.launch { 
+        try {
+            repository.sendGroupMessage(segment, message) 
+            // --- CORREÇÃO: ATUALIZAÇÃO INSTANTÂNEA ---
+            _messages.value = _messages.value + message
+        } catch (e: Exception) {
+            Log.e("ChatViewModel", "Erro ao enviar msg de grupo", e)
+        }
+    }
   }
 
   /**
@@ -106,7 +115,13 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     viewModelScope.launch {
-      repository.sendMessage(chatRoomId, message, roomInfo)
+      try {
+        repository.sendMessage(chatRoomId, message, roomInfo)
+        // --- CORREÇÃO: ATUALIZAÇÃO INSTANTÂNEA ---
+        _messages.value = _messages.value + message
+      } catch (e: Exception) {
+        Log.e("ChatViewModel", "Erro ao enviar msg 1:1", e)
+      }
     }
   }
 

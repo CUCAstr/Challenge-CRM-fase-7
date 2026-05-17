@@ -3,21 +3,23 @@ package br.com.savedra.challengecrm.data.repository
 import android.util.Log
 import br.com.savedra.challengecrm.data.api.AuthApi
 import br.com.savedra.challengecrm.data.api.AuthenticationRequest
+import br.com.savedra.challengecrm.data.api.CustomerApi
 import br.com.savedra.challengecrm.data.api.RegisterRequest
 import br.com.savedra.challengecrm.data.local.TokenManager
 import br.com.savedra.challengecrm.model.User
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
+/**
+ * Repositório central para autenticação e gestão de usuários.
+ */
 class AuthRepository(
     private val authApi: AuthApi,
-    private val tokenManager: TokenManager,
-    private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val customerApi: CustomerApi, // Adicionado para buscar lista de usuários
+    private val tokenManager: TokenManager
 ) {
-  fun getCurrentUser() = auth.currentUser
-
+  /**
+   * Realiza login e armazena o token JWT.
+   */
   suspend fun login(email: String, password: String) {
     Log.d("AuthRepo", "Tentando login para: $email")
     val response = authApi.authenticate(AuthenticationRequest(email, password))
@@ -33,6 +35,9 @@ class AuthRepository(
     }
   }
 
+  /**
+   * Realiza o registro de um novo usuário.
+   */
   suspend fun register(
     email: String,
     password: String,
@@ -59,6 +64,9 @@ class AuthRepository(
     }
   }
 
+  /**
+   * Retorna os dados do usuário atualmente logado.
+   */
   suspend fun getCurrentUserData(): User? {
     val token = tokenManager.getToken() ?: return null
     val response = authApi.getMe()
@@ -69,55 +77,29 @@ class AuthRepository(
     }
   }
 
+  /**
+   * Retorna TODOS os usuários do sistema.
+   * Resolvido bug do "Ghost Registration": agora busca do endpoint real /all.
+   */
   suspend fun getUsers(): List<User> {
-    // For now, if we don't have a specific getUsers endpoint, 
-    // we might need to add one or use the CustomerRepository if it fits.
-    // But since this is AuthRepository, let's assume we want all users.
-    return emptyList() // TODO: Implement REST endpoint for this
+    val response = customerApi.getAllUsers()
+    return if (response.isSuccessful) {
+        response.body() ?: emptyList()
+    } else {
+        Log.e("AuthRepo", "Erro ao buscar todos os usuários: ${response.code()}")
+        emptyList()
+    }
   }
 
+  /**
+   * Retorna apenas os usuários com cargo de OPERATOR.
+   */
   suspend fun getOperators(): List<User> {
-    // Tenta por role em PT/EN. Se vazio, faz fallback trazendo todos e filtrando != Cliente
-    val ptEnRoles = listOf("Operador", "Operator")
-    val query = firestore.collection("users")
-      .whereIn("role", ptEnRoles)
-    val snapshot = try {
-      query.get().await()
-    } catch (_: Exception) {
-      null
-    }
-
-    val docs = snapshot?.documents?.takeIf { it.isNotEmpty() } ?: run {
-      val all = firestore.collection("users").get().await()
-      all.documents.filter { (it.getString("role") ?: "") != "Cliente" }
-    }
-
-    return docs.map { document ->
-      User(
-        id = document.id,
-        name = document.getString("name") ?: "",
-        company = document.getString("company") ?: "",
-        email = document.getString("email") ?: "",
-        role = document.getString("role") ?: "",
-        segment = document.getString("segment") ?: "",
-        score = (document.getLong("score") ?: 0).toInt(),
-        status = document.getString("status") ?: "",
-        memberSince = document.getTimestamp("memberSince")?.toDate(),
-        notes = document.getString("notes") ?: "",
-        gender = document.getString("gender") ?: "",
-        phone = document.getString("phone") ?: "",
-        category = document.getString("category") ?: ""
-      )
-    }
-  }
-
-  suspend fun updateUserNotes(userId: String, notes: String) {
-    firestore.collection("users").document(userId)
-      .update("notes", notes)
-      .await()
+    val allUsers = getUsers()
+    return allUsers.filter { it.role == "OPERATOR" || it.role == "Operador" }
   }
 
   fun logout() {
-    auth.signOut()
+    tokenManager.clearToken()
   }
 }

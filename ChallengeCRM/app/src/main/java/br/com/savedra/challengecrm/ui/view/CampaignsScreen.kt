@@ -42,7 +42,11 @@ fun CampaignsScreen(
   var showCreateCampaignModal by remember { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
 
-  LaunchedEffect(Unit) { focusManager.clearFocus() }
+  // --- CORREÇÃO: RECARREGAR DADOS ---
+  LaunchedEffect(Unit) {
+    focusManager.clearFocus()
+    viewModel.loadCampaigns()
+  }
 
   Scaffold(
     modifier = Modifier.systemBarsPadding(),

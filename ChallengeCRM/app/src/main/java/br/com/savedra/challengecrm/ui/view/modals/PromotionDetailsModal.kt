@@ -9,15 +9,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import br.com.savedra.challengecrm.model.Invite
+import br.com.savedra.challengecrm.model.Promotion
 import br.com.savedra.challengecrm.ui.theme.*
 
 /**
- * Modal de Detalhes do Convite.
+ * Modal de Detalhes da Promoção.
  */
 @Composable
-fun InviteDetailsModal(
-    invite: Invite,
+fun PromotionDetailsModal(
+    promotion: Promotion,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -28,20 +28,26 @@ fun InviteDetailsModal(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = invite.title,
+                    text = promotion.title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = slate800
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = invite.description, fontSize = 16.sp, color = slate700)
+                Text(text = promotion.description, fontSize = 16.sp, color = slate700)
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                DetailItem("Data", invite.date)
-                DetailItem("Hora", invite.time)
-                DetailItem("Local", invite.location)
-                DetailItem("Segmento", invite.segment)
+                Row {
+                    Text(text = "De: ", color = slate600)
+                    Text(text = "R$ ${promotion.originalValue}", style = androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Por: R$ ${promotion.promotionValue}", color = green500, fontWeight = FontWeight.Bold)
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Expira em: ${promotion.dateExpiresIn} às ${promotion.hoursExpiresIn}", fontSize = 14.sp, color = slate600)
+                Text(text = "Segmento: ${promotion.segment}", fontSize = 14.sp, color = slate600)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -55,13 +61,5 @@ fun InviteDetailsModal(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun DetailItem(label: String, value: String) {
-    Row(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(text = "$label: ", fontWeight = FontWeight.Bold, color = slate800, fontSize = 14.sp)
-        Text(text = value, color = slate600, fontSize = 14.sp)
     }
 }

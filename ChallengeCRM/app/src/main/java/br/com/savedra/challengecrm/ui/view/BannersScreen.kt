@@ -53,7 +53,11 @@ fun BannersScreen(
   var showCreateBannerModal by remember { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
 
-  LaunchedEffect(Unit) { focusManager.clearFocus() }
+  // --- CORREÇÃO: RECARREGAR DADOS ---
+  LaunchedEffect(Unit) {
+    focusManager.clearFocus()
+    viewModel.loadBanners()
+  }
 
   Scaffold(
     modifier = Modifier.systemBarsPadding(),

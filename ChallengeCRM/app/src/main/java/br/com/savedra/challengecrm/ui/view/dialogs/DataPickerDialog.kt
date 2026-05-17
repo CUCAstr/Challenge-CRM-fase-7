@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SelectableDates
@@ -59,26 +60,20 @@ fun DatePickerField(
   Box(modifier = modifier) {
     OutlinedTextField(
       value = dateString,
-      onValueChange = { },
+      onValueChange = { /* Permite edição manual se desejar, ou mantém readOnly */ },
       modifier = Modifier.fillMaxWidth(),
-      readOnly = true,
+      readOnly = true, // Mantemos readOnly por segurança de formato, mas o gatilho muda
       label = { Text(label) },
       trailingIcon = {
-        Icon(
-          imageVector = Icons.Default.DateRange,
-          contentDescription = "Abrir calendário"
-        )
+        IconButton(onClick = { showDialog = true }) { // CORREÇÃO: Gatilho apenas no ícone
+          Icon(
+            imageVector = Icons.Default.DateRange,
+            contentDescription = "Abrir calendário"
+          )
+        }
       }
     )
-    Box(
-      modifier = Modifier
-        .matchParentSize()
-        .clickable(
-          interactionSource = remember { MutableInteractionSource() },
-          indication = null,
-          onClick = { showDialog = true }
-        )
-    )
+    // REMOVIDO: O Box que cobria todo o campo e disparava o clique.
   }
 
   if (showDialog) {

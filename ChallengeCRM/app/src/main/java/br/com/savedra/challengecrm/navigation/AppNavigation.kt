@@ -150,7 +150,20 @@ fun AppNavigation() {
     composable(AppRoutes.SHERATON_HOTEL) {
         SheratonHotelScreen(navController = navController, onLogoutClick = { navController.navigate(AppRoutes.LOGIN) }, onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) }, onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) })
     }
-    composable(AppRoutes.SEGMENT_CHATS) { SegmentChatsScreen(navController = navController) }
+    composable(AppRoutes.SEGMENT_CHATS) { 
+      SegmentChatsScreen(
+        navController = navController,
+        onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
+        onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
+        onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
+        onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
+        onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
+        onLogoutClick = {
+          authViewModel.logout()
+          navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } }
+        }
+      ) 
+    }
     composable(
       route = "${AppRoutes.GROUP_CHAT}/{segment}",
       arguments = listOf(navArgument("segment") { type = NavType.StringType })
