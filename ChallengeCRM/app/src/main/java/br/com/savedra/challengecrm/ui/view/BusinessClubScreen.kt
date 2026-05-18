@@ -2,35 +2,24 @@ package br.com.savedra.challengecrm.ui.view
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,11 +27,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.BusinessClub
 import br.com.savedra.challengecrm.navigation.AppRoutes
-import br.com.savedra.challengecrm.ui.theme.slate50
-import br.com.savedra.challengecrm.ui.theme.slate600
-import br.com.savedra.challengecrm.ui.theme.slate800
+import br.com.savedra.challengecrm.ui.theme.*
+import br.com.savedra.challengecrm.viewmodel.BusinessClubUIState
 import br.com.savedra.challengecrm.viewmodel.BusinessClubViewModel
 
+/**
+ * Tela de Solicitação de Orçamento para Business Club.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BusinessClubScreen(
   navController: NavController,
@@ -50,141 +42,108 @@ fun BusinessClubScreen(
   onInboxClick: () -> Unit,
   onEventsCenterClick: () -> Unit,
   onSheratonHotelClick: () -> Unit,
-  businessViewModel: BusinessClubViewModel = viewModel()
+  viewModel: BusinessClubViewModel = viewModel()
 ) {
   var reason by remember { mutableStateOf("") }
-  val internalPartnersContact = remember { mutableStateOf<Boolean?>(null) }
+  var internalPartnersContact by remember { mutableStateOf(false) }
 
-  val businessUiState by businessViewModel.businessUiState.collectAsState()
+  val uiState by viewModel.businessUiState.collectAsState()
   val context = LocalContext.current
-
   val focusManager = LocalFocusManager.current
 
-  LaunchedEffect(Unit) {
-    focusManager.clearFocus()
-  }
-
-  LaunchedEffect(businessUiState) {
-    when (businessUiState) {
-      is br.com.savedra.challengecrm.viewmodel.BusinessClubUIState.Success -> {
-        Toast.makeText(context, "Interesse registrado com sucesso!", Toast.LENGTH_LONG).show()
-        navController.navigate(AppRoutes.CLIENT_HOME) {
-          popUpTo(AppRoutes.CLIENT_HOME) { this.inclusive = true }
-        }
-        businessViewModel.resetUiState()
-      }
-
-      else -> {}
+  LaunchedEffect(uiState) {
+    if (uiState is BusinessClubUIState.Success) {
+      Toast.makeText(context, "Solicitação enviada com sucesso!", Toast.LENGTH_LONG).show()
+      navController.navigate(AppRoutes.CLIENT_HOME) { popUpTo(AppRoutes.CLIENT_HOME) { this.inclusive = true } }
+      viewModel.resetUiState()
     }
   }
 
-  Box(
-    modifier = Modifier
-        .fillMaxSize()
-        .background(slate50)
-  ) {
+  Scaffold(
+    modifier = Modifier.systemBarsPadding(),
+    containerColor = slate50,
+    topBar = {
+        TopAppBar(
+            title = { Text("Business Club", color = slate800, fontWeight = FontWeight.Bold) },
+            navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = white)
+        )
+    },
+    bottomBar = {
+        BottomNavigationClient(
+            onInboxClick = onInboxClick,
+            onLogoutClick = onLogoutClick,
+            isInboxActive = false,
+            isEventsCenterActive = false,
+            isBusinessClubActive = true,
+            isSheratonHotelActive = false,
+            onEventsCenterClick = onEventsCenterClick,
+            onBusinessClubClick = { },
+            onSheratonHotelClick = onSheratonHotelClick
+        )
+    }
+  ) { innerPadding ->
     Column(
       modifier = Modifier
           .fillMaxSize()
+          .padding(innerPadding)
           .verticalScroll(rememberScrollState())
           .padding(24.dp)
     ) {
       Text(
-        text = "FORMULÁRIO DE INTERESSE",
-        fontSize = 28.sp,
+        text = "FAÇA PARTE DO CLUBE",
+        fontSize = 22.sp,
         fontWeight = FontWeight.Bold,
         color = slate800,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth()
       )
-
-      Spacer(modifier = Modifier.height(8.dp))
-
-      Text(
-        text = "Preencha o formulário e explore o ecossistema exclusivo do WTC Business Club.",
-        fontSize = 16.sp,
-        color = slate600,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
-      )
-
       Spacer(modifier = Modifier.height(24.dp))
 
       OutlinedTextField(
         value = reason,
         onValueChange = { reason = it },
-        label = { Text("Porque gostaria de participar? *") },
-        modifier = Modifier.fillMaxWidth()
+        label = { Text("Motivo do contato *", color = slate700) },
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+            focusedContainerColor = white, unfocusedContainerColor = white
+        )
       )
-
       Spacer(modifier = Modifier.height(16.dp))
 
-      Text(
-        "Informamos que sua solicitação será direcionada aos nossos parceiros internos para serviços adicionais. Caso prefira não receber este contato, por favor nos sinalize. *",
-        fontSize = 14.sp
-      )
-
       Row(verticalAlignment = Alignment.CenterVertically) {
-        RadioButton(
-          selected = internalPartnersContact.value == true,
-          onClick = { internalPartnersContact.value = true }
-        )
-
-        Text("Sim")
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        RadioButton(
-          selected = internalPartnersContact.value == false,
-          onClick = { internalPartnersContact.value = false }
-        )
-
-        Text("Não")
+          Checkbox(
+              checked = internalPartnersContact,
+              onCheckedChange = { internalPartnersContact = it }
+          )
+          Text("Desejo receber contato de parceiros", color = slate800)
       }
 
       Spacer(modifier = Modifier.height(24.dp))
 
       Button(
         onClick = {
-          val event = BusinessClub(
-            reason = reason,
-            internalPartnersContact = internalPartnersContact.value
-          )
-          businessViewModel.saveBusinessClub(event)
+          val bc = BusinessClub(reason = reason, internalPartnersContact = internalPartnersContact)
+          viewModel.saveBusinessClub(bc)
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().height(50.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = slate800)
       ) {
-        Text("SOLICITAR ORÇAMENTO")
-      }
-
-      when (businessUiState) {
-        is br.com.savedra.challengecrm.viewmodel.BusinessClubUIState.Loading -> {
-          CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        if (uiState is BusinessClubUIState.Loading) {
+            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = white)
+        } else {
+            Text("SOLICITAR CONTATO", fontWeight = FontWeight.Bold)
         }
-
-        is br.com.savedra.challengecrm.viewmodel.BusinessClubUIState.Error -> {
-          val errorMessage =
-            (businessUiState as br.com.savedra.challengecrm.viewmodel.BusinessClubUIState.Error).message
-          Text(errorMessage, color = MaterialTheme.colorScheme.error)
-        }
-
-        else -> {}
       }
-
-      Spacer(modifier = Modifier.height(80.dp))
+      
+      Spacer(modifier = Modifier.height(40.dp))
     }
-
-    BottomNavigationClient(
-      onInboxClick = onInboxClick,
-      onLogoutClick = onLogoutClick,
-      isInboxActive = false,
-      isEventsCenterActive = false,
-      isBusinessClubActive = true,
-      isSheratonHotelActive = false,
-      modifier = Modifier.align(Alignment.BottomCenter),
-      onEventsCenterClick = onEventsCenterClick,
-      onBusinessClubClick = { },
-      onSheratonHotelClick = onSheratonHotelClick
-    )
   }
 }

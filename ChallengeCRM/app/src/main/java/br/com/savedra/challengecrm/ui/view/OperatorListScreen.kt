@@ -41,7 +41,8 @@ fun OperatorListScreen(
   usersViewModel: UsersViewModel = viewModel(),
   authViewModel: AuthViewModel = viewModel(),
   onOperatorClick: (User) -> Unit,
-  navController: NavController
+  navController: NavController,
+  onBackClick: () -> Unit // Adicionado parâmetro faltante
 ) {
   val users by usersViewModel.users.collectAsState()
   val currentUser by authViewModel.currentUser.collectAsState()
@@ -64,7 +65,7 @@ fun OperatorListScreen(
         TopAppBar(
             title = { Text("Operadores e Canais", color = slate800, fontWeight = FontWeight.Bold) },
             navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = onBackClick) { // Usando o callback correto
                     Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
                 }
             },
@@ -112,7 +113,10 @@ fun OperatorListScreen(
   if (showCreateOperatorModal) {
     CreateOperatorModal(
       onDismiss = { showCreateOperatorModal = false },
-      onSuccess = { showCreateOperatorModal = false }
+      onSuccess = { 
+          showCreateOperatorModal = false
+          usersViewModel.loadUsers() // Recarrega após sucesso
+      }
     )
   }
 }

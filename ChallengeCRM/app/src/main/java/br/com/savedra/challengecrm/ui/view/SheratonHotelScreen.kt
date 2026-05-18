@@ -3,212 +3,164 @@ package br.com.savedra.challengecrm.ui.view
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.SheratonHotel
 import br.com.savedra.challengecrm.navigation.AppRoutes
-import br.com.savedra.challengecrm.ui.theme.slate50
-import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
-import br.com.savedra.challengecrm.ui.view.dialogs.convertDateStringToMillis
-import br.com.savedra.challengecrm.ui.view.dialogs.convertMillisToDateString
+import br.com.savedra.challengecrm.ui.theme.*
+import br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState
 import br.com.savedra.challengecrm.viewmodel.SheratonHotelViewModel
-import java.util.Calendar
 
+/**
+ * Tela de Reserva/Contato para Sheraton Hotel.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SheratonHotelScreen(
   navController: NavController,
   onLogoutClick: () -> Unit,
   onInboxClick: () -> Unit,
-  onEventsCenterClick: () -> Unit,
   onBusinessClubClick: () -> Unit,
-  sheratonHotelViewModel: SheratonHotelViewModel = viewModel()
+  onEventsCenterClick: () -> Unit,
+  viewModel: SheratonHotelViewModel = viewModel()
 ) {
   var checkInDate by remember { mutableStateOf("") }
   var checkOutDate by remember { mutableStateOf("") }
   var guests by remember { mutableStateOf("") }
-  var roomType by remember { mutableStateOf("Standard") }
-  var specialRequests by remember { mutableStateOf("") }
-  var showConfirmationDialog by remember { mutableStateOf(false) }
+  var roomType by remember { mutableStateOf("") }
 
-  val sheratonHotelUiState by sheratonHotelViewModel.sheratonUiState.collectAsState()
+  val uiState by viewModel.sheratonUiState.collectAsState()
   val context = LocalContext.current
-
   val focusManager = LocalFocusManager.current
 
-  LaunchedEffect(Unit) {
-    focusManager.clearFocus()
-  }
-
-  LaunchedEffect(sheratonHotelUiState) {
-    when (sheratonHotelUiState) {
-      is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Success -> {
-        Toast.makeText(context, "Pedido de reserva enviada com sucesso!", Toast.LENGTH_LONG).show()
-        navController.navigate(AppRoutes.CLIENT_HOME) {
-          popUpTo(AppRoutes.CLIENT_HOME) { this.inclusive = true }
-        }
-        sheratonHotelViewModel.resetUiState()
-      }
-
-      else -> {}
+  LaunchedEffect(uiState) {
+    if (uiState is SheratonHotelUIState.Success) {
+      Toast.makeText(context, "Reserva solicitada com sucesso!", Toast.LENGTH_LONG).show()
+      navController.navigate(AppRoutes.CLIENT_HOME) { popUpTo(AppRoutes.CLIENT_HOME) { this.inclusive = true } }
+      viewModel.resetUiState()
     }
   }
 
-  Box(
-    modifier = Modifier
-        .fillMaxSize()
-        .background(slate50)
-  ) {
+  Scaffold(
+    modifier = Modifier.systemBarsPadding(),
+    containerColor = slate50,
+    topBar = {
+        TopAppBar(
+            title = { Text("Sheraton Hotel", color = slate800, fontWeight = FontWeight.Bold) },
+            navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = white)
+        )
+    },
+    bottomBar = {
+        BottomNavigationClient(
+            onInboxClick = onInboxClick,
+            onLogoutClick = onLogoutClick,
+            isInboxActive = false,
+            isEventsCenterActive = false,
+            isBusinessClubActive = false,
+            isSheratonHotelActive = true,
+            onEventsCenterClick = onEventsCenterClick,
+            onBusinessClubClick = onBusinessClubClick,
+            onSheratonHotelClick = { }
+        )
+    }
+  ) { innerPadding ->
     Column(
       modifier = Modifier
           .fillMaxSize()
-          .padding(16.dp),
-      horizontalAlignment = Alignment.CenterHorizontally
+          .padding(innerPadding)
+          .verticalScroll(rememberScrollState())
+          .padding(24.dp)
     ) {
       Text(
-        text = "Sheraton Hotel Reservation",
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.padding(bottom = 16.dp)
+        text = "RESERVE SUA ESTADIA",
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold,
+        color = slate800,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth()
       )
+      Spacer(modifier = Modifier.height(24.dp))
 
-      DatePickerField(
-        label = "Check-in",
-        dateString = checkInDate,
-        onDateSelected = { 
-            checkInDate = convertMillisToDateString(it)
-            checkOutDate = ""
-         },
-        dateValidator = { date ->
-          val today = Calendar.getInstance()
-          today.set(Calendar.HOUR_OF_DAY, 0)
-          today.set(Calendar.MINUTE, 0)
-          today.set(Calendar.SECOND, 0)
-          today.set(Calendar.MILLISECOND, 0)
-          date >= today.timeInMillis
-        },
+      OutlinedTextField(
+        value = checkInDate,
+        onValueChange = { checkInDate = it },
+        label = { Text("Data de Check-in *", color = slate700) },
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+            focusedContainerColor = white, unfocusedContainerColor = white
+        )
       )
       Spacer(modifier = Modifier.height(16.dp))
-      val checkInDateMillis = if (checkInDate.isNotEmpty()) {
-          convertDateStringToMillis(checkInDate)
-      } else {
-          0L
-      }
-      key(checkInDate) {
-          DatePickerField(
-            label = "Check-out",
-            dateString = checkOutDate,
-            onDateSelected = { checkOutDate = convertMillisToDateString(it) },
-            dateValidator = { date ->
-              if (checkInDateMillis > 0) {
-                date >= checkInDateMillis
-              } else {
-                val today = Calendar.getInstance()
-                today.set(Calendar.HOUR_OF_DAY, 0)
-                today.set(Calendar.MINUTE, 0)
-                today.set(Calendar.SECOND, 0)
-                today.set(Calendar.MILLISECOND, 0)
-                date >= today.timeInMillis
-              }
-            },
-          )
-      }
+
+      OutlinedTextField(
+        value = checkOutDate,
+        onValueChange = { checkOutDate = it },
+        label = { Text("Data de Check-out *", color = slate700) },
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+            focusedContainerColor = white, unfocusedContainerColor = white
+        )
+      )
       Spacer(modifier = Modifier.height(16.dp))
+
       OutlinedTextField(
         value = guests,
-        onValueChange = { guests = it },
-        label = { Text("Hóspedes") },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = Modifier.fillMaxWidth()
+        onValueChange = { if (it.all { c -> c.isDigit() }) guests = it },
+        label = { Text("Número de Hóspedes *", color = slate700) },
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+            focusedContainerColor = white, unfocusedContainerColor = white
+        )
       )
-      Spacer(modifier = Modifier.height(16.dp))
-      RoomTypeSelector(
-        selectedType = roomType,
-        onTypeSelected = { roomType = it }
-      )
-      Spacer(modifier = Modifier.height(16.dp))
-      OutlinedTextField(
-        value = specialRequests,
-        onValueChange = { specialRequests = it },
-        label = { Text("Solicitações especiais") },
-        modifier = Modifier.fillMaxWidth()
-      )
-      Spacer(modifier = Modifier.height(32.dp))
+      Spacer(modifier = Modifier.height(24.dp))
+
       Button(
         onClick = {
-          val event = SheratonHotel(
-            checkInDate = checkInDate,
-            checkOutDate = checkOutDate,
-            guests = guests,
-            roomType = roomType,
-            specialRequests = specialRequests
-          )
-          sheratonHotelViewModel.saveSheratonHotel(event)
+          val sh = SheratonHotel(checkInDate = checkInDate, checkOutDate = checkOutDate, guests = guests, roomType = roomType)
+          viewModel.saveSheratonHotel(sh)
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().height(50.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = slate800)
       ) {
-        Text("PEDIR RESERVA")
-      }
-
-      when (sheratonHotelUiState) {
-        is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Loading -> {
-          CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        if (uiState is SheratonHotelUIState.Loading) {
+            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = white)
+        } else {
+            Text("SOLICITAR RESERVA", fontWeight = FontWeight.Bold)
         }
-
-        is br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Error -> {
-          val errorMessage =
-            (sheratonHotelUiState as br.com.savedra.challengecrm.viewmodel.SheratonHotelUIState.Error).message
-          Text(errorMessage, color = MaterialTheme.colorScheme.error)
-        }
-
-        else -> {}
       }
-
-      Spacer(modifier = Modifier.height(80.dp))
-    }
-
-    BottomNavigationClient(
-      onInboxClick = onInboxClick,
-      onLogoutClick = onLogoutClick,
-      isInboxActive = false,
-      isEventsCenterActive = false,
-      isBusinessClubActive = false,
-      isSheratonHotelActive = true,
-      modifier = Modifier.align(Alignment.BottomCenter),
-      onEventsCenterClick = onEventsCenterClick,
-      onBusinessClubClick = onBusinessClubClick,
-      onSheratonHotelClick = { }
-    )
-  }
-}
-
-@Composable
-fun RoomTypeSelector(selectedType: String, onTypeSelected: (String) -> Unit) {
-  Row(
-    modifier = Modifier.fillMaxWidth(),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Text("Tipo de quarto:", modifier = Modifier.weight(1f))
-    Row(modifier = Modifier.weight(2f)) {
-      RadioButton(
-        selected = selectedType == "Standard",
-        onClick = { onTypeSelected("Standard") }
-      )
-      Text("Standard", modifier = Modifier.align(Alignment.CenterVertically))
-      Spacer(modifier = Modifier.width(16.dp))
-      RadioButton(
-        selected = selectedType == "Deluxe",
-        onClick = { onTypeSelected("Deluxe") }
-      )
-      Text("Deluxe", modifier = Modifier.align(Alignment.CenterVertically))
+      
+      Spacer(modifier = Modifier.height(40.dp))
     }
   }
 }

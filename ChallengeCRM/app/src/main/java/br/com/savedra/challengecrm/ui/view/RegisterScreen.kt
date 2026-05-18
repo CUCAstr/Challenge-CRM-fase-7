@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -16,11 +17,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -42,6 +46,8 @@ import br.com.savedra.challengecrm.viewmodel.AuthViewModel
  * 1. Implementada a navegação automática após sucesso.
  * 2. Corrigido contraste em dropdowns e campos de texto.
  * 3. Adicionado Scroll para telas pequenas.
+ * 4. Implementado ImeAction.Next para navegação entre campos via teclado.
+ * 5. Restrição de entrada para Telefone (apenas números).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,9 +126,15 @@ fun RegisterScreen(
         onValueChange = { viewModel.onNameChange(it) },
         label = { Text("Nome Completo", color = slate700) },
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Words,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
         colors = OutlinedTextFieldDefaults.colors(
           focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate300
         )
       )
 
@@ -134,9 +146,15 @@ fun RegisterScreen(
         onValueChange = { viewModel.onEmailChange(it) },
         label = { Text("Email", color = slate700) },
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
         colors = OutlinedTextFieldDefaults.colors(
           focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate300
         )
       )
 
@@ -148,9 +166,15 @@ fun RegisterScreen(
         onValueChange = { viewModel.onCompanyChange(it) },
         label = { Text("Empresa", color = slate700) },
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
         colors = OutlinedTextFieldDefaults.colors(
           focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate300
         )
       )
 
@@ -171,7 +195,8 @@ fun RegisterScreen(
           modifier = Modifier.menuAnchor().fillMaxWidth(),
           colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+            focusedBorderColor = indigo500, unfocusedBorderColor = slate300
           )
         )
         ExposedDropdownMenu(
@@ -194,13 +219,22 @@ fun RegisterScreen(
       // Telefone
       OutlinedTextField(
         value = phone,
-        onValueChange = { viewModel.onPhoneChange(it) },
-        label = { Text("Telefone", color = slate700) },
+        onValueChange = { 
+            if (it.all { char -> char.isDigit() }) {
+                viewModel.onPhoneChange(it) 
+            }
+        },
+        label = { Text("Telefone (Apenas números)", color = slate700) },
         modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
         colors = OutlinedTextFieldDefaults.colors(
           focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate300
         )
       )
 
@@ -221,7 +255,8 @@ fun RegisterScreen(
           modifier = Modifier.menuAnchor().fillMaxWidth(),
           colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+            focusedBorderColor = indigo500, unfocusedBorderColor = slate300
           )
         )
         ExposedDropdownMenu(
@@ -247,7 +282,16 @@ fun RegisterScreen(
         onValueChange = { viewModel.onPasswordChange(it) },
         label = { Text("Defina uma Senha", color = slate700) },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { 
+                focusManager.clearFocus()
+                viewModel.register()
+            }
+        ),
         trailingIcon = {
           val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
           IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -257,7 +301,8 @@ fun RegisterScreen(
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
           focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
+          focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
+          focusedBorderColor = indigo500, unfocusedBorderColor = slate300
         )
       )
 

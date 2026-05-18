@@ -36,11 +36,15 @@ public class ChatController {
 
     @GetMapping("/messages/{chatRoomId}")
     public ResponseEntity<List<Message>> getChatMessages(@PathVariable String chatRoomId) {
-        return ResponseEntity.ok(chatService.getChatMessages(chatRoomId));
+        System.out.println("Loading messages for room: " + chatRoomId);
+        List<Message> messages = chatService.getChatMessages(chatRoomId);
+        System.out.println("Found " + messages.size() + " messages");
+        return ResponseEntity.ok(messages);
     }
 
     @PostMapping("/messages/{chatRoomId}")
     public ResponseEntity<Message> sendMessage(@PathVariable String chatRoomId, @RequestBody Message message) {
+        System.out.println("Sending message to room: " + chatRoomId + " from sender: " + message.getSenderId());
         return ResponseEntity.ok(chatService.sendMessage(chatRoomId, message));
     }
 

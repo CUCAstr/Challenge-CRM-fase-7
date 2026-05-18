@@ -1,42 +1,31 @@
 package br.com.savedra.challengecrm.ui.view.modals
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import br.com.savedra.challengecrm.ui.theme.white
-import br.com.savedra.challengecrm.ui.view.dialogs.DatePickerField
-import br.com.savedra.challengecrm.ui.view.dialogs.FilteredClientsDialog
-import br.com.savedra.challengecrm.ui.view.dialogs.convertDateStringToMillis
+import br.com.savedra.challengecrm.ui.view.dialogs.StandardDatePicker
 import br.com.savedra.challengecrm.ui.view.dialogs.convertMillisToDateString
+import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
+import br.com.savedra.challengecrm.ui.view.components.*
 
+/**
+ * Modal para criação de novas campanhas.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateCampaignModal(
@@ -47,251 +36,138 @@ fun CreateCampaignModal(
   val description by viewModel.newCampaignDescription.collectAsState()
   val startDate by viewModel.newCampaignStartDate.collectAsState()
   val endDate by viewModel.newCampaignEndDate.collectAsState()
+  val segmentFilter by viewModel.segmentFilter.collectAsState()
+  val showError by viewModel.showError.collectAsState()
 
-  val segments = listOf(
-    "Todos",
-    "ED",
-    "IT",
-    "Retail & Financial",
-    "GRC",
-    "HR",
-    "Smart Spends",
-    "Health",
-    "CSC",
-    "Field Marketing",
-    "Finance",
-    "ESG",
-    "CX"
-  )
-  val status = listOf("Todos", "Ativo", "Em negociação", "Inativo", "Aguardando resposta")
+  var showStartDatePicker by remember { mutableStateOf(false) }
+  var showEndDatePicker by remember { mutableStateOf(false) }
 
+  val segments = listOf("Todos", "ED", "IT", "Finance", "ESG", "CX")
   var expandedSegment by remember { mutableStateOf(false) }
-  var expandedStatus by remember { mutableStateOf(false) }
-
-  var showFilteredClients by remember { mutableStateOf(false) }
 
   Dialog(
     onDismissRequest = onDismiss,
     properties = DialogProperties(usePlatformDefaultWidth = false)
   ) {
     Card(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize().padding(16.dp),
       shape = RoundedCornerShape(12.dp),
       colors = CardDefaults.cardColors(containerColor = white)
     ) {
-      LazyColumn(
-        modifier = Modifier.padding(16.dp)
-      ) {
+      LazyColumn(modifier = Modifier.padding(24.dp)) {
         item {
-          OutlinedTextField(
+          Text("Nova Campanha", style = MaterialTheme.typography.headlineSmall, color = slate800, fontWeight = FontWeight.Bold)
+          Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+          StandardTextField(
             value = title,
             onValueChange = { viewModel.onNewCampaignTitleChange(it) },
-            label = { Text("Título da campanha") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(
-              capitalization = KeyboardCapitalization.Unspecified,
-              autoCorrectEnabled = true,
-              keyboardType = KeyboardType.Text,
-              imeAction = ImeAction.Unspecified
-            ),
+            label = "Título da Campanha"
           )
         }
+
         item {
-          Spacer(modifier = Modifier.height(8.dp))
-          OutlinedTextField(
+          Spacer(modifier = Modifier.height(12.dp))
+          StandardTextField(
             value = description,
             onValueChange = { viewModel.onNewCampaignDescriptionChange(it) },
-            label = { Text("Descrição da campanha") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(
-              capitalization = KeyboardCapitalization.Unspecified,
-              autoCorrectEnabled = true,
-              keyboardType = KeyboardType.Text,
-              imeAction = ImeAction.Unspecified
-            ),
+            label = "Descrição"
           )
-        }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
-          DatePickerField(
-            label = "Data inicial da campanha",
-            dateString = startDate,
-            onDateSelected = { millis ->
-              val selectedDate = convertMillisToDateString(millis)
-              viewModel.onNewCampaignStartDateChange(selectedDate)
-              viewModel.onNewCampaignEndDateChange("")
-            },
-            dateValidator = { utcTimeMillis ->
-              utcTimeMillis >= System.currentTimeMillis()
-            },
-            modifier = Modifier.fillMaxWidth()
-          )
-        }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
-          val startDateMillis = if (startDate.isNotEmpty()) {
-              convertDateStringToMillis(startDate)
-          } else {
-              0L
-          }
-          key(startDate) { // Force recomposition when startDate changes
-              DatePickerField(
-                label = "Data final da campanha",
-                dateString = endDate,
-                onDateSelected = { millis ->
-                  val selectedDate = convertMillisToDateString(millis)
-                  viewModel.onNewCampaignEndDateChange(selectedDate)
-                },
-                dateValidator = { utcTimeMillis ->
-                  if (startDateMillis > 0) {
-                    utcTimeMillis >= startDateMillis
-                  } else {
-                    utcTimeMillis >= System.currentTimeMillis()
-                  }
-                },
-                modifier = Modifier.fillMaxWidth()
-              )
-          }
-        }
-        item {
-          Spacer(modifier = Modifier.height(16.dp))
-          Divider()
-          Spacer(modifier = Modifier.height(16.dp))
-          Text("Filtros de Envio", style = MaterialTheme.typography.titleMedium)
-          Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Filters
         item {
+          Spacer(modifier = Modifier.height(12.dp))
+          StandardDateInput(
+            label = "Data de Início (DDMMYYYY)",
+            value = startDate.replace("/",""),
+            onValueChange = { viewModel.onNewCampaignStartDateChange(it) },
+            onIconClick = { showStartDatePicker = true },
+            visualTransformation = DateTransformation()
+          )
+        }
+
+        item {
+          Spacer(modifier = Modifier.height(12.dp))
+          StandardDateInput(
+            label = "Data de Término (DDMMYYYY)",
+            value = endDate.replace("/",""),
+            onValueChange = { viewModel.onNewCampaignEndDateChange(it) },
+            onIconClick = { showEndDatePicker = true },
+            visualTransformation = DateTransformation()
+          )
+        }
+
+        item {
+          Spacer(modifier = Modifier.height(12.dp))
           ExposedDropdownMenuBox(
             expanded = expandedSegment,
-            onExpandedChange = { expandedSegment = !expandedSegment },
-            modifier = Modifier.fillMaxWidth()
+            onExpandedChange = { expandedSegment = !expandedSegment }
           ) {
             OutlinedTextField(
-              value = viewModel.segmentFilter.collectAsState().value,
+              value = segmentFilter,
               onValueChange = { },
-              label = { Text("Segmento") },
+              label = { Text("Segmento Alvo", color = slate700) },
               readOnly = true,
-              trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment)
-              },
-              modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth(),
+              trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment) },
+              modifier = Modifier.menuAnchor().fillMaxWidth(),
+              colors = OutlinedTextFieldDefaults.colors(
+                  focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+                  focusedContainerColor = white, unfocusedContainerColor = white
+              )
             )
             ExposedDropdownMenu(
-              expanded = expandedSegment,
-              onDismissRequest = { expandedSegment = false },
-              modifier = Modifier.fillMaxWidth()
+                expanded = expandedSegment, 
+                onDismissRequest = { expandedSegment = false },
+                modifier = Modifier.background(white)
             ) {
-              segments.forEach { segment ->
+              segments.forEach { s ->
                 DropdownMenuItem(
-                  text = { Text(segment) },
-                  onClick = {
-                    viewModel.onSegmentFilterChange(segment)
-                    expandedSegment = false
-                  }
+                    text = { Text(s, color = Color.Black) }, 
+                    onClick = { viewModel.onSegmentFilterChange(s); expandedSegment = false },
+                    modifier = Modifier.background(white)
                 )
               }
             }
           }
         }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
-          ExposedDropdownMenuBox(
-            expanded = expandedStatus,
-            onExpandedChange = { expandedStatus = !expandedStatus },
-            modifier = Modifier.fillMaxWidth()
-          ) {
-            OutlinedTextField(
-              value = viewModel.statusFilter.collectAsState().value,
-              onValueChange = { },
-              label = { Text("Status") },
-              readOnly = true,
-              trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus)
-              },
-              modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth(),
-            )
-            ExposedDropdownMenu(
-              expanded = expandedStatus,
-              onDismissRequest = { expandedStatus = false },
-              modifier = Modifier.fillMaxWidth()
-            ) {
-              status.forEach { status ->
-                DropdownMenuItem(
-                  text = { Text(status) },
-                  onClick = {
-                    viewModel.onStatusFilterChange(status)
-                    expandedStatus = false
-                  }
-                )
-              }
-            }
-          }
-        }
-        item {
-          Spacer(modifier = Modifier.height(8.dp))
-          Row(modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-              value = viewModel.scoreStartFilter.collectAsState().value,
-              onValueChange = { viewModel.onScoreStartFilterChange(it) },
-              label = { Text("Score Mínimo") },
-              modifier = Modifier.weight(1f),
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            OutlinedTextField(
-              value = viewModel.scoreEndFilter.collectAsState().value,
-              onValueChange = { viewModel.onScoreEndFilterChange(it) },
-              label = { Text("Score Máximo") },
-              modifier = Modifier.weight(1f),
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-          }
-        }
 
         item {
-          Spacer(modifier = Modifier.height(16.dp))
-          TextButton(onClick = {
-            viewModel.getFilteredClients()
-            showFilteredClients = true
-          }) {
-            Text("Exibir resultados dos filtros")
+          Spacer(modifier = Modifier.height(32.dp))
+          if (showError) {
+              Text("Preencha todos os campos obrigatórios.", color = Color.Red, fontSize = 12.sp)
+              Spacer(modifier = Modifier.height(8.dp))
           }
-        }
-
-        item {
-          if (viewModel.showError.collectAsState().value) {
-            Text(
-              "Todos os campos devem ser preenchidos.",
-              color = MaterialTheme.colorScheme.error,
-              style = MaterialTheme.typography.bodySmall,
-              modifier = Modifier.padding(top = 8.dp)
-            )
-          }
-          Spacer(modifier = Modifier.height(16.dp))
           Button(
-            onClick = {
-              viewModel.sendCampaign()
-              onDismiss()
+            onClick = { 
+                viewModel.sendCampaign()
+                onDismiss() 
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = indigo500)
           ) {
-            Text("Enviar")
+            Text("CRIAR E ENVIAR CAMPANHA", color = Color.White, fontWeight = FontWeight.Bold)
+          }
+          Spacer(modifier = Modifier.height(12.dp))
+          TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
+            Text("CANCELAR", color = slate600, fontWeight = FontWeight.Bold)
           }
         }
       }
     }
-  }
-
-  if (showFilteredClients) {
-    FilteredClientsDialog(
-      clients = viewModel.filteredClients.collectAsState().value,
-      onDismiss = { showFilteredClients = false }
-    )
+    
+    if (showStartDatePicker) {
+        StandardDatePicker(
+            onDateSelected = { viewModel.onNewCampaignStartDateChange(convertMillisToDateString(it).replace("/","")); showStartDatePicker = false },
+            onDismiss = { showStartDatePicker = false }
+        )
+    }
+    if (showEndDatePicker) {
+        StandardDatePicker(
+            onDateSelected = { viewModel.onNewCampaignEndDateChange(convertMillisToDateString(it).replace("/","")); showEndDatePicker = false },
+            onDismiss = { showEndDatePicker = false }
+        )
+    }
   }
 }

@@ -1,7 +1,11 @@
 package br.com.savedra.challengecrm.navigation
 
+import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.*
-import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -12,14 +16,45 @@ import br.com.savedra.challengecrm.ui.view.*
 import br.com.savedra.challengecrm.viewmodel.*
 
 /**
- * Gerenciador de Navegação Central.
+ * Factory customizada e ROBUSTA para capturar erros de criação de ViewModel.
  */
+class SafeViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return try {
+            Log.d("SafeFactory", "Tentando instanciar ${modelClass.simpleName}...")
+            
+            // Tenta primeiro o construtor com Application (AndroidViewModel)
+            try {
+                val constructor = modelClass.getConstructor(Application::class.java)
+                Log.d("SafeFactory", "Usando construtor (Application) para ${modelClass.simpleName}")
+                constructor.newInstance(application)
+            } catch (e: NoSuchMethodException) {
+                // Se não tiver, tenta o construtor vazio (ViewModel padrão)
+                Log.d("SafeFactory", "Usando construtor vazio para ${modelClass.simpleName}")
+                modelClass.getDeclaredConstructor().newInstance()
+            }
+        } catch (e: Exception) {
+            Log.e("SafeFactory", "ERRO FATAL na criação de ${modelClass.simpleName}: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
+    }
+}
+
 @Composable
 fun AppNavigation() {
+  val context = LocalContext.current
+  val application = context.applicationContext as Application
+  val factory = remember { SafeViewModelFactory(application) }
+
+  Log.d("AppNavigation", "Iniciando AppNavigation...")
   val navController = rememberNavController()
-  val customerViewModel: OperatorViewModel = viewModel()
-  val usersViewModel: UsersViewModel = viewModel()
-  val authViewModel: AuthViewModel = viewModel()
+
+  // Inicialização segura
+  val authViewModel: AuthViewModel = viewModel(factory = factory)
+  val customerViewModel: OperatorViewModel = viewModel(factory = factory)
+  val usersViewModel: UsersViewModel = viewModel(factory = factory)
+
   val currentUser by authViewModel.currentUser.collectAsState()
 
   NavHost(navController = navController, startDestination = AppRoutes.LOGIN) {
@@ -38,7 +73,7 @@ fun AppNavigation() {
         onLogoutClick = {
           authViewModel.logout()
           navController.navigate(AppRoutes.LOGIN) { 
-            popUpTo(AppRoutes.LOGIN) { inclusive = true } 
+            popUpTo(AppRoutes.CLIENT_HOME) { inclusive = true } 
           }
         },
         onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) },
@@ -59,7 +94,7 @@ fun AppNavigation() {
         onLogoutClick = {
           authViewModel.logout()
           navController.navigate(AppRoutes.LOGIN) { 
-            popUpTo(AppRoutes.LOGIN) { inclusive = true } 
+            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } 
           }
         }
       )
@@ -73,7 +108,7 @@ fun AppNavigation() {
     ) { backStackEntry ->
       val operatorId = backStackEntry.arguments?.getString("operatorId")
       val userId = backStackEntry.arguments?.getString("userId")
-      val chatViewModel: ChatViewModel = viewModel()
+      val chatViewModel: ChatViewModel = viewModel(factory = factory)
       val users by usersViewModel.users.collectAsState()
 
       val operator = users.find { it.id == operatorId }
@@ -87,7 +122,8 @@ fun AppNavigation() {
           operator = operator,
           user = user,
           currentSenderId = currentSenderId,
-          currentUserRole = currentUserRole
+          currentUserRole = currentUserRole,
+          onBackClick = { navController.popBackStack() }
         )
       }
     }
@@ -98,7 +134,8 @@ fun AppNavigation() {
         onOperatorClick = { operator ->
           navController.navigate("${AppRoutes.CHAT}/${operator.id}/${currentUser?.id}")
         },
-        navController = navController
+        navController = navController,
+        onBackClick = { navController.popBackStack() }
       )
     }
     composable(AppRoutes.INVITES) {
@@ -108,7 +145,11 @@ fun AppNavigation() {
         onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
         onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
         onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
-        onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } }
+        onLogoutClick = { 
+            authViewModel.logout()
+            navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } 
+        },
+        onBackClick = { navController.popBackStack() }
       )
     }
     composable(AppRoutes.PROMOTIONS) {
@@ -118,7 +159,11 @@ fun AppNavigation() {
         onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
         onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
         onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
-        onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } }
+        onLogoutClick = { 
+            authViewModel.logout()
+            navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } 
+        },
+        onBackClick = { navController.popBackStack() }
       )
     }
     composable(AppRoutes.CAMPAIGNS) {
@@ -128,7 +173,11 @@ fun AppNavigation() {
         onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
         onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
         onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
-        onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } }
+        onLogoutClick = { 
+            authViewModel.logout()
+            navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } 
+        },
+        onBackClick = { navController.popBackStack() }
       )
     }
     composable(AppRoutes.BANNERS) {
@@ -138,17 +187,39 @@ fun AppNavigation() {
         onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
         onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
         onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
-        onLogoutClick = { navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } }
+        onLogoutClick = { 
+            authViewModel.logout()
+            navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.LOGIN) { inclusive = true } } 
+        },
+        onBackClick = { navController.popBackStack() }
       )
     }
     composable(AppRoutes.EVENTS_CENTER) {
-        EventsCenterScreen(navController = navController, onLogoutClick = { navController.navigate(AppRoutes.LOGIN) }, onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) }, onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) })
+        EventsCenterScreen(
+            navController = navController, 
+            onLogoutClick = { authViewModel.logout(); navController.navigate(AppRoutes.LOGIN) }, 
+            onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, 
+            onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) }, 
+            onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) }
+        )
     }
     composable(AppRoutes.BUSINESS_CLUB) {
-        BusinessClubScreen(navController = navController, onLogoutClick = { navController.navigate(AppRoutes.LOGIN) }, onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) }, onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) })
+        BusinessClubScreen(
+            navController = navController, 
+            onLogoutClick = { authViewModel.logout(); navController.navigate(AppRoutes.LOGIN) }, 
+            onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, 
+            onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) }, 
+            onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) }
+        )
     }
     composable(AppRoutes.SHERATON_HOTEL) {
-        SheratonHotelScreen(navController = navController, onLogoutClick = { navController.navigate(AppRoutes.LOGIN) }, onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) }, onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) })
+        SheratonHotelScreen(
+            navController = navController, 
+            onLogoutClick = { authViewModel.logout(); navController.navigate(AppRoutes.LOGIN) }, 
+            onInboxClick = { navController.navigate(AppRoutes.CLIENT_HOME) }, 
+            onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) }, 
+            onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) }
+        )
     }
     composable(AppRoutes.SEGMENT_CHATS) { 
       SegmentChatsScreen(
@@ -169,10 +240,15 @@ fun AppNavigation() {
       arguments = listOf(navArgument("segment") { type = NavType.StringType })
     ) { backStackEntry ->
       val segment = backStackEntry.arguments?.getString("segment")
-      val chatViewModel: ChatViewModel = viewModel()
+      val chatViewModel: ChatViewModel = viewModel(factory = factory)
       val currentSenderId = currentUser?.id
       if (segment != null && currentSenderId != null) {
-        GroupChatScreen(viewModel = chatViewModel, segment = segment, currentSenderId = currentSenderId)
+        GroupChatScreen(
+            viewModel = chatViewModel, 
+            segment = segment, 
+            currentSenderId = currentSenderId,
+            onBackClick = { navController.popBackStack() }
+        )
       }
     }
     composable(
@@ -180,10 +256,15 @@ fun AppNavigation() {
       arguments = listOf(navArgument("segment") { type = NavType.StringType })
     ) { backStackEntry ->
       val segment = backStackEntry.arguments?.getString("segment")
-      val chatViewModel: ChatViewModel = viewModel()
+      val chatViewModel: ChatViewModel = viewModel(factory = factory)
       val currentSenderId = currentUser?.id
       if (segment != null && currentSenderId != null) {
-        GroupChatReadOnlyScreen(viewModel = chatViewModel, segment = segment, currentSenderId = currentSenderId)
+        GroupChatReadOnlyScreen(
+            viewModel = chatViewModel, 
+            segment = segment, 
+            currentSenderId = currentSenderId,
+            onBackClick = { navController.popBackStack() }
+        )
       }
     }
   }

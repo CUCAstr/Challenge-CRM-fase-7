@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.PhotoCameraBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -44,6 +45,7 @@ fun BannersScreen(
   onCampaignsClick: () -> Unit = {},
   onChatsClick: () -> Unit = {},
   onLogoutClick: () -> Unit = {},
+  onBackClick: () -> Unit = {}, // CORREÇÃO: Parâmetro faltante
   viewModel: BannerViewModel = viewModel()
 ) {
   val banners by viewModel.filteredBanners.collectAsState()
@@ -62,6 +64,17 @@ fun BannersScreen(
   Scaffold(
     modifier = Modifier.systemBarsPadding(),
     containerColor = slate50,
+    topBar = {
+        TopAppBar(
+            title = { Text("Banners", color = slate800, fontWeight = FontWeight.Bold) },
+            navigationIcon = {
+                IconButton(onClick = onBackClick) {
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = white)
+        )
+    },
     bottomBar = {
       ScrollableBottomNavigation(
         onClientsClick = onClientsClick,
@@ -78,14 +91,10 @@ fun BannersScreen(
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
       // Header
       Row(
-        modifier = Modifier.fillMaxWidth().padding(24.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(text = "Painel de Banners", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = slate800)
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(text = "Gestão de Banners", fontSize = 16.sp, color = slate600)
-        }
+        Text(text = "Gestão de Banners", fontSize = 16.sp, color = slate600, modifier = Modifier.weight(1f))
         IconButton(onClick = { showCreateBannerModal = true }) {
           Icon(Icons.Default.Add, contentDescription = "Criar Banner", tint = indigo500)
         }
@@ -96,7 +105,8 @@ fun BannersScreen(
         Card(
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(12.dp),
-          colors = CardDefaults.cardColors(containerColor = white)
+          colors = CardDefaults.cardColors(containerColor = white),
+          elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
           Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),

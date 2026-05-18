@@ -25,9 +25,6 @@ import java.util.*
 
 /**
  * Tela de Chat 1:1.
- * 
- * CORREÇÃO: Removidas as funções MessageBubble e MessageInputRow que foram movidas
- * para ChatComponents.kt para evitar erros de duplicidade na compilação.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,16 +33,18 @@ fun ChatScreen(
   operator: User,
   user: User,
   currentSenderId: String,
-  currentUserRole: String
+  currentUserRole: String,
+  onBackClick: () -> Unit
 ) {
   val messages by viewModel.messages.collectAsState()
   var text by remember { mutableStateOf("") }
 
-  // Garantindo strings não nulas para as funções de busca
   val opId = operator.id ?: ""
   val uId = user.id ?: ""
 
-  LaunchedEffect(Unit) {
+  // --- CORREÇÃO: RECARREGAR HISTÓRICO ---
+  // Toda vez que entramos no chat, limpamos a lista e carregamos novamente.
+  LaunchedEffect(opId, uId) {
     viewModel.loadMessages(opId, uId)
   }
 
@@ -68,6 +67,11 @@ fun ChatScreen(
             )
           }
         },
+        navigationIcon = {
+          IconButton(onClick = onBackClick) {
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = slate800)
+          }
+        },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = white)
       )
     }
@@ -85,12 +89,10 @@ fun ChatScreen(
           .padding(horizontal = 16.dp)
       ) {
         items(messages) { message ->
-          // MessageBubble agora é importada de ChatComponents.kt
           MessageBubble(message = message, isCurrentUser = message.senderId == currentSenderId)
         }
       }
 
-      // MessageInputRow agora é importada de ChatComponents.kt
       MessageInputRow(
         text = text,
         onTextChange = { text = it },

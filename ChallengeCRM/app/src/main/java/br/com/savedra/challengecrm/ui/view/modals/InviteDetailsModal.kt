@@ -12,6 +12,8 @@ import androidx.compose.ui.window.Dialog
 import br.com.savedra.challengecrm.model.Invite
 import br.com.savedra.challengecrm.ui.theme.*
 
+import br.com.savedra.challengecrm.util.FormatUtils
+
 /**
  * Modal de Detalhes do Convite.
  */
@@ -38,8 +40,9 @@ fun InviteDetailsModal(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                DetailItem("Data", invite.date)
-                DetailItem("Hora", invite.time)
+                // CORREÇÃO: Formatação de Data e Hora para exibição amigável
+                DetailItem("Data", FormatUtils.formatDate(invite.date))
+                DetailItem("Hora", FormatUtils.formatTime(invite.time))
                 DetailItem("Local", invite.location)
                 DetailItem("Segmento", invite.segment)
 

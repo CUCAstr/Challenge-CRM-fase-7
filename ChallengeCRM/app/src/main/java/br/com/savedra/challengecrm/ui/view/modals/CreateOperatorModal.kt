@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.ui.view.modals
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,13 +14,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import br.com.savedra.challengecrm.ui.theme.indigo500
-import br.com.savedra.challengecrm.ui.theme.slate100
-import br.com.savedra.challengecrm.ui.theme.slate200
-import br.com.savedra.challengecrm.ui.theme.slate800
+import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.AuthUIState
 import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
+/**
+ * Modal para criação de novos operadores (Acesso restrito).
+ * 
+ * CORREÇÕES APLICADAS:
+ * 1. Cores de alto contraste (Fundo Branco, Texto Preto).
+ * 2. Menu suspenso com fundo forçado para evitar tema escuro.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateOperatorModal(
@@ -43,7 +48,7 @@ fun CreateOperatorModal(
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = slate100)
+            colors = CardDefaults.cardColors(containerColor = white) // CORREÇÃO: Fundo Branco
         ) {
             Column(
                 modifier = Modifier
@@ -61,10 +66,11 @@ fun CreateOperatorModal(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { viewModel.onNameChange(it) },
-                    label = { Text("Nome") },
+                    label = { Text("Nome Completo", color = slate700) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = slate800, unfocusedTextColor = slate800
+                        focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+                        focusedContainerColor = white, unfocusedContainerColor = white
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -72,10 +78,11 @@ fun CreateOperatorModal(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { viewModel.onEmailChange(it) },
-                    label = { Text("Email") },
+                    label = { Text("Email", color = slate700) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = slate800, unfocusedTextColor = slate800
+                        focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+                        focusedContainerColor = white, unfocusedContainerColor = white
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -83,15 +90,16 @@ fun CreateOperatorModal(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { viewModel.onPasswordChange(it) },
-                    label = { Text("Senha") },
+                    label = { Text("Senha", color = slate700) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = slate800, unfocusedTextColor = slate800
+                        focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+                        focusedContainerColor = white, unfocusedContainerColor = white
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                val segments = listOf("ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX")
+                val segments = listOf("ED", "IT", "Finance", "ESG", "CX")
                 var expanded by remember { mutableStateOf(false) }
 
                 ExposedDropdownMenuBox(
@@ -102,19 +110,28 @@ fun CreateOperatorModal(
                         value = segment,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Segmento Responsável") },
+                        label = { Text("Segmento Responsável", color = slate700) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = slate800, unfocusedTextColor = slate800
+                            focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+                            focusedContainerColor = white, unfocusedContainerColor = white
                         )
                     )
-                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    ExposedDropdownMenu(
+                        expanded = expanded, 
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier.background(white) // CORREÇÃO: Fundo dropdown
+                    ) {
                         segments.forEach { seg ->
-                            DropdownMenuItem(text = { Text(seg) }, onClick = {
-                                viewModel.onSegmentChange(seg)
-                                expanded = false
-                            })
+                            DropdownMenuItem(
+                                text = { Text(seg, color = Color.Black) }, 
+                                onClick = {
+                                    viewModel.onSegmentChange(seg)
+                                    expanded = false
+                                },
+                                modifier = Modifier.background(white)
+                            )
                         }
                     }
                 }
@@ -126,12 +143,11 @@ fun CreateOperatorModal(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancelar", color = Color.Gray)
+                        Text("Cancelar", color = slate600)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { 
-                            // Manually setting required fields for Operator
                             viewModel.onCompanyChange("WTC")
                             viewModel.onGenderChange("Outro")
                             viewModel.onPhoneChange("0000000000")
@@ -139,7 +155,11 @@ fun CreateOperatorModal(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = indigo500)
                     ) {
-                        Text("Criar")
+                        if (authState is AuthUIState.Loading) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = white, strokeWidth = 2.dp)
+                        } else {
+                            Text("Criar")
+                        }
                     }
                 }
 

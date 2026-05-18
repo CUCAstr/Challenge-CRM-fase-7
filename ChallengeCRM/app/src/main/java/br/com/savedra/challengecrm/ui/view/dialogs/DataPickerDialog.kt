@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
 import java.time.LocalDate
 
 fun convertMillisToDateString(millis: Long): String {
@@ -31,13 +30,46 @@ fun convertMillisToDateString(millis: Long): String {
   return formatter.format(instant)
 }
 
-fun convertDateStringToMillis(dateString: String): Long {
-    if (dateString.isEmpty()) return 0L
-    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val localDate = LocalDate.parse(dateString, formatter)
-    return localDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
-}
+/**
+ * Componente de Diálogo de Data Renomeado para evitar conflito com Material3.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StandardDatePicker(
+    onDateSelected: (Long) -> Unit,
+    onDismiss: () -> Unit,
+    dateValidator: (Long) -> Boolean = { true }
+) {
+    val datePickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return dateValidator(utcTimeMillis)
+            }
+        }
+    )
 
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { onDateSelected(it) }
+                    onDismiss()
+                },
+                enabled = datePickerState.selectedDateMillis != null
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,58 +81,27 @@ fun DatePickerField(
   modifier: Modifier = Modifier
 ) {
   var showDialog by remember { mutableStateOf(false) }
-  val datePickerState = rememberDatePickerState(
-    selectableDates = object : SelectableDates {
-      override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-        return dateValidator(utcTimeMillis)
-      }
-    }
-  )
 
   Box(modifier = modifier) {
     OutlinedTextField(
       value = dateString,
-      onValueChange = { /* Permite edição manual se desejar, ou mantém readOnly */ },
+      onValueChange = { },
       modifier = Modifier.fillMaxWidth(),
-      readOnly = true, // Mantemos readOnly por segurança de formato, mas o gatilho muda
+      readOnly = true,
       label = { Text(label) },
       trailingIcon = {
-        IconButton(onClick = { showDialog = true }) { // CORREÇÃO: Gatilho apenas no ícone
-          Icon(
-            imageVector = Icons.Default.DateRange,
-            contentDescription = "Abrir calendário"
-          )
+        IconButton(onClick = { showDialog = true }) {
+          Icon(imageVector = Icons.Default.DateRange, contentDescription = "Abrir calendário")
         }
       }
     )
-    // REMOVIDO: O Box que cobria todo o campo e disparava o clique.
   }
 
   if (showDialog) {
-    DatePickerDialog(
-      onDismissRequest = { showDialog = false },
-      confirmButton = {
-        TextButton(
-          onClick = {
-            datePickerState.selectedDateMillis?.let { millis ->
-              onDateSelected(millis)
-            }
-            showDialog = false
-          },
-          enabled = datePickerState.selectedDateMillis != null
-        ) {
-          Text("OK")
-        }
-      },
-      dismissButton = {
-        TextButton(onClick = { showDialog = false }) {
-          Text("Cancelar")
-        }
-      }
-    ) {
-      DatePicker(
-        state = datePickerState
-      )
-    }
+    StandardDatePicker(
+        onDateSelected = onDateSelected,
+        onDismiss = { showDialog = false },
+        dateValidator = dateValidator
+    )
   }
 }

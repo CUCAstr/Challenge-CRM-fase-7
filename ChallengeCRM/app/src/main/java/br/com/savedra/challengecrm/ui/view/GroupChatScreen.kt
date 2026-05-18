@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,15 +23,14 @@ import br.com.savedra.challengecrm.viewmodel.ChatViewModel
 
 /**
  * Tela de Chat de Grupo.
- * 
- * CORREÇÃO: Utiliza os componentes centralizados (MessageBubble, MessageInputRow)
- * importados automaticamente via pacote .ui.view.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupChatScreen(
     viewModel: ChatViewModel,
     segment: String,
-    currentSenderId: String
+    currentSenderId: String,
+    onBackClick: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     LaunchedEffect(Unit) {
@@ -49,31 +49,48 @@ fun GroupChatScreen(
 
     var text by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize().background(slate50)) {
-        GroupChatHeader(segment = segment)
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.weight(1f).padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(messages) { message ->
-                // MessageBubble agora é um componente centralizado
-                MessageBubble(
-                    message = message,
-                    isCurrentUser = (message.senderId == currentSenderId)
-                )
-            }
+    Scaffold(
+        modifier = Modifier.systemBarsPadding(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(text = segment, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = slate800)
+                        Text(text = "Canal de Segmento", fontSize = 12.sp, color = slate600)
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = white)
+            )
         }
-
-        // MessageInputRow agora é um componente centralizado
-        MessageInputRow(
-            text = text,
-            onTextChange = { text = it },
-            onSendClick = {
-                viewModel.sendGroupMessage(text, currentSenderId, segment)
-                text = ""
+    ) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).background(slate50)) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.weight(1f).padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(messages) { message ->
+                    MessageBubble(
+                        message = message,
+                        isCurrentUser = (message.senderId == currentSenderId)
+                    )
+                }
             }
-        )
+
+            MessageInputRow(
+                text = text,
+                onTextChange = { text = it },
+                onSendClick = {
+                    viewModel.sendGroupMessage(text, currentSenderId, segment)
+                    text = ""
+                }
+            )
+        }
     }
 }
 

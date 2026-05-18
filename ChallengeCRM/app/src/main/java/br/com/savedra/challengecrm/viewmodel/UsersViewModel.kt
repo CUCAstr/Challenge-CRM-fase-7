@@ -26,7 +26,11 @@ class UsersViewModel(application: Application) : AndroidViewModel(application) {
    */
   fun loadUsers() {
     viewModelScope.launch {
-      _users.value = authRepository.getUsers()
+      try {
+        _users.value = authRepository.getUsers()
+      } catch (e: Exception) {
+        android.util.Log.e("UsersVM", "Erro ao carregar usuários (Offline?)", e)
+      }
     }
   }
 }

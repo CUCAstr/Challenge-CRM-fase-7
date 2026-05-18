@@ -54,6 +54,10 @@ fun MessageBubble(message: Message, isCurrentUser: Boolean) {
 
 /**
  * Linha de entrada de mensagem reutilizável.
+ * 
+ * CORREÇÕES:
+ * 1. Aplicado navigationBarsPadding() para evitar que os botões do Android fiquem em cima do input.
+ * 2. Aplicado imePadding() para que a caixa de texto suba junto com o teclado.
  */
 @Composable
 fun MessageInputRow(
@@ -62,7 +66,10 @@ fun MessageInputRow(
   onSendClick: () -> Unit
 ) {
   Surface(
-    modifier = Modifier.fillMaxWidth(),
+    modifier = Modifier
+      .fillMaxWidth()
+      .navigationBarsPadding() // CORREÇÃO: Respeita os botões de navegação do sistema
+      .imePadding(),          // CORREÇÃO: Respeita a subida do teclado
     color = white,
     shadowElevation = 8.dp
   ) {

@@ -1,7 +1,6 @@
 package br.com.savedra.challengecrm.viewmodel
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import br.com.savedra.challengecrm.data.repository.ChatRepository
 import br.com.savedra.challengecrm.di.RepositoryProvider
@@ -12,13 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import kotlinx.coroutines.launch
 import java.util.Date
 
 /**
  * ViewModel para o Chat.
- * 
- * CORREÇÃO: Tratamento de nulos em todos os campos de usuário para evitar crashes.
  */
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
   private val repository: ChatRepository = RepositoryProvider.getChatRepository(application)
@@ -44,13 +42,18 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
   /**
    * Carrega mensagens entre um operador e um cliente.
+   * 
+   * CORREÇÃO: Limpa a lista atual antes de carregar o novo histórico para garantir que
+   * o usuário não veja mensagens de outro chat por engano.
    */
   fun loadMessages(operatorId: String, userId: String) {
+    _messages.value = emptyList() // Limpa cache local
     val chatRoomId = repository.getChatRoomId(operatorId, userId)
     currentChatRoomId = chatRoomId
 
     viewModelScope.launch {
       repository.getMessages(chatRoomId).collect { messageList ->
+        Log.d("ChatViewModel", "Histórico carregado para $chatRoomId: ${messageList.size} msgs")
         _messages.value = messageList
       }
     }
@@ -60,6 +63,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
    * Carrega mensagens de um canal de segmento.
    */
   fun loadGroupMessages(segment: String) {
+    _messages.value = emptyList() // Limpa cache local
     viewModelScope.launch {
       currentChatRoomId = segment
       repository.getGroupMessages(segment).collect { messageList ->
@@ -77,7 +81,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     viewModelScope.launch { 
         try {
             repository.sendGroupMessage(segment, message) 
-            // --- CORREÇÃO: ATUALIZAÇÃO INSTANTÂNEA ---
+            // Atualização otimista
             _messages.value = _messages.value + message
         } catch (e: Exception) {
             Log.e("ChatViewModel", "Erro ao enviar msg de grupo", e)
@@ -87,9 +91,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
   /**
    * Envia uma mensagem no chat 1:1.
-   * 
-   * CORREÇÃO: Usando Elvis operator (?: "") para garantir que campos opcionais do User
-   * não causem erro de tipo ao criar objetos do modelo de Chat.
    */
   fun sendMessage(
     text: String,
@@ -117,7 +118,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     viewModelScope.launch {
       try {
         repository.sendMessage(chatRoomId, message, roomInfo)
-        // --- CORREÇÃO: ATUALIZAÇÃO INSTANTÂNEA ---
+        // Atualização otimista
         _messages.value = _messages.value + message
       } catch (e: Exception) {
         Log.e("ChatViewModel", "Erro ao enviar msg 1:1", e)

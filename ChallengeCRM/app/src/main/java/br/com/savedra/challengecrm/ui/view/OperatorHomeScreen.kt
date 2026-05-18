@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -39,10 +41,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 /**
  * Painel Principal do Operador.
  * 
- * CORREÇÕES:
+ * CORREÇÕES APLICADAS:
  * 1. Tratamento de nulos (?: "") em todas as propriedades do User.
- * 2. SystemBarsPadding para evitar notch.
+ * 2. SystemBarsPadding para evitar notch e barra de navegação.
  * 3. Alto contraste em textos e dropdowns.
+ * 4. Navegação via Tab (ImeAction.Next) na busca.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("DEPRECATION")
@@ -70,7 +73,7 @@ fun OperatorHomeScreen(
   }
 
   Scaffold(
-    modifier = Modifier.systemBarsPadding(),
+    modifier = Modifier.systemBarsPadding(), // CORREÇÃO: Notch e Nav Bar
     containerColor = slate50,
     bottomBar = {
       ScrollableBottomNavigation(
@@ -87,33 +90,58 @@ fun OperatorHomeScreen(
   ) { innerPadding ->
     Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
       Column(modifier = Modifier.fillMaxSize()) {
+        // --- CABEÇALHO ---
         Column(
-          modifier = Modifier.fillMaxWidth().padding(24.dp)
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp)
         ) {
-          Text(text = "Painel do Operador", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = slate800)
+          Text(
+            text = "Painel do Operador",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = slate800
+          )
           Spacer(modifier = Modifier.height(4.dp))
-          Text(text = "Gestão de Clientes", fontSize = 16.sp, color = slate600)
+          Text(
+            text = "Gestão de Clientes",
+            fontSize = 16.sp,
+            color = slate600
+          )
         }
 
+        // --- BARRA DE PESQUISA E FILTROS ---
         Column(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
         ) {
           Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = white)
+            colors = CardDefaults.cardColors(containerColor = white),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
           ) {
             Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
               verticalAlignment = Alignment.CenterVertically
             ) {
-              Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = slate400, modifier = Modifier.size(20.dp))
+              Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search",
+                tint = slate400,
+                modifier = Modifier.size(20.dp)
+              )
               Spacer(modifier = Modifier.width(12.dp))
               TextField(
                 value = searchQuery,
                 onValueChange = { viewModel.updateSearchQuery(it) },
                 placeholder = { Text("Filtrar por nome...", color = slate400) },
                 modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 colors = TextFieldDefaults.colors(
                   focusedContainerColor = Color.Transparent,
                   unfocusedContainerColor = Color.Transparent,
@@ -125,20 +153,129 @@ fun OperatorHomeScreen(
               )
             }
           }
-          // ... (Resto dos filtros omitidos para brevidade, mas mantidos na implementação real)
+
+          Spacer(modifier = Modifier.height(12.dp))
+
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Top
+          ) {
+            // --- FILTRO SEGMENTO ---
+            Column(modifier = Modifier.weight(1f)) {
+              Text("Segmento", color = slate600, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+              var expandedSegment by remember { mutableStateOf(false) }
+              val itemsSegment = listOf("Todos", "ED", "IT", "Finance", "ESG", "CX")
+              var selectedSegment by remember { mutableStateOf(itemsSegment[0]) }
+
+              ExposedDropdownMenuBox(
+                expanded = expandedSegment,
+                onExpandedChange = { expandedSegment = !expandedSegment }
+              ) {
+                OutlinedTextField(
+                  value = selectedSegment,
+                  onValueChange = {},
+                  readOnly = true,
+                  modifier = Modifier.menuAnchor().fillMaxWidth(),
+                  trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment) },
+                  colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = white,
+                    unfocusedContainerColor = white,
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedBorderColor = indigo500,
+                    unfocusedBorderColor = slate300
+                  )
+                )
+                ExposedDropdownMenu(
+                  expanded = expandedSegment,
+                  onDismissRequest = { expandedSegment = false },
+                  modifier = Modifier.background(white)
+                ) {
+                  itemsSegment.forEach { item ->
+                    DropdownMenuItem(
+                      text = { Text(item, color = Color.Black) },
+                      onClick = {
+                        selectedSegment = item
+                        expandedSegment = false
+                        viewModel.updateSegmentFilter(item)
+                      },
+                      modifier = Modifier.background(white)
+                    )
+                  }
+                }
+              }
+            }
+
+            // --- FILTRO STATUS ---
+            Column(modifier = Modifier.weight(1f)) {
+              Text("Status", color = slate600, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+              var expandedStatus by remember { mutableStateOf(false) }
+              val itemsStatus = listOf("Todos", "Ativo", "Inativo")
+              var selectedStatus by remember { mutableStateOf(itemsStatus[0]) }
+
+              ExposedDropdownMenuBox(
+                expanded = expandedStatus,
+                onExpandedChange = { expandedStatus = !expandedStatus }
+              ) {
+                OutlinedTextField(
+                  value = selectedStatus,
+                  onValueChange = {},
+                  readOnly = true,
+                  modifier = Modifier.menuAnchor().fillMaxWidth(),
+                  trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus) },
+                  colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = white,
+                    unfocusedContainerColor = white,
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedBorderColor = indigo500,
+                    unfocusedBorderColor = slate300
+                  )
+                )
+                ExposedDropdownMenu(
+                  expanded = expandedStatus,
+                  onDismissRequest = { expandedStatus = false },
+                  modifier = Modifier.background(white)
+                ) {
+                  itemsStatus.forEach { item ->
+                    DropdownMenuItem(
+                      text = { Text(item, color = Color.Black) },
+                      onClick = {
+                        selectedStatus = item
+                        expandedStatus = false
+                        viewModel.updateStatusFilter(item)
+                      },
+                      modifier = Modifier.background(white)
+                    )
+                  }
+                }
+              }
+            }
+          }
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // --- LISTA DE CLIENTES ---
         if (customers.isEmpty()) {
           Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Nenhum cliente encontrado.", color = slate800)
+            Text("Nenhum cliente encontrado.", color = slate800, fontWeight = FontWeight.Medium)
           }
         } else {
           LazyColumn(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(bottom = 80.dp)
           ) {
             items(customers) { customer ->
-              CustomerCard(customer = customer, onClick = { selectedCustomer = customer; showCustomerDetails = true })
+              CustomerCard(
+                customer = customer,
+                onClick = {
+                  selectedCustomer = customer
+                  showCustomerDetails = true
+                }
+              )
             }
           }
         }
@@ -146,16 +283,24 @@ fun OperatorHomeScreen(
     }
   }
 
+  // --- MODAL DE DETALHES ---
   if (showCustomerDetails && selectedCustomer != null) {
     CustomerDetailsModal(
       customer = selectedCustomer!!,
       onDismiss = { showCustomerDetails = false; selectedCustomer = null },
       onSendMessage = { showCustomerDetails = false; onCustomerClick(selectedCustomer!!) },
-      onSaveNotes = { notes -> viewModel.saveNotes(selectedCustomer?.id ?: "", notes); showCustomerDetails = false }
+      onSaveNotes = { notes ->
+        viewModel.saveNotes(selectedCustomer?.id ?: "", notes)
+        showCustomerDetails = false
+        selectedCustomer = null
+      }
     )
   }
 }
 
+/**
+ * Card de exibição do cliente.
+ */
 @Composable
 fun CustomerCard(customer: User, onClick: () -> Unit) {
   Card(
@@ -164,24 +309,42 @@ fun CustomerCard(customer: User, onClick: () -> Unit) {
     colors = CardDefaults.cardColors(containerColor = white),
     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
   ) {
-    Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-      Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(slate200), contentAlignment = Alignment.Center) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Box(
+        modifier = Modifier.size(48.dp).clip(CircleShape).background(slate200),
+        contentAlignment = Alignment.Center
+      ) {
         Icon(Icons.Default.Person, contentDescription = null, tint = slate600)
       }
       Spacer(modifier = Modifier.width(16.dp))
       Column(modifier = Modifier.weight(1f)) {
-        Text(text = customer.name ?: "Sem Nome", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = slate800)
-        Text(text = customer.email ?: "", fontSize = 14.sp, color = slate600)
+        Text(
+          text = customer.name ?: "Sem Nome", 
+          fontSize = 16.sp, 
+          fontWeight = FontWeight.Bold, 
+          color = slate800
+        )
+        Text(
+          text = customer.email ?: "Sem Email", 
+          fontSize = 14.sp, 
+          color = slate600
+        )
       }
-      Icon(imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = slate400)
+      Icon(
+        imageVector = Icons.Default.Person, 
+        contentDescription = "Ver Detalhes", 
+        tint = slate400,
+        modifier = Modifier.size(20.dp)
+      )
     }
   }
 }
 
 /**
  * Navegação Inferior para o Operador.
- * 
- * CORREÇÃO: Restaurado parâmetros isBannersActive, isCampaignsActive, etc para compatibilidade com outras telas.
  */
 @Composable
 fun ScrollableBottomNavigation(
@@ -198,14 +361,18 @@ fun ScrollableBottomNavigation(
   isPromotionsActive: Boolean = false,
   isCampaignsActive: Boolean = false,
   isBannersActive: Boolean = false,
-  modifier: Modifier = Modifier // Adicionado parâmetro modifier
+  modifier: Modifier = Modifier
 ) {
   Card(
     modifier = modifier.fillMaxWidth(),
     shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-    colors = CardDefaults.cardColors(containerColor = slate800)
+    colors = CardDefaults.cardColors(containerColor = slate800),
+    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
   ) {
-    LazyRow(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    LazyRow(
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
       item { NavItem(Icons.Default.Person, "Clientes", isClientsActive, onClientsClick) }
       item { NavItem(Icons.Default.Mail, "Chats", isChatsActive, onChatsClick) }
       item { NavItem(Icons.Default.Mail, "Convites", isInvitesActive, onInvitesClick) }
@@ -230,6 +397,11 @@ fun NavItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String
       modifier = Modifier.size(24.dp)
     )
     Spacer(modifier = Modifier.height(4.dp))
-    Text(text = label, color = tint ?: (if (isActive) purple500 else white), fontSize = 12.sp)
+    Text(
+      text = label, 
+      color = tint ?: (if (isActive) purple500 else white), 
+      fontSize = 11.sp,
+      fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
+    )
   }
 }

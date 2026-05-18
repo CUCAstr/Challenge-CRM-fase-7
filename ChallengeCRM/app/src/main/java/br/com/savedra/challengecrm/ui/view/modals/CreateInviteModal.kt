@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.ui.view.modals
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,10 @@ import br.com.savedra.challengecrm.model.Invite
 import br.com.savedra.challengecrm.model.User
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
+import br.com.savedra.challengecrm.ui.view.components.*
+import br.com.savedra.challengecrm.ui.view.dialogs.StandardDatePicker
+import br.com.savedra.challengecrm.ui.view.dialogs.StandardTimePicker
+import br.com.savedra.challengecrm.ui.view.dialogs.convertMillisToDateString
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
@@ -92,103 +97,67 @@ fun CreateInviteModal(
   val newInviteDate by viewModel.newInviteDate.collectAsState()
   val newInviteLocation by viewModel.newInviteLocation.collectAsState()
   val newInviteTime by viewModel.newInviteTime.collectAsState()
-
   val segmentFilter by viewModel.segmentFilter.collectAsState()
   val showError by viewModel.showError.collectAsState()
 
+  var showDatePicker by remember { mutableStateOf(false) }
+  var showTimePicker by remember { mutableStateOf(false) }
+
   Dialog(onDismissRequest = onDismiss) {
     Card(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp),
+      modifier = Modifier.fillMaxWidth().padding(16.dp),
       shape = RoundedCornerShape(16.dp),
-      colors = CardDefaults.cardColors(containerColor = slate100)
+      colors = CardDefaults.cardColors(containerColor = white)
     ) {
-      Column(
-        modifier = Modifier
-          .padding(16.dp)
-          .fillMaxWidth()
-      ) {
-        Text(
-          text = "Novo Convite",
-          fontSize = 20.sp,
-          fontWeight = FontWeight.Bold,
-          color = slate800
-        )
+      Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+        Text(text = "Novo Convite", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = slate800)
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn(
-          modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f, fill = false),
+          modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
           verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
           item {
-            OutlinedTextField(
-              value = newInviteTitle,
-              onValueChange = { viewModel.onNewInviteTitleChange(it) },
-              label = { Text("Nome do Evento") },
-              modifier = Modifier.fillMaxWidth(),
-              colors = OutlinedTextFieldDefaults.colors(
-                  focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-                  focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
-              )
+            StandardTextField(
+                value = newInviteTitle,
+                onValueChange = { viewModel.onNewInviteTitleChange(it) },
+                label = "Nome do Evento"
             )
           }
           item {
-            OutlinedTextField(
-              value = newInviteDescription,
-              onValueChange = { viewModel.onNewInviteDescriptionChange(it) },
-              label = { Text("Descrição Detalhada") },
-              modifier = Modifier.fillMaxWidth(),
-              colors = OutlinedTextFieldDefaults.colors(
-                  focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-                  focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
-              )
+            StandardTextField(
+                value = newInviteDescription,
+                onValueChange = { viewModel.onNewInviteDescriptionChange(it) },
+                label = "Descrição Detalhada"
             )
           }
           item {
-            OutlinedTextField(
-              value = newInviteDate,
-              onValueChange = { if (it.length <= 8) viewModel.onNewInviteDateChange(it) },
-              label = { Text("Data do Evento (DDMMYYYY)") },
-              visualTransformation = DateTransformation(),
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-              modifier = Modifier.fillMaxWidth(),
-              colors = OutlinedTextFieldDefaults.colors(
-                  focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-                  focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
-              )
+            StandardDateInput(
+                label = "Data do Evento (DDMMYYYY)",
+                value = newInviteDate.replace("/",""),
+                onValueChange = { viewModel.onNewInviteDateChange(it) },
+                onIconClick = { showDatePicker = true },
+                visualTransformation = DateTransformation()
             )
           }
           item {
-            OutlinedTextField(
-              value = newInviteTime,
-              onValueChange = { if (it.length <= 4) viewModel.onNewInviteTimeChange(it) },
-              label = { Text("Hora do Evento (HHMM)") },
-              visualTransformation = TimeTransformation(),
-              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-              modifier = Modifier.fillMaxWidth(),
-              colors = OutlinedTextFieldDefaults.colors(
-                  focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-                  focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
-              )
+            StandardTimeInput(
+                label = "Hora do Evento (HHMM)",
+                value = newInviteTime.replace(":",""),
+                onValueChange = { viewModel.onNewInviteTimeChange(it) },
+                onIconClick = { showTimePicker = true },
+                visualTransformation = TimeTransformation()
             )
           }
           item {
-            OutlinedTextField(
-              value = newInviteLocation,
-              onValueChange = { viewModel.onNewInviteLocationChange(it) },
-              label = { Text("Localização") },
-              modifier = Modifier.fillMaxWidth(),
-              colors = OutlinedTextFieldDefaults.colors(
-                  focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
-                  focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
-              )
+            StandardTextField(
+                value = newInviteLocation,
+                onValueChange = { viewModel.onNewInviteLocationChange(it) },
+                label = "Localização"
             )
           }
           item {
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = slate200)
+            Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Segmento Alvo", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = slate700)
             
             var expanded by remember { mutableStateOf(false) }
@@ -209,12 +178,17 @@ fun CreateInviteModal(
                     focusedContainerColor = Color.White, unfocusedContainerColor = Color.White
                 )
               )
-              ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+              ExposedDropdownMenu(
+                  expanded = expanded, 
+                  onDismissRequest = { expanded = false },
+                  modifier = Modifier.background(white)
+              ) {
                 segments.forEach { seg ->
-                  DropdownMenuItem(text = { Text(seg, color = Color.Black) }, onClick = {
-                    viewModel.onSegmentFilterChange(seg)
-                    expanded = false
-                  })
+                  DropdownMenuItem(
+                      text = { Text(seg, color = Color.Black) }, 
+                      onClick = { viewModel.onSegmentFilterChange(seg); expanded = false },
+                      modifier = Modifier.background(white)
+                  )
                 }
               }
             }
@@ -222,22 +196,35 @@ fun CreateInviteModal(
         }
 
         if (showError) {
-          Text(text = "Preencha todos os campos.", color = Color.Red, fontSize = 12.sp)
+          Text(text = "Preencha todos os campos obrigatórios.", color = Color.Red, fontSize = 12.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-          TextButton(onClick = onDismiss) { Text("Cancelar", color = slate600) }
+          TextButton(onClick = onDismiss) { Text("CANCELAR", color = slate600, fontWeight = FontWeight.Bold) }
           Spacer(modifier = Modifier.width(8.dp))
           Button(
             onClick = { viewModel.sendInvite(); onDismiss() },
             colors = ButtonDefaults.buttonColors(containerColor = indigo500)
           ) {
-            Text("Enviar")
+            Text("ENVIAR CONVITE", fontWeight = FontWeight.Bold)
           }
         }
       }
+    }
+    
+    if (showDatePicker) {
+        StandardDatePicker(
+            onDateSelected = { viewModel.onNewInviteDateChange(convertMillisToDateString(it).replace("/","")); showDatePicker = false },
+            onDismiss = { showDatePicker = false }
+        )
+    }
+    if (showTimePicker) {
+        StandardTimePicker(
+            onTimeSelected = { viewModel.onNewInviteTimeChange(it.replace(":","")); showTimePicker = false },
+            onDismiss = { showTimePicker = false }
+        )
     }
   }
 }

@@ -12,6 +12,8 @@ import androidx.compose.ui.window.Dialog
 import br.com.savedra.challengecrm.model.Promotion
 import br.com.savedra.challengecrm.ui.theme.*
 
+import br.com.savedra.challengecrm.util.FormatUtils
+
 /**
  * Modal de Detalhes da Promoção.
  */
@@ -46,7 +48,10 @@ fun PromotionDetailsModal(
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Expira em: ${promotion.dateExpiresIn} às ${promotion.hoursExpiresIn}", fontSize = 14.sp, color = slate600)
+                // CORREÇÃO: Formatação amigável
+                val dateF = FormatUtils.formatDate(promotion.dateExpiresIn)
+                val timeF = FormatUtils.formatTime(promotion.hoursExpiresIn)
+                Text(text = "Expira em: $dateF às $timeF", fontSize = 14.sp, color = slate600)
                 Text(text = "Segmento: ${promotion.segment}", fontSize = 14.sp, color = slate600)
 
                 Spacer(modifier = Modifier.height(24.dp))

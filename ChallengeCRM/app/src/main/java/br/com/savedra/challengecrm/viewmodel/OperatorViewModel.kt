@@ -9,12 +9,11 @@ import br.com.savedra.challengecrm.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import android.util.Log
 import kotlinx.coroutines.launch
 
 /**
  * ViewModel para a Gestão de Clientes (Operador).
- * 
- * CORREÇÃO: Tratamento rigoroso de nulos nos filtros para evitar crashes de compilação e execução.
  */
 class OperatorViewModel(application: Application) : AndroidViewModel(application) {
   private val customerRepository = RepositoryProvider.getCustomerRepository(application)
@@ -34,11 +33,19 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
     loadCustomers()
   }
 
-  private fun loadCustomers() {
+  /**
+   * Carrega lista de clientes do backend.
+   */
+  fun loadCustomers() {
     viewModelScope.launch {
-      val customers = customerRepository.getCustomers()
-      _allCustomers.value = customers
-      filterCustomers()
+      try {
+        val customers = customerRepository.getCustomers()
+        _allCustomers.value = customers
+        filterCustomers()
+        Log.d("OperatorVM", "Clientes carregados: ${customers.size}")
+      } catch (e: Exception) {
+        Log.e("OperatorVM", "Erro ao carregar clientes", e)
+      }
     }
   }
 
@@ -57,12 +64,6 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
     filterCustomers()
   }
 
-  /**
-   * Filtra a lista de clientes.
-   * 
-   * CORREÇÃO: Utilizando safe call (?.) e Elvis operator (?: "") para comparar
-   * strings que podem vir nulas do backend.
-   */
   private fun filterCustomers() {
     val query = _searchQuery.value.lowercase()
     val segmentF = _segmentFilter.value
@@ -87,14 +88,27 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
     _filteredCustomers.value = filtered
   }
 
+  /**
+   * Salva notas do operador sobre um cliente.
+   * 
+   * CORREÇÃO: Garante que a nota seja salva e a lista local atualizada.
+   */
   fun saveNotes(userId: String, notes: String) {
     if (userId.isBlank()) return
     viewModelScope.launch {
-      val customer = customerRepository.getCustomerById(userId)
-      if (customer != null) {
-          // Mantém a integridade dos dados ao atualizar notas
-          customerRepository.updateCustomer(userId, customer.copy(notes = notes))
-          loadCustomers()
+      try {
+        Log.d("OperatorVM", "Salvando notas para o usuário: $userId")
+        val customer = customerRepository.getCustomerById(userId)
+        if (customer != null) {
+            val updated = customer.copy(notes = notes)
+            val result = customerRepository.updateCustomer(userId, updated)
+            if (result != null) {
+                Log.d("OperatorVM", "Notas salvas com sucesso no backend")
+                loadCustomers() // Recarrega lista para refletir mudança
+            }
+        }
+      } catch (e: Exception) {
+        Log.e("OperatorVM", "Falha ao salvar notas", e)
       }
     }
   }

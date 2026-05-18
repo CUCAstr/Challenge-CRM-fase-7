@@ -1,5 +1,6 @@
 package br.com.savedra.challengecrm.data.repository
 
+import android.util.Log
 import br.com.savedra.challengecrm.data.api.ChatApi
 import br.com.savedra.challengecrm.data.api.WebSocketManager
 import br.com.savedra.challengecrm.model.ChatRoom
@@ -9,10 +10,18 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+/**
+ * Repositório de Chat com integração REST e WebSocket.
+ */
 class ChatRepository(private val chatApi: ChatApi) {
-    private val webSocketManager = WebSocketManager("ws://10.0.2.2:8080/ws")
+    // CORREÇÃO: Usar lazy para evitar que a conexão abra no momento que a ViewModel é criada (causando crash se o backend demorar)
+    private val webSocketManager by lazy { WebSocketManager("ws://10.0.2.2:8080/ws") }
     private val gson = Gson()
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     fun getChatRoomId(operatorId: String, userId: String): String {
         return if (operatorId > userId) {
@@ -23,25 +32,40 @@ class ChatRepository(private val chatApi: ChatApi) {
     }
 
     fun getMessages(chatRoomId: String): Flow<List<Message>> = callbackFlow {
-        // Initial load
-        val response = chatApi.getChatMessages(chatRoomId)
-        if (response.isSuccessful) {
-            trySend(response.body() ?: emptyList())
+        /**
+         * Busca a lista completa de mensagens do servidor.
+         */
+        suspend fun fetchAndSend() {
+            try {
+                val response = chatApi.getChatMessages(chatRoomId)
+                if (response.isSuccessful) {
+                    trySend(response.body() ?: emptyList())
+                }
+            } catch (e: Exception) {
+                Log.e("ChatRepo", "Erro ao buscar histórico", e)
+            }
         }
 
-        // Real-time updates via WebSocket
+        // Carga inicial
+        scope.launch { fetchAndSend() }
+
+        // --- CONEXÃO WEBSOCKET ---
         webSocketManager.connect { json ->
             try {
                 val message = gson.fromJson(json, Message::class.java)
                 if (message.chatRoomId == chatRoomId) {
-                    // Fetch list again for simplicity in this version
+                    Log.d("ChatRepo", "Mensagem recebida via WS. Atualizando lista...")
+                    scope.launch { fetchAndSend() }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("ChatRepo", "Erro no processamento de mensagem WS", e)
             }
         }
 
-        awaitClose { webSocketManager.disconnect() }
+        awaitClose { 
+            Log.d("ChatRepo", "Desconectando WebSocket")
+            webSocketManager.disconnect() 
+        }
     }
 
     suspend fun sendMessage(chatRoomId: String, message: Message, chatRoomInfo: ChatRoom) {
@@ -66,7 +90,7 @@ class ChatRepository(private val chatApi: ChatApi) {
         return if (response.isSuccessful) response.body() else null
     }
 
-    // Missing methods for UI compatibility
+    // Compatibilidade com UI Legada
     fun getGroupMessages(segment: String): Flow<List<Message>> = getMessages(segment)
     suspend fun sendGroupMessage(segment: String, message: Message) {
         chatApi.sendMessage(segment, message)

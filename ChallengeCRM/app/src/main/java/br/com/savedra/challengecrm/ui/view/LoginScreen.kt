@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.ImeAction
 import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.AuthUIState
@@ -109,13 +111,17 @@ fun LoginScreen(
         modifier = Modifier.padding(bottom = 32.dp)
       )
 
-      // Campo Email - Cores forçadas para contraste
+      // Campo Email
       OutlinedTextField(
         value = email,
         onValueChange = { authViewModel.onEmailChange(it) },
         label = { Text("Email", color = slate700) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next // CORREÇÃO: Habilita o botão 'Próximo' no teclado
+        ),
         colors = OutlinedTextFieldDefaults.colors(
           focusedTextColor = Color.Black,
           unfocusedTextColor = Color.Black,
@@ -128,14 +134,23 @@ fun LoginScreen(
 
       Spacer(modifier = Modifier.height(16.dp))
 
-      // Campo Senha - Cores forçadas para contraste
+      // Campo Senha
       OutlinedTextField(
         value = password,
         onValueChange = { authViewModel.onPasswordChange(it) },
         label = { Text("Senha", color = slate700) },
         singleLine = true,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done // CORREÇÃO: Habilita o botão 'Concluído'
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { 
+                focusManager.clearFocus()
+                authViewModel.login()
+            }
+        ),
         trailingIcon = {
           val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
           IconButton(onClick = { passwordVisible = !passwordVisible }) {

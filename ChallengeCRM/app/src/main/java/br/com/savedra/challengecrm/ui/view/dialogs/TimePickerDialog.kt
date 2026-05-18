@@ -16,7 +16,42 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import java.util.Calendar
+import java.util.*
+
+/**
+ * Componente de Diálogo de Hora Renomeado para evitar conflito.
+ */
+@Composable
+fun StandardTimePicker(
+    onTimeSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+    val initialHour = calendar.get(Calendar.HOUR_OF_DAY)
+    val initialMinute = calendar.get(Calendar.MINUTE)
+
+    val timeSetListener =
+      TimePickerDialog.OnTimeSetListener { _: TimePicker, hour: Int, minute: Int ->
+        val formattedTime = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+        onTimeSelected(formattedTime)
+        onDismiss()
+      }
+
+    DisposableEffect(Unit) {
+        val picker = TimePickerDialog(
+            context,
+            timeSetListener,
+            initialHour,
+            initialMinute,
+            true
+        ).apply {
+            setOnDismissListener { onDismiss() }
+            show()
+        }
+        onDispose { picker.dismiss() }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,20 +62,6 @@ fun TimePickerField(
   modifier: Modifier = Modifier
 ) {
   var showDialog by remember { mutableStateOf(false) }
-  val context = LocalContext.current
-  val calendar = Calendar.getInstance()
-
-  val initialHour = if (timeString.isNotBlank()) {
-    timeString.split(":")[0].toInt()
-  } else {
-    calendar.get(Calendar.HOUR_OF_DAY)
-  }
-
-  val initialMinute = if (timeString.isNotBlank()) {
-    timeString.split(":")[1].toInt()
-  } else {
-    calendar.get(Calendar.MINUTE)
-  }
 
   Box(modifier = modifier) {
     OutlinedTextField(
@@ -50,7 +71,7 @@ fun TimePickerField(
       readOnly = true,
       label = { Text(label) },
       trailingIcon = {
-        IconButton(onClick = { showDialog = true }) { // CORREÇÃO: Gatilho apenas no ícone
+        IconButton(onClick = { showDialog = true }) {
           Icon(
             imageVector = Icons.Default.AccessTime,
             contentDescription = "Abrir seletor de tempo"
@@ -58,25 +79,12 @@ fun TimePickerField(
         }
       }
     )
-    // REMOVIDO: O Box que cobria todo o campo.
   }
 
   if (showDialog) {
-    val timeSetListener =
-      TimePickerDialog.OnTimeSetListener { _: TimePicker, hour: Int, minute: Int ->
-        onTimeSelected(String.format("%02d:%02d", hour, minute))
-        showDialog = false
-      }
-
-    TimePickerDialog(
-      context,
-      timeSetListener,
-      initialHour,
-      initialMinute,
-      true
-    ).apply {
-      setOnDismissListener { showDialog = false }
-      show()
-    }
+    StandardTimePicker(
+        onTimeSelected = onTimeSelected,
+        onDismiss = { showDialog = false }
+    )
   }
 }

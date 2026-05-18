@@ -44,6 +44,8 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateCustomer(@PathVariable String id, @RequestBody User user) {
+        System.out.println("Receiving update request for customer ID: " + id);
+        System.out.println("New Notes: " + user.getNotes());
         return ResponseEntity.ok(customerService.updateCustomer(id, user));
     }
 
