@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -20,33 +19,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.Banner
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.CreateBannerModal
 import br.com.savedra.challengecrm.viewmodel.BannerViewModel
 import androidx.compose.ui.platform.LocalFocusManager
 
-/**
- * Tela de Gestão de Banners.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BannersScreen(
-  onClientsClick: () -> Unit = {},
-  onInvitesClick: () -> Unit = {},
-  onPromotionsClick: () -> Unit = {},
-  onCampaignsClick: () -> Unit = {},
-  onChatsClick: () -> Unit = {},
-  onLogoutClick: () -> Unit = {},
-  onBackClick: () -> Unit = {}, // CORREÇÃO: Parâmetro faltante
-  viewModel: BannerViewModel = viewModel()
+  navController: NavController,
+  onClientsClick: () -> Unit,
+  onInvitesClick: () -> Unit,
+  onPromotionsClick: () -> Unit,
+  onCampaignsClick: () -> Unit,
+  onChatsClick: () -> Unit,
+  onLogoutClick: () -> Unit,
+  onBackClick: () -> Unit,
+  viewModel: BannerViewModel
 ) {
   val banners by viewModel.filteredBanners.collectAsState()
   val searchQuery by viewModel.searchQuery.collectAsState()
@@ -55,7 +49,6 @@ fun BannersScreen(
   var showCreateBannerModal by remember { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
 
-  // --- CORREÇÃO: RECARREGAR DADOS ---
   LaunchedEffect(Unit) {
     focusManager.clearFocus()
     viewModel.loadBanners()
@@ -77,6 +70,7 @@ fun BannersScreen(
     },
     bottomBar = {
       ScrollableBottomNavigation(
+        navController = navController,
         onClientsClick = onClientsClick,
         onInvitesClick = onInvitesClick,
         onPromotionsClick = onPromotionsClick,
@@ -89,73 +83,37 @@ fun BannersScreen(
     }
   ) { paddingValues ->
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      // Header
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
+      Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(text = "Gestão de Banners", fontSize = 16.sp, color = slate600, modifier = Modifier.weight(1f))
         IconButton(onClick = { showCreateBannerModal = true }) {
           Icon(Icons.Default.Add, contentDescription = "Criar Banner", tint = indigo500)
         }
       }
-
-      // Search Bar
       Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
-        Card(
-          modifier = Modifier.fillMaxWidth(),
-          shape = RoundedCornerShape(12.dp),
-          colors = CardDefaults.cardColors(containerColor = white),
-          elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
-          Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-          ) {
+        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+          Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = slate400, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(12.dp))
-            TextField(
-              value = searchQuery,
-              onValueChange = { viewModel.updateSearchQuery(it) },
-              placeholder = { Text("Filtrar por título...", color = slate400) },
-              modifier = Modifier.fillMaxWidth(),
-              colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black
-              )
-            )
+            TextField(value = searchQuery, onValueChange = { viewModel.updateSearchQuery(it) }, placeholder = { Text("Filtrar por título...", color = slate400) }, modifier = Modifier.fillMaxWidth(), colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedTextColor = Color.Black, unfocusedTextColor = Color.Black))
           }
         }
       }
-
       Spacer(modifier = Modifier.height(16.dp))
-
       if (banners.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-          Text("Nenhum banner encontrado.", color = slate800)
-        }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Nenhum banner encontrado.", color = slate800) }
       } else {
-        LazyColumn(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-          verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-          items(banners) { banner ->
-            BannerCard(banner = banner, onClick = { selectedBanner = banner; showBannerDetails = true })
+        LazyColumn(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          items(banners) { banner -> 
+            BannerCard(banner = banner, onClick = { selectedBanner = banner; showBannerDetails = true }) 
           }
         }
       }
     }
   }
-
-  if (showBannerDetails && selectedBanner != null) {
-    BannerDetailsModal(banner = selectedBanner!!, onDismiss = { showBannerDetails = false; selectedBanner = null })
+  if (showBannerDetails && selectedBanner != null) { 
+    BannerDetailsModal(banner = selectedBanner!!, onDismiss = { showBannerDetails = false; selectedBanner = null }) 
   }
-
-  if (showCreateBannerModal) {
-    CreateBannerModal(onDismiss = { showCreateBannerModal = false }, viewModel = viewModel)
-  }
+  if (showCreateBannerModal) { CreateBannerModal(onDismiss = { showCreateBannerModal = false }, viewModel = viewModel) }
 }
 
 @Composable
@@ -172,8 +130,8 @@ fun BannerCard(banner: Banner, onClick: () -> Unit) {
       }
       Spacer(modifier = Modifier.width(16.dp))
       Column(modifier = Modifier.weight(1f)) {
-        Text(text = banner.title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = slate800)
-        Text(text = banner.description, fontSize = 14.sp, color = slate600)
+        Text(text = banner.title ?: "", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = slate800)
+        Text(text = banner.description ?: "", fontSize = 14.sp, color = slate600)
       }
     }
   }
@@ -184,11 +142,11 @@ fun BannerDetailsModal(banner: Banner, onDismiss: () -> Unit) {
   Dialog(onDismissRequest = onDismiss) {
     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = white)) {
       Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = banner.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = slate800)
+        Text(text = banner.title ?: "", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = slate800)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = banner.description, fontSize = 16.sp, color = slate800)
+        Text(text = banner.description ?: "", fontSize = 16.sp, color = slate800)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "URL: ${banner.imageUrl}", fontSize = 14.sp, color = slate600)
+        Text(text = "URL: ${banner.imageUrl ?: ""}", fontSize = 14.sp, color = slate600)
         Spacer(modifier = Modifier.height(16.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
           TextButton(onClick = onDismiss) { Text("Fechar", color = indigo500) }

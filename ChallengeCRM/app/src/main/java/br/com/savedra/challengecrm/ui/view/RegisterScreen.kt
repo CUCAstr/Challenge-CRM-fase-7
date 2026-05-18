@@ -71,23 +71,14 @@ fun RegisterScreen(
   // Inicializa o estado ao abrir a tela
   LaunchedEffect(Unit) {
     viewModel.resetUiState()
-    viewModel.onRoleChange("Cliente")
+    viewModel.onRoleChange("Cliente") // Força o papel de Cliente
   }
 
   // --- LÓGICA DE NAVEGAÇÃO ---
   if (authState is AuthUIState.Success) {
-    val user = (authState as AuthUIState.Success).user
-    LaunchedEffect(user) {
-      user?.let {
-        if (it.role == "Operador") {
-          navController.navigate(AppRoutes.OPERATOR_HOME) {
-            popUpTo(AppRoutes.REGISTER) { inclusive = true }
-          }
-        } else {
-          navController.navigate(AppRoutes.CLIENT_HOME) {
-            popUpTo(AppRoutes.REGISTER) { inclusive = true }
-          }
-        }
+    LaunchedEffect(Unit) {
+      navController.navigate(AppRoutes.CLIENT_HOME) {
+        popUpTo(AppRoutes.REGISTER) { inclusive = true }
       }
     }
   }

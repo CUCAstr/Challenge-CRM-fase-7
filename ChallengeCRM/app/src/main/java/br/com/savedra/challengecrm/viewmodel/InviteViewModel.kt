@@ -76,7 +76,7 @@ class InviteViewModel(application: Application) : AndroidViewModel(application) 
     val query = _searchQuery.value.lowercase()
 
     val filtered = _allInvites.value.filter { invite ->
-      val nameMatches = invite.title.lowercase().contains(query)
+      val nameMatches = (invite.title ?: "").lowercase().contains(query)
       nameMatches
     }
 

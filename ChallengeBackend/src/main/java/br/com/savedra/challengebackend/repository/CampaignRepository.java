@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface CampaignRepository extends MongoRepository<Campaign, String> {
     List<Campaign> findBySegment(String segment);
+    List<Campaign> findBySegmentIn(List<String> segments);
 }

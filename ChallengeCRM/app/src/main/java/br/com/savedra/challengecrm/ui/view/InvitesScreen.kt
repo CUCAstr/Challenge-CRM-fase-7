@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.Invite
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.CreateInviteModal
@@ -28,36 +28,26 @@ import br.com.savedra.challengecrm.ui.view.modals.InviteDetailsModal
 import br.com.savedra.challengecrm.viewmodel.InviteViewModel
 import androidx.compose.ui.platform.LocalFocusManager
 
-/**
- * Tela de Gestão de Convites.
- * 
- * CORREÇÕES:
- * 1. Botão Voltar na TopAppBar.
- * 2. Recarregamento de dados ao entrar na tela.
- * 3. Modal de detalhes ao clicar no convite.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvitesScreen(
-  onClientsClick: () -> Unit = {},
-  onPromotionsClick: () -> Unit = {},
-  onCampaignsClick: () -> Unit = {},
-  onBannersClick: () -> Unit = {},
-  onChatsClick: () -> Unit = {},
-  onLogoutClick: () -> Unit = {},
-  onBackClick: () -> Unit = {},
-  viewModel: InviteViewModel = viewModel()
+  navController: NavController,
+  onClientsClick: () -> Unit,
+  onPromotionsClick: () -> Unit,
+  onCampaignsClick: () -> Unit,
+  onBannersClick: () -> Unit,
+  onChatsClick: () -> Unit,
+  onLogoutClick: () -> Unit,
+  onBackClick: () -> Unit,
+  viewModel: InviteViewModel
 ) {
   val invites by viewModel.filteredInvites.collectAsState()
   val searchQuery by viewModel.searchQuery.collectAsState()
-  
   var showCreateInviteModal by remember { mutableStateOf(false) }
   var selectedInvite by remember { mutableStateOf<Invite?>(null) }
   var showDetailsModal by remember { mutableStateOf(false) }
-  
   val focusManager = LocalFocusManager.current
 
-  // --- CORREÇÃO: RECARREGAR DADOS ---
   LaunchedEffect(Unit) {
     focusManager.clearFocus()
     viewModel.loadInvites()
@@ -79,6 +69,7 @@ fun InvitesScreen(
     },
     bottomBar = {
       ScrollableBottomNavigation(
+        navController = navController,
         onClientsClick = onClientsClick,
         onInvitesClick = { },
         onPromotionsClick = onPromotionsClick,
@@ -91,56 +82,28 @@ fun InvitesScreen(
     }
   ) { paddingValues ->
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      // Header Info
       Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(text = "Gestão de Convites", fontSize = 16.sp, color = slate600, modifier = Modifier.weight(1f))
-        IconButton(onClick = { showCreateInviteModal = true }) {
-          Icon(Icons.Default.Add, contentDescription = null, tint = indigo500)
-        }
+        IconButton(onClick = { showCreateInviteModal = true }) { Icon(Icons.Default.Add, contentDescription = null, tint = indigo500) }
       }
-
-      // Search Bar
       Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
-        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(2.dp)) {
+        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
           Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Search, null, tint = slate400)
-            TextField(
-              value = searchQuery,
-              onValueChange = { viewModel.updateSearchQuery(it) },
-              placeholder = { Text("Pesquisar...", color = slate400) },
-              modifier = Modifier.fillMaxWidth(),
-              colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black
-              )
-            )
+            TextField(value = searchQuery, onValueChange = { viewModel.updateSearchQuery(it) }, placeholder = { Text("Pesquisar...", color = slate400) }, modifier = Modifier.fillMaxWidth(), colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedTextColor = Color.Black, unfocusedTextColor = Color.Black))
           }
         }
       }
-
       Spacer(modifier = Modifier.height(16.dp))
-
-      // Lista de Convites
       if (invites.isEmpty()) {
-          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-              Text("Nenhum convite encontrado.", color = slate800)
-          }
+          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Nenhum convite encontrado.", color = slate800) }
       } else {
           LazyColumn(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(invites) { invite ->
-                Card(
-                  modifier = Modifier.fillMaxWidth().clickable { 
-                      selectedInvite = invite
-                      showDetailsModal = true
-                  }, 
-                  colors = CardDefaults.cardColors(containerColor = white),
-                  elevation = CardDefaults.cardElevation(2.dp)
-                ) {
+                Card(modifier = Modifier.fillMaxWidth().clickable { selectedInvite = invite; showDetailsModal = true }, colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = invite.title, fontWeight = FontWeight.Bold, color = slate800)
-                        Text(text = invite.description, color = slate600, maxLines = 1)
+                        Text(text = invite.title ?: "", fontWeight = FontWeight.Bold, color = slate800)
+                        Text(text = invite.description ?: "", color = slate600, maxLines = 1)
                     }
                 }
             }
@@ -148,12 +111,6 @@ fun InvitesScreen(
       }
     }
   }
-
-  if (showCreateInviteModal) {
-    CreateInviteModal(onDismiss = { showCreateInviteModal = false }, viewModel = viewModel)
-  }
-
-  if (showDetailsModal && selectedInvite != null) {
-    InviteDetailsModal(invite = selectedInvite!!, onDismiss = { showDetailsModal = false; selectedInvite = null })
-  }
+  if (showCreateInviteModal) { CreateInviteModal(onDismiss = { showCreateInviteModal = false }, viewModel = viewModel) }
+  if (showDetailsModal && selectedInvite != null) { InviteDetailsModal(invite = selectedInvite!!, onDismiss = { showDetailsModal = false; selectedInvite = null }) }
 }

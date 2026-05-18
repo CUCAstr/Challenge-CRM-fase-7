@@ -30,21 +30,21 @@ fun InviteDetailsModal(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = invite.title,
+                    text = invite.title ?: "",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = slate800
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = invite.description, fontSize = 16.sp, color = slate700)
+                Text(text = invite.description ?: "", fontSize = 16.sp, color = slate700)
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // CORREÇÃO: Formatação de Data e Hora para exibição amigável
-                DetailItem("Data", FormatUtils.formatDate(invite.date))
-                DetailItem("Hora", FormatUtils.formatTime(invite.time))
-                DetailItem("Local", invite.location)
-                DetailItem("Segmento", invite.segment)
+                DetailItem("Data", FormatUtils.formatDate(invite.date ?: ""))
+                DetailItem("Hora", FormatUtils.formatTime(invite.time ?: ""))
+                DetailItem("Local", invite.location ?: "")
+                DetailItem("Segmento", invite.segment ?: "")
 
                 Spacer(modifier = Modifier.height(24.dp))
 

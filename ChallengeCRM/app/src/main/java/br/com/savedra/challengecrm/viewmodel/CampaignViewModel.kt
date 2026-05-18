@@ -73,7 +73,7 @@ class CampaignViewModel(application: Application) : AndroidViewModel(application
     val query = _searchQuery.value.lowercase()
 
     val filtered = _allCampaigns.value.filter { campaign ->
-      val nameMatches = campaign.title.lowercase().contains(query)
+      val nameMatches = (campaign.title ?: "").lowercase().contains(query)
       nameMatches
     }
 
@@ -112,26 +112,42 @@ class CampaignViewModel(application: Application) : AndroidViewModel(application
     _scoreEndFilter.value = score
   }
 
-  private val _showError = MutableStateFlow(false)
-  val showError: StateFlow<Boolean> = _showError.asStateFlow()
+  private val _showError = MutableStateFlow<String?>(null)
+  val showError: StateFlow<String?> = _showError.asStateFlow()
 
   fun sendCampaign() {
-    if (
-      _newCampaignTitle.value.isBlank() ||
-      _newCampaignDescription.value.isBlank() ||
-      _newCampaignStartDate.value.isBlank() ||
-      _newCampaignEndDate.value.isBlank()
-    ) {
-      _showError.value = true
+    val title = _newCampaignTitle.value
+    val description = _newCampaignDescription.value
+    val startDateRaw = _newCampaignStartDate.value
+    val endDateRaw = _newCampaignEndDate.value
+
+    if (title.isBlank() || description.isBlank() || startDateRaw.isBlank() || endDateRaw.isBlank()) {
+      _showError.value = "Preencha todos os campos obrigatórios."
       return
     }
 
+    // Validação de Data (B12)
+    try {
+        val sdf = java.text.SimpleDateFormat("ddMMyyyy", java.util.Locale.getDefault())
+        val start = sdf.parse(startDateRaw)
+        val end = sdf.parse(endDateRaw)
+        
+        if (end != null && start != null && end.before(start)) {
+            _showError.value = "A data de término deve ser após a data de início."
+            return
+        }
+    } catch (e: Exception) {
+        _showError.value = "Formato de data inválido."
+        return
+    }
+
+    _showError.value = null
     viewModelScope.launch {
         val campaign = Campaign(
-          title = _newCampaignTitle.value,
-          description = _newCampaignDescription.value,
-          startDate = _newCampaignStartDate.value,
-          endDate = _newCampaignEndDate.value,
+          title = title,
+          description = description,
+          startDate = startDateRaw,
+          endDate = endDateRaw,
           segment = _segmentFilter.value
         )
         campaignRepository.sendCampaign(campaign)

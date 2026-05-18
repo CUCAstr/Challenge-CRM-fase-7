@@ -1,7 +1,11 @@
 package br.com.savedra.challengebackend.config;
 
 import br.com.savedra.challengebackend.model.User;
+import br.com.savedra.challengebackend.model.Banner;
+import br.com.savedra.challengebackend.model.Campaign;
 import br.com.savedra.challengebackend.repository.UserRepository;
+import br.com.savedra.challengebackend.repository.BannerRepository;
+import br.com.savedra.challengebackend.repository.CampaignRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -16,80 +20,56 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Inicializador de Dados Profissional.
- * 
- * ESTRATÉGIA:
- * 1. Limpa duplicatas de emails que impedem o funcionamento da autenticação.
- * 2. Cria o índice único manualmente após a limpeza para evitar o erro 11000.
- * 3. Garante o usuário admin padrão.
- */
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final BannerRepository bannerRepository;
+    private final CampaignRepository campaignRepository;
     private final MongoTemplate mongoTemplate;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
-        log.info("Iniciando fase de saneamento de dados...");
-        
         try {
-            // 1. Limpeza de Emails Duplicados
-            List<User> allUsers = userRepository.findAll();
-            Set<String> seenEmails = new HashSet<>();
-            int removedCount = 0;
-            
-            for (User user : allUsers) {
-                if (user.getEmail() == null) {
-                    userRepository.delete(user);
-                    continue;
-                }
-                String email = user.getEmail().toLowerCase().trim();
-                if (seenEmails.contains(email)) {
-                    log.warn("Removendo duplicata para o email: {}", email);
-                    userRepository.delete(user);
-                    removedCount++;
-                } else {
-                    seenEmails.add(email);
-                }
+            // 1. Limpeza e Saneamento
+            mongoTemplate.indexOps(User.class).ensureIndex(new Index().on("email", Sort.Direction.ASC).unique());
+
+            // 2. Usuários de Teste (SPRINT 2 FINAL)
+            ensureUser("Admin WTC", "admin@wtc.com", "OPERATOR", "Administração", "Ativo", "password123");
+            ensureUser("Operador 2", "op2@wtc.com", "OPERATOR", "Suporte", "Ativo", "123");
+            ensureUser("Cliente Finance", "finance@cliente.com", "CLIENT", "Finance", "Ativo", "password123");
+            ensureUser("Cliente ESG", "esg@cliente.com", "CLIENT", "ESG", "Ativo", "password123");
+
+            // 3. Seed de Conteúdo
+            if (bannerRepository.count() == 0) {
+                Banner b = new Banner();
+                b.setTitle("Bem-vindo ao WTC");
+                b.setDescription("Aproveite nossas ofertas exclusivas.");
+                b.setSegment("Todos");
+                bannerRepository.save(b);
             }
-            log.info("Saneamento concluído. Duplicatas removidas: {}", removedCount);
-
-            // 2. Criação Manual do Índice Único
-            // Isso garante que novas duplicatas não sejam criadas.
-            mongoTemplate.indexOps(User.class).ensureIndex(
-                new Index().on("email", Sort.Direction.ASC).unique()
-            );
-            log.info("Índice de email único garantido no MongoDB.");
-
-            // 3. Usuário Admin
-            ensureAdmin();
-
         } catch (Exception e) {
-            log.error("FALHA NA FASE DE INICIALIZAÇÃO: {}", e.getMessage());
+            log.error("Erro na inicialização: {}", e.getMessage());
         }
     }
 
-    private void ensureAdmin() {
-        if (userRepository.findAll().stream().noneMatch(u -> "admin@wtc.com".equals(u.getEmail()))) {
-            User admin = new User();
-            admin.setName("Admin WTC");
-            admin.setEmail("admin@wtc.com");
-            admin.setPassword(passwordEncoder.encode("password123"));
-            admin.setRole("OPERATOR");
-            admin.setStatus("Ativo");
-            admin.setCompany("WTC");
-            admin.setSegment("Administração");
-            admin.setNotes("");
-            admin.setMemberSince(new Date());
-            userRepository.save(admin);
-            log.info("Admin padrão criado: admin@wtc.com / password123");
-        } else {
-            log.info("Admin já existe e está pronto.");
+    private void ensureUser(String name, String email, String role, String segment, String status, String password) {
+        if (userRepository.findAll().stream().noneMatch(u -> email.equalsIgnoreCase(u.getEmail()))) {
+            User user = new User();
+            user.setName(name);
+            user.setEmail(email.toLowerCase().trim());
+            user.setPassword(passwordEncoder.encode(password));
+            user.setRole(role);
+            user.setStatus(status);
+            user.setCompany("WTC");
+            user.setSegment(segment);
+            user.setNotes("");
+            user.setMemberSince(new Date());
+            userRepository.save(user);
+            log.info("Usuário criado: {} com senha {}", email, password);
         }
     }
 }

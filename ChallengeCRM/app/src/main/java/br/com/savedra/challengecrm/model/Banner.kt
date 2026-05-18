@@ -1,8 +1,12 @@
 package br.com.savedra.challengecrm.model
 
+/**
+ * Modelo de Banner para o Android.
+ */
 data class Banner(
-  val title: String = "",
-  val description: String = "",
-  val imageUrl: String = "",
-  val segment: String = ""
+  val id: String? = null,
+  val title: String? = "",
+  val description: String? = "",
+  val imageUrl: String? = "",
+  val segment: String? = ""
 )

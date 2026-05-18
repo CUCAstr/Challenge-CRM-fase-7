@@ -22,6 +22,7 @@ import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.ChatViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import android.util.Log
 
 /**
  * Tela de Chat 1:1.
@@ -39,13 +40,10 @@ fun ChatScreen(
   val messages by viewModel.messages.collectAsState()
   var text by remember { mutableStateOf("") }
 
-  val opId = operator.id ?: ""
-  val uId = user.id ?: ""
-
-  // --- CORREÇÃO: RECARREGAR HISTÓRICO ---
-  // Toda vez que entramos no chat, limpamos a lista e carregamos novamente.
-  LaunchedEffect(opId, uId) {
-    viewModel.loadMessages(opId, uId)
+  // --- CORREÇÃO: LOG DE DEPURAÇÃO E RECARREGAMENTO ---
+  LaunchedEffect(operator.id, user.id) {
+    Log.d("ChatScreen", "Entrando no chat: Op=${operator.name} (${operator.id}) | User=${user.name} (${user.id})")
+    viewModel.loadMessages(operator, user)
   }
 
   Scaffold(
@@ -55,13 +53,13 @@ fun ChatScreen(
         title = {
           Column {
             Text(
-              text = if (currentUserRole == "Operador") (user.name ?: "Cliente") else (operator.name ?: "Atendente"),
+              text = if (currentUserRole == "Operador" || currentUserRole == "OPERATOR") (user.name ?: "Cliente") else (operator.name ?: "Atendente"),
               fontSize = 18.sp,
               fontWeight = FontWeight.Bold,
               color = slate800
             )
             Text(
-              text = if (currentUserRole == "Operador") "Cliente" else "Suporte WTC",
+              text = if (currentUserRole == "Operador" || currentUserRole == "OPERATOR") "Conversa Direta" else "Suporte WTC",
               fontSize = 12.sp,
               color = slate600
             )
@@ -82,15 +80,21 @@ fun ChatScreen(
         .padding(innerPadding)
         .background(slate50)
     ) {
-      LazyColumn(
-        modifier = Modifier
-          .weight(1f)
-          .fillMaxWidth()
-          .padding(horizontal = 16.dp)
-      ) {
-        items(messages) { message ->
-          MessageBubble(message = message, isCurrentUser = message.senderId == currentSenderId)
-        }
+      if (messages.isEmpty()) {
+          Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+              Text("Nenhuma mensagem por aqui ainda.", color = slate400)
+          }
+      } else {
+          LazyColumn(
+            modifier = Modifier
+              .weight(1f)
+              .fillMaxWidth()
+              .padding(horizontal = 16.dp)
+          ) {
+            items(messages) { message ->
+              MessageBubble(message = message, isCurrentUser = message.senderId == currentSenderId)
+            }
+          }
       }
 
       MessageInputRow(

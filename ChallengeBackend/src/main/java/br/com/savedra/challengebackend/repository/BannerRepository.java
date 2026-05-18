@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface BannerRepository extends MongoRepository<Banner, String> {
     List<Banner> findBySegment(String segment);
+    List<Banner> findBySegmentIn(List<String> segments);
 }

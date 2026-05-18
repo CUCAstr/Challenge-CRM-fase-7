@@ -21,39 +21,30 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.Campaign
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.CreateCampaignModal
 import br.com.savedra.challengecrm.viewmodel.CampaignViewModel
 
-/**
- * Tela de Gestão de Campanhas.
- * 
- * CORREÇÕES:
- * 1. Botão Voltar na TopAppBar.
- * 2. Recarregamento de dados ao entrar.
- * 3. Menu de navegação inferior mantido.
- * 4. Alto contraste nos textos.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CampaignsScreen(
-  onClientsClick: () -> Unit = {},
-  onInvitesClick: () -> Unit = {},
-  onPromotionsClick: () -> Unit = {},
-  onBannersClick: () -> Unit = {},
-  onChatsClick: () -> Unit = {},
-  onLogoutClick: () -> Unit = {},
-  onBackClick: () -> Unit = {},
-  viewModel: CampaignViewModel = viewModel()
+  navController: NavController,
+  onClientsClick: () -> Unit,
+  onInvitesClick: () -> Unit,
+  onPromotionsClick: () -> Unit,
+  onBannersClick: () -> Unit,
+  onChatsClick: () -> Unit,
+  onLogoutClick: () -> Unit,
+  onBackClick: () -> Unit,
+  viewModel: CampaignViewModel
 ) {
   val campaigns by viewModel.filteredCampaigns.collectAsState()
   val searchQuery by viewModel.searchQuery.collectAsState()
   var showCreateCampaignModal by remember { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
 
-  // --- CORREÇÃO: RECARREGAR DADOS ---
   LaunchedEffect(Unit) {
     focusManager.clearFocus()
     viewModel.loadCampaigns()
@@ -67,7 +58,7 @@ fun CampaignsScreen(
             title = { Text("Campanhas", color = slate800, fontWeight = FontWeight.Bold) },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
+                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Voltar", tint = slate800)
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = white)
@@ -75,6 +66,7 @@ fun CampaignsScreen(
     },
     bottomBar = {
       ScrollableBottomNavigation(
+        navController = navController,
         onClientsClick = onClientsClick,
         onInvitesClick = onInvitesClick,
         onPromotionsClick = onPromotionsClick,
@@ -87,54 +79,30 @@ fun CampaignsScreen(
     }
   ) { paddingValues ->
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      // Header Info
       Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(text = "Gestão de Campanhas", fontSize = 16.sp, color = slate600, modifier = Modifier.weight(1f))
-        IconButton(onClick = { showCreateCampaignModal = true }) {
-          Icon(Icons.Default.Add, contentDescription = null, tint = indigo500)
-        }
+        IconButton(onClick = { showCreateCampaignModal = true }) { Icon(Icons.Default.Add, contentDescription = null, tint = indigo500) }
       }
-
-      // Search Bar
       Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
         Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
           Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Search, null, tint = slate400)
-            TextField(
-              value = searchQuery,
-              onValueChange = { viewModel.updateSearchQuery(it) },
-              placeholder = { Text("Pesquisar campanhas...", color = slate400) },
-              modifier = Modifier.fillMaxWidth(),
-              colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black
-              )
-            )
+            TextField(value = searchQuery, onValueChange = { viewModel.updateSearchQuery(it) }, placeholder = { Text("Pesquisar campanhas...", color = slate400) }, modifier = Modifier.fillMaxWidth(), colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedTextColor = Color.Black, unfocusedTextColor = Color.Black))
           }
         }
       }
-
       Spacer(modifier = Modifier.height(16.dp))
-
       if (campaigns.isEmpty()) {
-          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-              Text("Nenhuma campanha encontrada.", color = slate800)
-          }
+          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Nenhuma campanha encontrada.", color = slate800) }
       } else {
           LazyColumn(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(campaigns) { campaign ->
-                Card(
-                  modifier = Modifier.fillMaxWidth(), 
-                  colors = CardDefaults.cardColors(containerColor = white),
-                  elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
+                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = campaign.title, fontWeight = FontWeight.Bold, color = slate800)
-                        Text(text = campaign.description, color = slate600, maxLines = 2)
+                        Text(text = campaign.title ?: "", fontWeight = FontWeight.Bold, color = slate800)
+                        Text(text = campaign.description ?: "", color = slate600, maxLines = 2)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "Segmento: ${campaign.segment}", fontSize = 12.sp, color = indigo600)
+                        Text(text = "Segmento: ${campaign.segment ?: ""}", fontSize = 12.sp, color = indigo600)
                     }
                 }
             }
@@ -142,8 +110,5 @@ fun CampaignsScreen(
       }
     }
   }
-
-  if (showCreateCampaignModal) {
-    CreateCampaignModal(onDismiss = { showCreateCampaignModal = false }, viewModel = viewModel)
-  }
+  if (showCreateCampaignModal) { CreateCampaignModal(onDismiss = { showCreateCampaignModal = false }, viewModel = viewModel) }
 }

@@ -18,9 +18,9 @@ object AppRoutes {
   const val EVENTS_CENTER = "eventsCenter"
   const val BUSINESS_CLUB = "businessClub"
   const val SHERATON_HOTEL = "sheratonHotel"
-  const val OPERATOR_LIST = "operatorList"
+  const val OPERATOR_LIST = "operator_list"
   const val SEGMENT_CHATS = "segmentChats"
   const val GROUP_CHAT = "groupChat"
   const val CLIENT_SEGMENT_CHATS = "client_segment_chats"
-  const val GROUP_CHAT_READONLY = "group_chat_reado"
+  const val GROUP_CHAT_READONLY = "group_chat_readonly"
 }

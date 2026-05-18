@@ -2,8 +2,13 @@ package br.com.savedra.challengecrm.navigation
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import br.com.savedra.challengecrm.ui.theme.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -15,27 +20,17 @@ import androidx.navigation.navArgument
 import br.com.savedra.challengecrm.ui.view.*
 import br.com.savedra.challengecrm.viewmodel.*
 
-/**
- * Factory customizada e ROBUSTA para capturar erros de criação de ViewModel.
- */
 class SafeViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return try {
-            Log.d("SafeFactory", "Tentando instanciar ${modelClass.simpleName}...")
-            
-            // Tenta primeiro o construtor com Application (AndroidViewModel)
             try {
                 val constructor = modelClass.getConstructor(Application::class.java)
-                Log.d("SafeFactory", "Usando construtor (Application) para ${modelClass.simpleName}")
                 constructor.newInstance(application)
             } catch (e: NoSuchMethodException) {
-                // Se não tiver, tenta o construtor vazio (ViewModel padrão)
-                Log.d("SafeFactory", "Usando construtor vazio para ${modelClass.simpleName}")
                 modelClass.getDeclaredConstructor().newInstance()
             }
         } catch (e: Exception) {
-            Log.e("SafeFactory", "ERRO FATAL na criação de ${modelClass.simpleName}: ${e.message}")
-            e.printStackTrace()
+            Log.e("SafeFactory", "ERRO na criação de ${modelClass.simpleName}", e)
             throw e
         }
     }
@@ -47,13 +42,16 @@ fun AppNavigation() {
   val application = context.applicationContext as Application
   val factory = remember { SafeViewModelFactory(application) }
 
-  Log.d("AppNavigation", "Iniciando AppNavigation...")
   val navController = rememberNavController()
 
-  // Inicialização segura
   val authViewModel: AuthViewModel = viewModel(factory = factory)
   val customerViewModel: OperatorViewModel = viewModel(factory = factory)
   val usersViewModel: UsersViewModel = viewModel(factory = factory)
+  val bannerViewModel: BannerViewModel = viewModel(factory = factory)
+  val campaignViewModel: CampaignViewModel = viewModel(factory = factory)
+  val inviteViewModel: InviteViewModel = viewModel(factory = factory)
+  val promotionViewModel: PromotionViewModel = viewModel(factory = factory)
+  val chatViewModel: ChatViewModel = viewModel(factory = factory)
 
   val currentUser by authViewModel.currentUser.collectAsState()
 
@@ -69,23 +67,31 @@ fun AppNavigation() {
     }
     composable(AppRoutes.CLIENT_HOME) {
       ClientHomeScreen(
+        navController = navController,
         authViewModel = authViewModel,
+        bannerViewModel = bannerViewModel,
+        campaignViewModel = campaignViewModel,
         onLogoutClick = {
           authViewModel.logout()
-          navController.navigate(AppRoutes.LOGIN) { 
-            popUpTo(AppRoutes.CLIENT_HOME) { inclusive = true } 
-          }
+          navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.CLIENT_HOME) { inclusive = true } }
         },
         onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) },
         onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) },
         onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) },
-        onChatClick = { navController.navigate(AppRoutes.OPERATOR_LIST) }
+        onChatClick = { 
+            usersViewModel.loadUsers()
+            navController.navigate(AppRoutes.OPERATOR_LIST) 
+        }
       )
     }
     composable(AppRoutes.OPERATOR_HOME) {
       OperatorHomeScreen(
+        navController = navController,
         viewModel = customerViewModel,
-        onCustomerClick = { navController.navigate("${AppRoutes.CHAT}/${currentUser?.id}/${it.id}") },
+        onCustomerClick = { 
+            usersViewModel.loadUsers()
+            navController.navigate("${AppRoutes.CHAT}/${currentUser?.id}/${it.id}") 
+        },
         onChatsClick = { navController.navigate(AppRoutes.SEGMENT_CHATS) },
         onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
         onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
@@ -93,9 +99,7 @@ fun AppNavigation() {
         onBannersClick = { navController.navigate(AppRoutes.BANNERS) },
         onLogoutClick = {
           authViewModel.logout()
-          navController.navigate(AppRoutes.LOGIN) { 
-            popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } 
-          }
+          navController.navigate(AppRoutes.LOGIN) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } }
         }
       )
     }
@@ -108,7 +112,6 @@ fun AppNavigation() {
     ) { backStackEntry ->
       val operatorId = backStackEntry.arguments?.getString("operatorId")
       val userId = backStackEntry.arguments?.getString("userId")
-      val chatViewModel: ChatViewModel = viewModel(factory = factory)
       val users by usersViewModel.users.collectAsState()
 
       val operator = users.find { it.id == operatorId }
@@ -125,21 +128,36 @@ fun AppNavigation() {
           currentUserRole = currentUserRole,
           onBackClick = { navController.popBackStack() }
         )
+      } else {
+          LaunchedEffect(users, operatorId, userId) {
+              if (users.isEmpty() || operator == null || user == null) {
+                usersViewModel.loadUsers()
+              }
+          }
+          Box(Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+              Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                  CircularProgressIndicator(color = indigo500)
+                  Spacer(Modifier.height(16.dp))
+                  Text("Carregando conversa...", color = slate600)
+              }
+          }
       }
     }
     composable(AppRoutes.OPERATOR_LIST) {
       OperatorListScreen(
-        usersViewModel = usersViewModel,
+        navController = navController,
         authViewModel = authViewModel,
+        usersViewModel = usersViewModel,
         onOperatorClick = { operator ->
           navController.navigate("${AppRoutes.CHAT}/${operator.id}/${currentUser?.id}")
         },
-        navController = navController,
         onBackClick = { navController.popBackStack() }
       )
     }
     composable(AppRoutes.INVITES) {
       InvitesScreen(
+        navController = navController,
+        viewModel = inviteViewModel,
         onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
         onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
         onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
@@ -154,6 +172,8 @@ fun AppNavigation() {
     }
     composable(AppRoutes.PROMOTIONS) {
       PromotionsScreen(
+        navController = navController,
+        viewModel = promotionViewModel,
         onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
         onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
         onCampaignsClick = { navController.navigate(AppRoutes.CAMPAIGNS) },
@@ -168,6 +188,8 @@ fun AppNavigation() {
     }
     composable(AppRoutes.CAMPAIGNS) {
       CampaignsScreen(
+        navController = navController,
+        viewModel = campaignViewModel,
         onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
         onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
         onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
@@ -182,6 +204,8 @@ fun AppNavigation() {
     }
     composable(AppRoutes.BANNERS) {
       BannersScreen(
+        navController = navController,
+        viewModel = bannerViewModel,
         onClientsClick = { navController.navigate(AppRoutes.OPERATOR_HOME) { popUpTo(AppRoutes.OPERATOR_HOME) { inclusive = true } } },
         onInvitesClick = { navController.navigate(AppRoutes.INVITES) },
         onPromotionsClick = { navController.navigate(AppRoutes.PROMOTIONS) },
@@ -240,7 +264,6 @@ fun AppNavigation() {
       arguments = listOf(navArgument("segment") { type = NavType.StringType })
     ) { backStackEntry ->
       val segment = backStackEntry.arguments?.getString("segment")
-      val chatViewModel: ChatViewModel = viewModel(factory = factory)
       val currentSenderId = currentUser?.id
       if (segment != null && currentSenderId != null) {
         GroupChatScreen(
@@ -256,7 +279,6 @@ fun AppNavigation() {
       arguments = listOf(navArgument("segment") { type = NavType.StringType })
     ) { backStackEntry ->
       val segment = backStackEntry.arguments?.getString("segment")
-      val chatViewModel: ChatViewModel = viewModel(factory = factory)
       val currentSenderId = currentUser?.id
       if (segment != null && currentSenderId != null) {
         GroupChatReadOnlyScreen(

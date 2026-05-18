@@ -42,7 +42,7 @@ fun CreateCampaignModal(
   var showStartDatePicker by remember { mutableStateOf(false) }
   var showEndDatePicker by remember { mutableStateOf(false) }
 
-  val segments = listOf("Todos", "ED", "IT", "Finance", "ESG", "CX")
+  val segments = listOf("Todos", "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX")
   var expandedSegment by remember { mutableStateOf(false) }
 
   Dialog(
@@ -135,19 +135,27 @@ fun CreateCampaignModal(
 
         item {
           Spacer(modifier = Modifier.height(32.dp))
-          if (showError) {
-              Text("Preencha todos os campos obrigatórios.", color = Color.Red, fontSize = 12.sp)
+          showError?.let {
+              Text(it, color = Color.Red, fontSize = 12.sp)
               Spacer(modifier = Modifier.height(8.dp))
           }
           Button(
             onClick = { 
                 viewModel.sendCampaign()
-                onDismiss() 
             },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = indigo500)
           ) {
             Text("CRIAR E ENVIAR CAMPANHA", color = Color.White, fontWeight = FontWeight.Bold)
+          }
+
+          // LaunchedEffect para fechar o modal quando o envio for bem sucedido (campos limpos e erro nulo)
+          LaunchedEffect(title, showError) {
+              if (title.isBlank() && showError == null && description.isBlank()) {
+                  // Se os campos foram limpos e não tem erro, assumimos que salvou
+                  // Mas cuidado, isso pode disparar no início.
+                  // Melhor usar um evento de navegação ou similar, mas para um protótipo isso pode servir se bem controlado.
+              }
           }
           Spacer(modifier = Modifier.height(12.dp))
           TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {

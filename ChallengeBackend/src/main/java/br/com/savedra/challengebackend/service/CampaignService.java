@@ -22,6 +22,10 @@ public class CampaignService {
         return campaignRepository.findBySegment(segment);
     }
 
+    public List<Campaign> getCampaignsBySegments(List<String> segments) {
+        return campaignRepository.findBySegmentIn(segments);
+    }
+
     public Optional<Campaign> getCampaignById(String id) {
         return campaignRepository.findById(id);
     }

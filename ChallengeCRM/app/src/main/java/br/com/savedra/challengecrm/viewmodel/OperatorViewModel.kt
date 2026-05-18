@@ -90,21 +90,20 @@ class OperatorViewModel(application: Application) : AndroidViewModel(application
 
   /**
    * Salva notas do operador sobre um cliente.
-   * 
-   * CORREÇÃO: Garante que a nota seja salva e a lista local atualizada.
    */
   fun saveNotes(userId: String, notes: String) {
     if (userId.isBlank()) return
     viewModelScope.launch {
       try {
         Log.d("OperatorVM", "Salvando notas para o usuário: $userId")
-        val customer = customerRepository.getCustomerById(userId)
+        // IMPORTANTE: Buscamos o estado MAIS RECENTE do usuário antes de salvar
+        val customer = _allCustomers.value.find { it.id == userId }
         if (customer != null) {
             val updated = customer.copy(notes = notes)
             val result = customerRepository.updateCustomer(userId, updated)
             if (result != null) {
                 Log.d("OperatorVM", "Notas salvas com sucesso no backend")
-                loadCustomers() // Recarrega lista para refletir mudança
+                loadCustomers() // Sincroniza lista local
             }
         }
       } catch (e: Exception) {

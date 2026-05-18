@@ -19,10 +19,15 @@ public class CampaignController {
     public ResponseEntity<List<Campaign>> getAllCampaigns(
             @RequestParam(required = false) String segment
     ) {
-        if (segment != null) {
-            return ResponseEntity.ok(campaignService.getCampaignsBySegment(segment));
+        System.out.println("DEBUG INBOX: Request for campaigns with segment: " + segment);
+        if (segment != null && !segment.isEmpty() && !segment.equalsIgnoreCase("Todos")) {
+            List<Campaign> campaigns = campaignService.getCampaignsBySegments(java.util.Arrays.asList(segment, "Todos"));
+            System.out.println("DEBUG INBOX: Found " + campaigns.size() + " campaigns for " + segment + " + Todos");
+            return ResponseEntity.ok(campaigns);
         }
-        return ResponseEntity.ok(campaignService.getAllCampaigns());
+        List<Campaign> allCampaigns = campaignService.getAllCampaigns();
+        System.out.println("DEBUG INBOX: Found " + allCampaigns.size() + " campaigns (findAll)");
+        return ResponseEntity.ok(allCampaigns);
     }
 
     @GetMapping("/{id}")

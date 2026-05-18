@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -19,28 +20,29 @@ import br.com.savedra.challengecrm.ui.view.components.StandardTextField
 
 /**
  * Modal de Detalhes do Cliente.
- * 
- * CORREÇÕES APLICADAS:
- * 1. Botões alinhados horizontalmente (Row).
- * 2. Uso do StandardTextField para fixar o TAB e o Contraste.
- * 3. Cores de alto contraste em todos os botões.
  */
 @Composable
 fun CustomerDetailsModal(
     customer: User,
     onDismiss: () -> Unit,
-    onSendMessage: () -> Unit,
-    onSaveNotes: (String) -> Unit
+    onSendMessage: () -> Unit = {},
+    onSaveNotes: (String) -> Unit = {}
 ) {
-    var notes by remember { mutableStateOf(customer.notes ?: "") }
+    // CORREÇÃO (Bug 6): Forçar o estado interno a resetar quando o objeto 'customer' muda
+    var notes by remember(customer.id) { mutableStateOf(customer.notes ?: "") }
+    val isOperator = customer.role == "OPERATOR" || customer.role == "Operador"
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 24.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = white)
         ) {
-            Column(modifier = Modifier.padding(24.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
                 Text(
                     text = customer.name ?: "Sem Nome",
                     fontSize = 22.sp,
@@ -54,40 +56,61 @@ fun CustomerDetailsModal(
                 Text(text = "Segmento: ${customer.segment ?: "Geral"}", fontSize = 14.sp, color = slate800)
                 Text(text = "Status: ${customer.status ?: "Ativo"}", fontSize = 14.sp, color = slate800)
                 
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                Text(text = "Notas do Operador", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = slate700)
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // CORREÇÃO: Uso do componente padrão
-                StandardTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
-                    label = "Observações",
-                    modifier = Modifier.height(120.dp)
-                )
+                if (!isOperator) {
+                    Text(text = "Score: ${customer.score ?: 0} pts", fontSize = 14.sp, color = slate800)
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(color = slate200)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(text = "Perfil 360 (Histórico Recente)", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = slate800)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Column(modifier = Modifier.fillMaxWidth().background(slate50, RoundedCornerShape(8.dp)).padding(12.dp)) {
+                        Text("• Última Campanha: Natal 2025", fontSize = 12.sp, color = slate600)
+                        Text("• Última Mensagem: ${customer.notes?.take(20) ?: "Nenhuma"}", fontSize = 12.sp, color = slate600)
+                        Text("• Membro desde: 2024", fontSize = 12.sp, color = slate600)
+                    }
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Text(text = "Notas do Operador", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = slate700)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    StandardTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        label = "Observações",
+                        modifier = Modifier.height(100.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // CORREÇÃO: Alinhamento Horizontal (Row)
+                // CORREÇÃO (Bug 6): Layout de botões fixo em Row (Horizontal)
                 Row(
                     modifier = Modifier.fillMaxWidth(), 
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) { 
-                        Text("CANCELAR", color = slate600, fontWeight = FontWeight.Bold) 
+                        Text("FECHAR", color = slate600, fontWeight = FontWeight.Bold) 
                     }
-                    Row {
+                    
+                    if (!isOperator) {
+                        Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = onSendMessage,
-                            colors = ButtonDefaults.buttonColors(containerColor = indigo500)
+                            colors = ButtonDefaults.buttonColors(containerColor = indigo500),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
                         ) { 
                             Text("CHAT", color = Color.White, fontWeight = FontWeight.Bold) 
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
                             onClick = { onSaveNotes(notes) },
-                            colors = ButtonDefaults.buttonColors(containerColor = slate800)
+                            colors = ButtonDefaults.buttonColors(containerColor = slate800),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
                         ) { 
                             Text("SALVAR", color = Color.White, fontWeight = FontWeight.Bold) 
                         }

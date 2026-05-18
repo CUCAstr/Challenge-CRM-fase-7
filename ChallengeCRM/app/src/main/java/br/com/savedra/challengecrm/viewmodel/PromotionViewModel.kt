@@ -79,7 +79,7 @@ class PromotionViewModel(application: Application) : AndroidViewModel(applicatio
     val query = _searchQuery.value.lowercase()
 
     val filtered = _allPromotions.value.filter { promotion ->
-      val nameMatches = promotion.title.lowercase().contains(query)
+      val nameMatches = (promotion.title ?: "").lowercase().contains(query)
       nameMatches
     }
 

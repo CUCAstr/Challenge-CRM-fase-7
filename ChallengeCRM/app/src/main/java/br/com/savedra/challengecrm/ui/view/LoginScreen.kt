@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.foundation.text.KeyboardActions
@@ -35,11 +36,6 @@ import br.com.savedra.challengecrm.viewmodel.AuthViewModel
 
 /**
  * Tela de Login do sistema.
- * 
- * CORREÇÕES APLICADAS:
- * 1. Implementada a lógica de navegação automática após sucesso no login.
- * 2. Corrigido o erro de contraste forçando cores de tema claro.
- * 3. Adicionado tratamento de erros detalhado.
  */
 @Composable
 fun LoginScreen(
@@ -54,13 +50,10 @@ fun LoginScreen(
   var passwordVisible by rememberSaveable { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
 
-  // Reset de estado ao entrar para evitar dados residuais
   LaunchedEffect(Unit) {
     authViewModel.resetUiState()
   }
 
-  // --- CORREÇÃO: LÓGICA DE NAVEGAÇÃO ---
-  // Quando o estado de autenticação muda para Sucesso, navegamos para a tela correta.
   if (authState is AuthUIState.Success) {
     val user = (authState as AuthUIState.Success).user
     LaunchedEffect(user) {
@@ -111,7 +104,6 @@ fun LoginScreen(
         modifier = Modifier.padding(bottom = 32.dp)
       )
 
-      // Campo Email
       OutlinedTextField(
         value = email,
         onValueChange = { authViewModel.onEmailChange(it) },
@@ -120,7 +112,7 @@ fun LoginScreen(
         modifier = Modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Email,
-            imeAction = ImeAction.Next // CORREÇÃO: Habilita o botão 'Próximo' no teclado
+            imeAction = ImeAction.Next
         ),
         colors = OutlinedTextFieldDefaults.colors(
           focusedTextColor = Color.Black,
@@ -134,7 +126,6 @@ fun LoginScreen(
 
       Spacer(modifier = Modifier.height(16.dp))
 
-      // Campo Senha
       OutlinedTextField(
         value = password,
         onValueChange = { authViewModel.onPasswordChange(it) },
@@ -143,7 +134,7 @@ fun LoginScreen(
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done // CORREÇÃO: Habilita o botão 'Concluído'
+            imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
             onDone = { 
@@ -170,7 +161,6 @@ fun LoginScreen(
 
       Spacer(modifier = Modifier.height(24.dp))
 
-      // Botão Entrar
       Button(
         onClick = { 
           focusManager.clearFocus()
@@ -196,7 +186,25 @@ fun LoginScreen(
         Text("Não possui conta? Cadastre-se", color = indigo600, fontWeight = FontWeight.Medium)
       }
 
-      // Feedback de Erro
+      // --- ATALHOS DE TESTE (Sprint 2 Final) ---
+      Spacer(modifier = Modifier.height(32.dp))
+      HorizontalDivider(color = slate300)
+      Spacer(modifier = Modifier.height(8.dp))
+      Text("Atalhos de Teste Rápido", fontSize = 12.sp, color = slate400)
+      
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+              Text("Operadores", fontSize = 10.sp, color = slate600, fontWeight = FontWeight.Bold)
+              TextButton(onClick = { quickLogin(authViewModel, "admin@wtc.com", "password123") }) { Text("Admin", fontSize = 12.sp) }
+              TextButton(onClick = { quickLogin(authViewModel, "op2@wtc.com", "123") }) { Text("Op 2", fontSize = 12.sp) }
+          }
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+              Text("Clientes", fontSize = 10.sp, color = slate600, fontWeight = FontWeight.Bold)
+              TextButton(onClick = { quickLogin(authViewModel, "finance@cliente.com", "password123") }) { Text("Finance", fontSize = 12.sp) }
+              TextButton(onClick = { quickLogin(authViewModel, "esg@cliente.com", "password123") }) { Text("ESG", fontSize = 12.sp) }
+          }
+      }
+
       if (authState is AuthUIState.Error) {
         Text(
           text = (authState as AuthUIState.Error).message,
@@ -207,5 +215,19 @@ fun LoginScreen(
         )
       }
     }
+  }
+}
+
+private fun quickLogin(viewModel: AuthViewModel, email: String, password: String = "password123") {
+    viewModel.onEmailChange(email)
+    viewModel.onPasswordChange(password)
+    viewModel.login()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+  ChallengeCRMTheme {
+    LoginScreen(navController = rememberNavController(), authViewModel = viewModel())
   }
 }

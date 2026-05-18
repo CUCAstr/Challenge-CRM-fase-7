@@ -1,7 +1,7 @@
 package br.com.savedra.challengecrm.ui.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable // CORREÇÃO: Importação faltante
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,41 +14,44 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import br.com.savedra.challengecrm.model.*
 import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.*
+import br.com.savedra.challengecrm.ui.view.modals.*
 import br.com.savedra.challengecrm.viewmodel.*
 
 /**
  * Tela Inicial do Cliente (Caixa de Entrada).
- * 
- * CORREÇÕES:
- * 1. Adicionado recarregamento de Banners e Campanhas ao entrar.
- * 2. systemBarsPadding para evitar notch.
- * 3. Alto contraste em todos os elementos.
  */
 @Composable
 fun ClientHomeScreen(
+  navController: NavController,
   authViewModel: AuthViewModel,
   onLogoutClick: () -> Unit,
   onEventsCenterClick: () -> Unit,
   onBusinessClubClick: () -> Unit,
   onSheratonHotelClick: () -> Unit,
   onChatClick: () -> Unit,
-  bannerViewModel: BannerViewModel = viewModel(),
-  campaignViewModel: CampaignViewModel = viewModel()
+  bannerViewModel: BannerViewModel,
+  campaignViewModel: CampaignViewModel
 ) {
   val currentUser by authViewModel.currentUser.collectAsState()
   val banners by bannerViewModel.filteredBanners.collectAsState()
   val campaigns by campaignViewModel.filteredCampaigns.collectAsState()
 
-  // --- CORREÇÃO: RECARREGAR LISTAS ---
-  LaunchedEffect(Unit) {
-      bannerViewModel.loadBanners()
-      campaignViewModel.loadCampaigns()
+  var selectedBanner by remember { mutableStateOf<Banner?>(null) }
+  var selectedCampaign by remember { mutableStateOf<Campaign?>(null) }
+  var showBannerDetails by remember { mutableStateOf(false) }
+  var showCampaignDetails by remember { mutableStateOf(false) }
+
+  LaunchedEffect(currentUser) {
+      if (currentUser != null) {
+          bannerViewModel.loadBanners(currentUser?.segment)
+          campaignViewModel.loadCampaigns(currentUser?.segment)
+      }
   }
 
   Scaffold(
@@ -80,7 +83,6 @@ fun ClientHomeScreen(
       
       Spacer(modifier = Modifier.height(24.dp))
 
-      // Seção de Banners
       Text("Destaques", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = slate800)
       Spacer(modifier = Modifier.height(8.dp))
       if (banners.isEmpty()) {
@@ -92,8 +94,14 @@ fun ClientHomeScreen(
       } else {
           LazyColumn(modifier = Modifier.height(150.dp)) {
               items(banners) { banner ->
-                  Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), colors = CardDefaults.cardColors(containerColor = indigo500)) {
-                      Text(banner.title, color = white, modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold)
+                  Card(
+                      modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).clickable { 
+                          selectedBanner = banner
+                          showBannerDetails = true 
+                      }, 
+                      colors = CardDefaults.cardColors(containerColor = indigo500)
+                  ) {
+                      Text(banner.title ?: "", color = white, modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold)
                   }
               }
           }
@@ -101,7 +109,6 @@ fun ClientHomeScreen(
 
       Spacer(modifier = Modifier.height(24.dp))
 
-      // Seção de Campanhas
       Text("Suas Campanhas", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = slate800)
       Spacer(modifier = Modifier.height(8.dp))
       LazyColumn(modifier = Modifier.weight(1f)) {
@@ -110,21 +117,23 @@ fun ClientHomeScreen(
         }
         items(campaigns) { campaign ->
           Card(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { 
+                selectedCampaign = campaign
+                showCampaignDetails = true
+            },
             colors = CardDefaults.cardColors(containerColor = white),
             elevation = CardDefaults.cardElevation(2.dp)
           ) {
             Column(modifier = Modifier.padding(16.dp)) {
-              Text(text = campaign.title, fontWeight = FontWeight.Bold, color = slate800)
-              Text(text = campaign.description, color = slate600, fontSize = 14.sp)
+              Text(text = campaign.title ?: "", fontWeight = FontWeight.Bold, color = slate800)
+              Text(text = campaign.description ?: "", color = slate600, fontSize = 14.sp)
             }
           }
         }
       }
       
-      // Botão de Chat Rápido
       Button(
-          onClick = onChatClick,
+          onClick = { navController.navigate(br.com.savedra.challengecrm.navigation.AppRoutes.OPERATOR_LIST) },
           modifier = Modifier.fillMaxWidth().height(56.dp),
           colors = ButtonDefaults.buttonColors(containerColor = slate800)
       ) {
@@ -133,6 +142,13 @@ fun ClientHomeScreen(
           Text("FALAR COM ATENDENTE", fontWeight = FontWeight.Bold, color = white)
       }
     }
+  }
+
+  if (showBannerDetails && selectedBanner != null) {
+      BannerDetailsModal(banner = selectedBanner!!, onDismiss = { showBannerDetails = false })
+  }
+  if (showCampaignDetails && selectedCampaign != null) {
+      CampaignDetailsModal(campaign = selectedCampaign!!, onDismiss = { showCampaignDetails = false })
   }
 }
 
@@ -161,7 +177,6 @@ fun BottomNavigationClient(
       horizontalArrangement = Arrangement.SpaceEvenly,
       verticalAlignment = Alignment.CenterVertically
     ) {
-      // Inbox
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable { onInboxClick() }.weight(1f)
@@ -175,7 +190,6 @@ fun BottomNavigationClient(
         Text("Início", color = white, fontSize = 10.sp)
       }
 
-      // Eventos
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable { onEventsCenterClick() }.weight(1f)
@@ -189,7 +203,6 @@ fun BottomNavigationClient(
         Text("Eventos", color = white, fontSize = 10.sp)
       }
 
-      // Business
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable { onBusinessClubClick() }.weight(1f)
@@ -203,7 +216,6 @@ fun BottomNavigationClient(
         Text("Clube", color = white, fontSize = 10.sp)
       }
 
-      // Sheraton
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable { onSheratonHotelClick() }.weight(1f)
@@ -217,7 +229,6 @@ fun BottomNavigationClient(
         Text("Hotel", color = white, fontSize = 10.sp)
       }
 
-      // Sair
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable { onLogoutClick() }.weight(1f)

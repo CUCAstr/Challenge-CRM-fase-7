@@ -59,7 +59,9 @@ fun SegmentChatsScreen(
         },
         bottomBar = {
             ScrollableBottomNavigation(
+                navController = navController,
                 onClientsClick = onClientsClick,
+
                 onInvitesClick = onInvitesClick,
                 onPromotionsClick = onPromotionsClick,
                 onCampaignsClick = onCampaignsClick,

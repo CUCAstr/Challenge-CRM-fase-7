@@ -70,7 +70,7 @@ class BannerViewModel(application: Application) : AndroidViewModel(application) 
     val query = _searchQuery.value.lowercase()
 
     val filtered = _allBanners.value.filter { banner ->
-      val nameMatches = banner.title.lowercase().contains(query)
+      val nameMatches = (banner.title ?: "").lowercase().contains(query)
       nameMatches
     }
 

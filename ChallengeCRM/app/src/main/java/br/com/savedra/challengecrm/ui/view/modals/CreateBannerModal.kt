@@ -44,7 +44,7 @@ fun CreateBannerModal(
   val scoreEndFilter by viewModel.scoreEndFilter.collectAsState()
   val showError by viewModel.showError.collectAsState()
 
-  val segments = listOf("Todos", "ED", "IT", "Finance", "ESG", "CX")
+  val segments = listOf("Todos", "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX")
   val statusList = listOf("Todos", "Ativo", "Em negociação", "Inativo")
 
   var expandedSegment by remember { mutableStateOf(false) }

@@ -17,47 +17,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.Promotion
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.CreatePromotionModal
 import br.com.savedra.challengecrm.ui.view.modals.PromotionDetailsModal
 import br.com.savedra.challengecrm.viewmodel.PromotionViewModel
-import androidx.compose.ui.platform.LocalFocusManager
 
-/**
- * Tela de Gestão de Promoções.
- * 
- * CORREÇÕES:
- * 1. Botão Voltar na TopAppBar.
- * 2. Recarregamento automático de dados.
- * 3. Modal de detalhes.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PromotionsScreen(
-  onClientsClick: () -> Unit = {},
-  onInvitesClick: () -> Unit = {},
-  onCampaignsClick: () -> Unit = {},
-  onBannersClick: () -> Unit = {},
-  onChatsClick: () -> Unit = {},
-  onLogoutClick: () -> Unit = {},
-  onBackClick: () -> Unit = {},
-  viewModel: PromotionViewModel = viewModel()
+  navController: NavController,
+  onClientsClick: () -> Unit,
+  onInvitesClick: () -> Unit,
+  onCampaignsClick: () -> Unit,
+  onBannersClick: () -> Unit,
+  onChatsClick: () -> Unit,
+  onLogoutClick: () -> Unit,
+  onBackClick: () -> Unit,
+  viewModel: PromotionViewModel
 ) {
   val promotions by viewModel.filteredPromotions.collectAsState()
   val searchQuery by viewModel.searchQuery.collectAsState()
-  
   var showCreatePromotionModal by remember { mutableStateOf(false) }
   var selectedPromotion by remember { mutableStateOf<Promotion?>(null) }
   var showDetailsModal by remember { mutableStateOf(false) }
-  
   val focusManager = LocalFocusManager.current
 
-  // --- CORREÇÃO: RECARREGAR DADOS ---
   LaunchedEffect(Unit) {
     focusManager.clearFocus()
     viewModel.loadPromotions()
@@ -79,6 +69,7 @@ fun PromotionsScreen(
     },
     bottomBar = {
       ScrollableBottomNavigation(
+        navController = navController,
         onClientsClick = onClientsClick,
         onInvitesClick = onInvitesClick,
         onPromotionsClick = { },
@@ -91,56 +82,28 @@ fun PromotionsScreen(
     }
   ) { paddingValues ->
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-      // Header Info
       Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(text = "Gestão de Promoções", fontSize = 16.sp, color = slate600, modifier = Modifier.weight(1f))
-        IconButton(onClick = { showCreatePromotionModal = true }) {
-          Icon(Icons.Default.Add, contentDescription = null, tint = indigo500)
-        }
+        IconButton(onClick = { showCreatePromotionModal = true }) { Icon(Icons.Default.Add, contentDescription = null, tint = indigo500) }
       }
-
-      // Search Bar
       Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
-        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(2.dp)) {
+        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
           Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.Search, null, tint = slate400)
-            TextField(
-              value = searchQuery,
-              onValueChange = { viewModel.updateSearchQuery(it) },
-              placeholder = { Text("Pesquisar...", color = slate400) },
-              modifier = Modifier.fillMaxWidth(),
-              colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black
-              )
-            )
+            TextField(value = searchQuery, onValueChange = { viewModel.updateSearchQuery(it) }, placeholder = { Text("Pesquisar...", color = slate400) }, modifier = Modifier.fillMaxWidth(), colors = TextFieldDefaults.colors(focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent, focusedTextColor = Color.Black, unfocusedTextColor = Color.Black))
           }
         }
       }
-
       Spacer(modifier = Modifier.height(16.dp))
-
-      // Lista de Promoções
       if (promotions.isEmpty()) {
-          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-              Text("Nenhuma promoção encontrada.", color = slate800)
-          }
+          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Nenhuma promoção encontrada.", color = slate800) }
       } else {
           LazyColumn(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(promotions) { promotion ->
-                Card(
-                  modifier = Modifier.fillMaxWidth().clickable { 
-                      selectedPromotion = promotion
-                      showDetailsModal = true
-                  }, 
-                  colors = CardDefaults.cardColors(containerColor = white),
-                  elevation = CardDefaults.cardElevation(2.dp)
-                ) {
+                Card(modifier = Modifier.fillMaxWidth().clickable { selectedPromotion = promotion; showDetailsModal = true }, colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = promotion.title, fontWeight = FontWeight.Bold, color = slate800)
-                        Text(text = promotion.description, color = slate600, maxLines = 1)
+                        Text(text = promotion.title ?: "", fontWeight = FontWeight.Bold, color = slate800)
+                        Text(text = promotion.description ?: "", color = slate600, maxLines = 1)
                     }
                 }
             }
@@ -148,12 +111,6 @@ fun PromotionsScreen(
       }
     }
   }
-
-  if (showCreatePromotionModal) {
-    CreatePromotionModal(onDismiss = { showCreatePromotionModal = false }, viewModel = viewModel)
-  }
-
-  if (showDetailsModal && selectedPromotion != null) {
-    PromotionDetailsModal(promotion = selectedPromotion!!, onDismiss = { showDetailsModal = false; selectedPromotion = null })
-  }
+  if (showCreatePromotionModal) { CreatePromotionModal(onDismiss = { showCreatePromotionModal = false }, viewModel = viewModel) }
+  if (showDetailsModal && selectedPromotion != null) { PromotionDetailsModal(promotion = selectedPromotion!!, onDismiss = { showDetailsModal = false; selectedPromotion = null }) }
 }

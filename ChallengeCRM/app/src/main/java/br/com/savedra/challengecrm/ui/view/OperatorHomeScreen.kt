@@ -13,44 +13,36 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.PhotoCameraBack
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import br.com.savedra.challengecrm.model.User
+import br.com.savedra.challengecrm.navigation.AppRoutes
 import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.viewmodel.OperatorViewModel
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material.icons.filled.PhotoCameraBack
 import br.com.savedra.challengecrm.ui.view.modals.CustomerDetailsModal
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.lazy.LazyRow
 
-/**
- * Painel Principal do Operador.
- * 
- * CORREÇÕES APLICADAS:
- * 1. Tratamento de nulos (?: "") em todas as propriedades do User.
- * 2. SystemBarsPadding para evitar notch e barra de navegação.
- * 3. Alto contraste em textos e dropdowns.
- * 4. Navegação via Tab (ImeAction.Next) na busca.
- */
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("DEPRECATION")
 @Composable
 fun OperatorHomeScreen(
+  navController: NavController,
   onCustomerClick: (User) -> Unit = {},
   onChatsClick: () -> Unit = {},
   onInvitesClick: () -> Unit = {},
@@ -64,19 +56,31 @@ fun OperatorHomeScreen(
   val searchQuery by viewModel.searchQuery.collectAsState()
   var showCustomerDetails by remember { mutableStateOf(false) }
   var selectedCustomer by remember { mutableStateOf<User?>(null) }
+  var showCreateOperator by remember { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
 
   LaunchedEffect(Unit) {
+    viewModel.loadCustomers()
     viewModel.updateSegmentFilter("Todos")
     viewModel.updateStatusFilter("Todos")
     focusManager.clearFocus()
   }
 
   Scaffold(
-    modifier = Modifier.systemBarsPadding(), // CORREÇÃO: Notch e Nav Bar
+    modifier = Modifier.systemBarsPadding(),
     containerColor = slate50,
+    floatingActionButton = {
+        FloatingActionButton(
+            onClick = { showCreateOperator = true },
+            containerColor = indigo500,
+            contentColor = Color.White
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Novo Operador")
+        }
+    },
     bottomBar = {
       ScrollableBottomNavigation(
+        navController = navController,
         onClientsClick = { },
         onChatsClick = onChatsClick,
         onInvitesClick = onInvitesClick,
@@ -90,50 +94,21 @@ fun OperatorHomeScreen(
   ) { innerPadding ->
     Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
       Column(modifier = Modifier.fillMaxSize()) {
-        // --- CABEÇALHO ---
-        Column(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp)
-        ) {
-          Text(
-            text = "Painel do Operador",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = slate800
-          )
+        Column(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
+          Text(text = "Painel do Operador", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = slate800)
           Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = "Gestão de Clientes",
-            fontSize = 16.sp,
-            color = slate600
-          )
+          Text(text = "Gestão de Clientes", fontSize = 16.sp, color = slate600)
         }
 
-        // --- BARRA DE PESQUISA E FILTROS ---
-        Column(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
           Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = white),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
           ) {
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-              verticalAlignment = Alignment.CenterVertically
-            ) {
-              Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search",
-                tint = slate400,
-                modifier = Modifier.size(20.dp)
-              )
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+              Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = slate400, modifier = Modifier.size(20.dp))
               Spacer(modifier = Modifier.width(12.dp))
               TextField(
                 value = searchQuery,
@@ -156,22 +131,14 @@ fun OperatorHomeScreen(
 
           Spacer(modifier = Modifier.height(12.dp))
 
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.Top
-          ) {
-            // --- FILTRO SEGMENTO ---
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
             Column(modifier = Modifier.weight(1f)) {
               Text("Segmento", color = slate600, fontSize = 12.sp, fontWeight = FontWeight.Medium)
               var expandedSegment by remember { mutableStateOf(false) }
-              val itemsSegment = listOf("Todos", "ED", "IT", "Finance", "ESG", "CX")
+              val itemsSegment = listOf("Todos", "ED", "IT", "Retail & Financial", "GRC", "HR", "Smart Spends", "Health", "CSC", "Field Marketing", "Finance", "ESG", "CX")
               var selectedSegment by remember { mutableStateOf(itemsSegment[0]) }
 
-              ExposedDropdownMenuBox(
-                expanded = expandedSegment,
-                onExpandedChange = { expandedSegment = !expandedSegment }
-              ) {
+              ExposedDropdownMenuBox(expanded = expandedSegment, onExpandedChange = { expandedSegment = !expandedSegment }) {
                 OutlinedTextField(
                   value = selectedSegment,
                   onValueChange = {},
@@ -179,27 +146,16 @@ fun OperatorHomeScreen(
                   modifier = Modifier.menuAnchor().fillMaxWidth(),
                   trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSegment) },
                   colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = white,
-                    unfocusedContainerColor = white,
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedBorderColor = indigo500,
-                    unfocusedBorderColor = slate300
+                    focusedContainerColor = white, unfocusedContainerColor = white,
+                    focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+                    focusedBorderColor = indigo500, unfocusedBorderColor = slate300
                   )
                 )
-                ExposedDropdownMenu(
-                  expanded = expandedSegment,
-                  onDismissRequest = { expandedSegment = false },
-                  modifier = Modifier.background(white)
-                ) {
+                ExposedDropdownMenu(expanded = expandedSegment, onDismissRequest = { expandedSegment = false }, modifier = Modifier.background(white)) {
                   itemsSegment.forEach { item ->
                     DropdownMenuItem(
                       text = { Text(item, color = Color.Black) },
-                      onClick = {
-                        selectedSegment = item
-                        expandedSegment = false
-                        viewModel.updateSegmentFilter(item)
-                      },
+                      onClick = { selectedSegment = item; expandedSegment = false; viewModel.updateSegmentFilter(item) },
                       modifier = Modifier.background(white)
                     )
                   }
@@ -207,17 +163,13 @@ fun OperatorHomeScreen(
               }
             }
 
-            // --- FILTRO STATUS ---
             Column(modifier = Modifier.weight(1f)) {
               Text("Status", color = slate600, fontSize = 12.sp, fontWeight = FontWeight.Medium)
               var expandedStatus by remember { mutableStateOf(false) }
               val itemsStatus = listOf("Todos", "Ativo", "Inativo")
               var selectedStatus by remember { mutableStateOf(itemsStatus[0]) }
 
-              ExposedDropdownMenuBox(
-                expanded = expandedStatus,
-                onExpandedChange = { expandedStatus = !expandedStatus }
-              ) {
+              ExposedDropdownMenuBox(expanded = expandedStatus, onExpandedChange = { expandedStatus = !expandedStatus }) {
                 OutlinedTextField(
                   value = selectedStatus,
                   onValueChange = {},
@@ -225,27 +177,16 @@ fun OperatorHomeScreen(
                   modifier = Modifier.menuAnchor().fillMaxWidth(),
                   trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus) },
                   colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = white,
-                    unfocusedContainerColor = white,
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    focusedBorderColor = indigo500,
-                    unfocusedBorderColor = slate300
+                    focusedContainerColor = white, unfocusedContainerColor = white,
+                    focusedTextColor = Color.Black, unfocusedTextColor = Color.Black,
+                    focusedBorderColor = indigo500, unfocusedBorderColor = slate300
                   )
                 )
-                ExposedDropdownMenu(
-                  expanded = expandedStatus,
-                  onDismissRequest = { expandedStatus = false },
-                  modifier = Modifier.background(white)
-                ) {
+                ExposedDropdownMenu(expanded = expandedStatus, onDismissRequest = { expandedStatus = false }, modifier = Modifier.background(white)) {
                   itemsStatus.forEach { item ->
                     DropdownMenuItem(
                       text = { Text(item, color = Color.Black) },
-                      onClick = {
-                        selectedStatus = item
-                        expandedStatus = false
-                        viewModel.updateStatusFilter(item)
-                      },
+                      onClick = { selectedStatus = item; expandedStatus = false; viewModel.updateStatusFilter(item) },
                       modifier = Modifier.background(white)
                     )
                   }
@@ -257,7 +198,6 @@ fun OperatorHomeScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- LISTA DE CLIENTES ---
         if (customers.isEmpty()) {
           Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Nenhum cliente encontrado.", color = slate800, fontWeight = FontWeight.Medium)
@@ -269,13 +209,7 @@ fun OperatorHomeScreen(
             contentPadding = PaddingValues(bottom = 80.dp)
           ) {
             items(customers) { customer ->
-              CustomerCard(
-                customer = customer,
-                onClick = {
-                  selectedCustomer = customer
-                  showCustomerDetails = true
-                }
-              )
+              CustomerCard(customer = customer, onClick = { selectedCustomer = customer; showCustomerDetails = true })
             }
           }
         }
@@ -283,7 +217,6 @@ fun OperatorHomeScreen(
     }
   }
 
-  // --- MODAL DE DETALHES ---
   if (showCustomerDetails && selectedCustomer != null) {
     CustomerDetailsModal(
       customer = selectedCustomer!!,
@@ -296,11 +229,15 @@ fun OperatorHomeScreen(
       }
     )
   }
+
+  if (showCreateOperator) {
+    br.com.savedra.challengecrm.ui.view.modals.CreateOperatorModal(
+        onDismiss = { showCreateOperator = false },
+        onSuccess = { showCreateOperator = false; viewModel.loadCustomers() }
+    )
+  }
 }
 
-/**
- * Card de exibição do cliente.
- */
 @Composable
 fun CustomerCard(customer: User, onClick: () -> Unit) {
   Card(
@@ -309,45 +246,23 @@ fun CustomerCard(customer: User, onClick: () -> Unit) {
     colors = CardDefaults.cardColors(containerColor = white),
     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Box(
-        modifier = Modifier.size(48.dp).clip(CircleShape).background(slate200),
-        contentAlignment = Alignment.Center
-      ) {
+    Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+      Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(slate200), contentAlignment = Alignment.Center) {
         Icon(Icons.Default.Person, contentDescription = null, tint = slate600)
       }
       Spacer(modifier = Modifier.width(16.dp))
       Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = customer.name ?: "Sem Nome", 
-          fontSize = 16.sp, 
-          fontWeight = FontWeight.Bold, 
-          color = slate800
-        )
-        Text(
-          text = customer.email ?: "Sem Email", 
-          fontSize = 14.sp, 
-          color = slate600
-        )
+        Text(text = customer.name ?: "Sem Nome", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = slate800)
+        Text(text = customer.email ?: "Sem Email", fontSize = 14.sp, color = slate600)
       }
-      Icon(
-        imageVector = Icons.Default.Person, 
-        contentDescription = "Ver Detalhes", 
-        tint = slate400,
-        modifier = Modifier.size(20.dp)
-      )
+      Icon(imageVector = Icons.Default.Person, contentDescription = "Ver Detalhes", tint = slate400, modifier = Modifier.size(20.dp))
     }
   }
 }
 
-/**
- * Navegação Inferior para o Operador.
- */
 @Composable
 fun ScrollableBottomNavigation(
+  navController: NavController,
   onClientsClick: () -> Unit,
   onChatsClick: () -> Unit,
   onInvitesClick: () -> Unit,
@@ -369,11 +284,9 @@ fun ScrollableBottomNavigation(
     colors = CardDefaults.cardColors(containerColor = slate800),
     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
   ) {
-    LazyRow(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
+    LazyRow(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
       item { NavItem(Icons.Default.Person, "Clientes", isClientsActive, onClientsClick) }
+      item { NavItem(Icons.Default.Group, "Equipe", false, { navController.navigate(AppRoutes.OPERATOR_LIST) }) }
       item { NavItem(Icons.Default.Mail, "Chats", isChatsActive, onChatsClick) }
       item { NavItem(Icons.Default.Mail, "Convites", isInvitesActive, onInvitesClick) }
       item { NavItem(Icons.Default.CardGiftcard, "Promoções", isPromotionsActive, onPromotionsClick) }
@@ -386,22 +299,9 @@ fun ScrollableBottomNavigation(
 
 @Composable
 fun NavItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, isActive: Boolean, onClick: () -> Unit, tint: Color? = null) {
-  Column(
-    horizontalAlignment = Alignment.CenterHorizontally,
-    modifier = Modifier.clickable { onClick() }.width(80.dp)
-  ) {
-    Icon(
-      imageVector = icon,
-      contentDescription = label,
-      tint = tint ?: (if (isActive) purple500 else white),
-      modifier = Modifier.size(24.dp)
-    )
+  Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onClick() }.width(80.dp)) {
+    Icon(imageVector = icon, contentDescription = label, tint = tint ?: (if (isActive) purple500 else white), modifier = Modifier.size(24.dp))
     Spacer(modifier = Modifier.height(4.dp))
-    Text(
-      text = label, 
-      color = tint ?: (if (isActive) purple500 else white), 
-      fontSize = 11.sp,
-      fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
-    )
+    Text(text = label, color = tint ?: (if (isActive) purple500 else white), fontSize = 11.sp, fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal)
   }
 }

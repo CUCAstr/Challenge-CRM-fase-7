@@ -30,29 +30,29 @@ fun PromotionDetailsModal(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = promotion.title,
+                    text = promotion.title ?: "",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = slate800
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = promotion.description, fontSize = 16.sp, color = slate700)
+                Text(text = promotion.description ?: "", fontSize = 16.sp, color = slate700)
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Row {
                     Text(text = "De: ", color = slate600)
-                    Text(text = "R$ ${promotion.originalValue}", style = androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough))
+                    Text(text = "R$ ${promotion.originalValue ?: ""}", style = androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Por: R$ ${promotion.promotionValue}", color = green500, fontWeight = FontWeight.Bold)
+                    Text(text = "Por: R$ ${promotion.promotionValue ?: ""}", color = green500, fontWeight = FontWeight.Bold)
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 // CORREÇÃO: Formatação amigável
-                val dateF = FormatUtils.formatDate(promotion.dateExpiresIn)
-                val timeF = FormatUtils.formatTime(promotion.hoursExpiresIn)
+                val dateF = FormatUtils.formatDate(promotion.dateExpiresIn ?: "")
+                val timeF = FormatUtils.formatTime(promotion.hoursExpiresIn ?: "")
                 Text(text = "Expira em: $dateF às $timeF", fontSize = 14.sp, color = slate600)
-                Text(text = "Segmento: ${promotion.segment}", fontSize = 14.sp, color = slate600)
+                Text(text = "Segmento: ${promotion.segment ?: ""}", fontSize = 14.sp, color = slate600)
 
                 Spacer(modifier = Modifier.height(24.dp))
 

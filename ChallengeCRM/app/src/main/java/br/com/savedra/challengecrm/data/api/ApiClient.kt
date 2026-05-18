@@ -1,7 +1,8 @@
 package br.com.savedra.challengecrm.data.api
 
-import android.util.Log // CORREÇÃO: Importação faltante
+import android.util.Log
 import br.com.savedra.challengecrm.data.local.TokenManager
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -11,6 +12,10 @@ object ApiClient {
     // --- CORREÇÃO: URL BASE ---
     // 10.0.2.2 é o endereço especial do Android para acessar o 'localhost' do seu PC.
     private const val BASE_URL = "http://10.0.2.2:8080/"
+
+    private val gson = GsonBuilder()
+        .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+        .create()
 
     private fun getOkHttpClient(tokenManager: TokenManager): OkHttpClient {
         // Interceptador para ver todos os detalhes das requisições no Logcat
@@ -41,7 +46,7 @@ object ApiClient {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(getOkHttpClient(tokenManager))
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(AuthApi::class.java)
     }
@@ -50,7 +55,7 @@ object ApiClient {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(getOkHttpClient(tokenManager))
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(apiClass)
     }

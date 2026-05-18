@@ -17,10 +17,15 @@ public class BannerController {
 
     @GetMapping
     public ResponseEntity<List<Banner>> getBanners(@RequestParam(required = false) String segment) {
-        if (segment != null) {
-            return ResponseEntity.ok(repository.findBySegment(segment));
+        System.out.println("DEBUG INBOX: Request for banners with segment: " + segment);
+        if (segment != null && !segment.isEmpty() && !segment.equalsIgnoreCase("Todos")) {
+            List<Banner> banners = repository.findBySegmentIn(java.util.Arrays.asList(segment, "Todos"));
+            System.out.println("DEBUG INBOX: Found " + banners.size() + " banners for " + segment + " + Todos");
+            return ResponseEntity.ok(banners);
         }
-        return ResponseEntity.ok(repository.findAll());
+        List<Banner> allBanners = repository.findAll();
+        System.out.println("DEBUG INBOX: Found " + allBanners.size() + " banners (findAll)");
+        return ResponseEntity.ok(allBanners);
     }
 
     @PostMapping
