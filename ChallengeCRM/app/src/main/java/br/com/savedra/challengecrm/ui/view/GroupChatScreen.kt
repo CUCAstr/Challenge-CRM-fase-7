@@ -34,7 +34,7 @@ fun GroupChatScreen(
 ) {
     val focusManager = LocalFocusManager.current
     LaunchedEffect(Unit) {
-        viewModel.loadGroupMessages(segment)
+        viewModel.loadGroupMessages(segment, currentSenderId)
         focusManager.clearFocus()
     }
 

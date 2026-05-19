@@ -77,11 +77,7 @@ fun AppNavigation() {
         },
         onEventsCenterClick = { navController.navigate(AppRoutes.EVENTS_CENTER) },
         onBusinessClubClick = { navController.navigate(AppRoutes.BUSINESS_CLUB) },
-        onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) },
-        onChatClick = { 
-            usersViewModel.loadUsers()
-            navController.navigate(AppRoutes.OPERATOR_LIST) 
-        }
+        onSheratonHotelClick = { navController.navigate(AppRoutes.SHERATON_HOTEL) }
       )
     }
     composable(AppRoutes.OPERATOR_HOME) {

@@ -13,6 +13,7 @@ import java.util.Optional;
 public class CustomerService {
 
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     public List<User> getAllCustomers() {
         return userRepository.findByRole("CLIENT");
@@ -41,6 +42,7 @@ public class CustomerService {
 
     public User updateCustomer(String id, User userDetails) {
         User user = userRepository.findById(id).orElseThrow();
+        String oldNotes = user.getNotes();
         user.setName(userDetails.getName());
         user.setCompany(userDetails.getCompany());
         user.setSegment(userDetails.getSegment());
@@ -50,6 +52,15 @@ public class CustomerService {
         user.setNotes(userDetails.getNotes());
         user.setPhone(userDetails.getPhone());
         user.setCategory(userDetails.getCategory());
-        return userRepository.save(user);
+        
+        User updated = userRepository.save(user);
+        
+        if (userDetails.getNotes() != null && !userDetails.getNotes().equals(oldNotes)) {
+            auditService.log("UPDATE_NOTES", "Notas atualizadas para o cliente: " + user.getEmail());
+        } else {
+            auditService.log("UPDATE_CUSTOMER", "Perfil atualizado para o cliente: " + user.getEmail());
+        }
+        
+        return updated;
     }
 }

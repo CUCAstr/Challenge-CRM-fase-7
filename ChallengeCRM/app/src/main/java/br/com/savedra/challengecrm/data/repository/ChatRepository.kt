@@ -97,6 +97,10 @@ class ChatRepository(private val chatApi: ChatApi) {
         chatApi.updateMessageStatus(messageId, status)
     }
 
+    suspend fun markAsRead(chatRoomId: String, userId: String) {
+        chatApi.markAsRead(chatRoomId, userId)
+    }
+
     suspend fun getOrCreateChatRoom(operatorId: String, operatorName: String, userId: String, userName: String): ChatRoom? {
         val response = chatApi.getOrCreateChatRoom(operatorId, operatorName, userId, userName)
         return if (response.isSuccessful) response.body() else null

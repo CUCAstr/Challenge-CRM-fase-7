@@ -120,4 +120,20 @@ public class ChatService {
         message.setStatus(status);
         messageRepository.save(message);
     }
+
+    public void markMessagesAsRead(String chatRoomId, String readerId) {
+        System.out.println("[CHAT_DEBUG] Marcando mensagens como LIDO para sala: " + chatRoomId);
+        List<Message> messages = messageRepository.findByChatRoomIdOrderByTimestampAsc(chatRoomId);
+        boolean updated = false;
+        for (Message msg : messages) {
+            if (!msg.getSenderId().equals(readerId) && !"READ".equals(msg.getStatus())) {
+                msg.setStatus("READ");
+                messageRepository.save(msg);
+                updated = true;
+            }
+        }
+        if (updated) {
+            System.out.println("[CHAT_DEBUG] Status atualizado para READ.");
+        }
+    }
 }

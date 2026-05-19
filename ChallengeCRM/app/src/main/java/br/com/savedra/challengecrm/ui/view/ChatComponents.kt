@@ -3,6 +3,8 @@ package br.com.savedra.challengecrm.ui.view
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -41,12 +43,28 @@ fun MessageBubble(message: Message, isCurrentUser: Boolean) {
     ) {
       Column(modifier = Modifier.padding(12.dp)) {
         Text(text = message.text ?: "", color = textColor, fontSize = 16.sp)
-        Text(
-          text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(message.timestamp ?: Date()),
-          color = if (isCurrentUser) indigo100 else slate400,
-          fontSize = 10.sp,
-          modifier = Modifier.align(Alignment.End)
-        )
+        
+        Row(
+            verticalAlignment = Alignment.CenterVertically, 
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text(
+                text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(message.timestamp ?: Date()),
+                color = if (isCurrentUser) indigo100 else slate400,
+                fontSize = 10.sp
+            )
+            
+            if (isCurrentUser) {
+                Spacer(Modifier.width(4.dp))
+                // Ícones de Status: Check Único (Sent), Check Duplo (Read)
+                Icon(
+                    imageVector = if (message.status == "READ") Icons.Default.DoneAll else Icons.Default.Check,
+                    contentDescription = message.status,
+                    tint = if (message.status == "READ") blue100 else indigo100,
+                    modifier = Modifier.size(12.dp)
+                )
+            }
+        }
       }
     }
   }
@@ -54,10 +72,6 @@ fun MessageBubble(message: Message, isCurrentUser: Boolean) {
 
 /**
  * Linha de entrada de mensagem reutilizável.
- * 
- * CORREÇÕES:
- * 1. Aplicado navigationBarsPadding() para evitar que os botões do Android fiquem em cima do input.
- * 2. Aplicado imePadding() para que a caixa de texto suba junto com o teclado.
  */
 @Composable
 fun MessageInputRow(
@@ -68,8 +82,8 @@ fun MessageInputRow(
   Surface(
     modifier = Modifier
       .fillMaxWidth()
-      .navigationBarsPadding() // CORREÇÃO: Respeita os botões de navegação do sistema
-      .imePadding(),          // CORREÇÃO: Respeita a subida do teclado
+      .navigationBarsPadding()
+      .imePadding(),
     color = white,
     shadowElevation = 8.dp
   ) {

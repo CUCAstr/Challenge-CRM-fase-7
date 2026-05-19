@@ -28,4 +28,10 @@ interface ChatApi {
         @Path("messageId") messageId: String,
         @Query("status") status: String
     ): Response<Void>
+
+    @PATCH("api/v1/chat/rooms/{chatRoomId}/read")
+    suspend fun markAsRead(
+        @Path("chatRoomId") chatRoomId: String,
+        @Query("userId") userId: String
+    ): Response<Void>
 }

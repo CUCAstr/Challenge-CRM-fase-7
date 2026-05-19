@@ -66,4 +66,13 @@ public class ChatController {
         chatService.updateMessageStatus(messageId, status);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/rooms/{chatRoomId}/read")
+    public ResponseEntity<Void> markAsRead(
+            @PathVariable String chatRoomId,
+            @RequestParam String userId
+    ) {
+        chatService.markMessagesAsRead(chatRoomId, userId);
+        return ResponseEntity.noContent().build();
+    }
 }

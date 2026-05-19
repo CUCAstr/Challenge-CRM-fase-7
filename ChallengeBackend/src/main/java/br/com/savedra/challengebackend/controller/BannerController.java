@@ -2,6 +2,7 @@ package br.com.savedra.challengebackend.controller;
 
 import br.com.savedra.challengebackend.model.Banner;
 import br.com.savedra.challengebackend.repository.BannerRepository;
+import br.com.savedra.challengebackend.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 public class BannerController {
 
     private final BannerRepository repository;
+    private final AuditService auditService;
 
     @GetMapping
     public ResponseEntity<List<Banner>> getBanners(@RequestParam(required = false) String segment) {
@@ -30,6 +32,8 @@ public class BannerController {
 
     @PostMapping
     public ResponseEntity<Banner> createBanner(@RequestBody Banner banner) {
-        return ResponseEntity.ok(repository.save(banner));
+        Banner saved = repository.save(banner);
+        auditService.log("CREATE_BANNER", "Banner criado: " + saved.getTitle());
+        return ResponseEntity.ok(saved);
     }
 }

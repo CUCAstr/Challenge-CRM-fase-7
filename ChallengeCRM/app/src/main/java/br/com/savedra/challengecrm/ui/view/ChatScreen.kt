@@ -43,7 +43,7 @@ fun ChatScreen(
   // --- CORREÇÃO: LOG DE DEPURAÇÃO E RECARREGAMENTO ---
   LaunchedEffect(operator.id, user.id) {
     Log.d("ChatScreen", "Entrando no chat: Op=${operator.name} (${operator.id}) | User=${user.name} (${user.id})")
-    viewModel.loadMessages(operator, user)
+    viewModel.loadMessages(operator, user, currentSenderId)
   }
 
   Scaffold(

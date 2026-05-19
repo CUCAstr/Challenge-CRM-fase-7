@@ -28,7 +28,6 @@ fun CustomerDetailsModal(
     onSendMessage: () -> Unit = {},
     onSaveNotes: (String) -> Unit = {}
 ) {
-    // CORREÇÃO (Bug 6): Forçar o estado interno a resetar quando o objeto 'customer' muda
     var notes by remember(customer.id) { mutableStateOf(customer.notes ?: "") }
     val isOperator = customer.role == "OPERATOR" || customer.role == "Operador"
 
@@ -66,10 +65,31 @@ fun CustomerDetailsModal(
                     Text(text = "Perfil 360 (Histórico Recente)", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = slate800)
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    Column(modifier = Modifier.fillMaxWidth().background(slate50, RoundedCornerShape(8.dp)).padding(12.dp)) {
-                        Text("• Última Campanha: Natal 2025", fontSize = 12.sp, color = slate600)
-                        Text("• Última Mensagem: ${customer.notes?.take(20) ?: "Nenhuma"}", fontSize = 12.sp, color = slate600)
-                        Text("• Membro desde: 2024", fontSize = 12.sp, color = slate600)
+                    val hasHistory = !customer.notes.isNullOrBlank() || (customer.score ?: 0) > 0
+                    
+                    if (hasHistory) {
+                        Column(modifier = Modifier.fillMaxWidth().background(slate50, RoundedCornerShape(8.dp)).padding(12.dp)) {
+                            Text("• Última Campanha: Natal 2025", fontSize = 12.sp, color = slate600)
+                            Text("• Última Mensagem: ${customer.notes?.take(20) ?: "Sem notas"}", fontSize = 12.sp, color = slate600)
+                            Text("• Membro desde: 2024", fontSize = 12.sp, color = slate600)
+                        }
+                    } else {
+                        Box(modifier = Modifier.fillMaxWidth().background(slate50, RoundedCornerShape(8.dp)).padding(16.dp), contentAlignment = Alignment.Center) {
+                            Text("Novo Usuário: Sem histórico registrado.", fontSize = 12.sp, color = slate400, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(text = "Tarefas Abertas", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = slate700)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(modifier = Modifier.fillMaxWidth().background(indigo100.copy(alpha = 0.5f), RoundedCornerShape(8.dp)).padding(12.dp)) {
+                        if (hasHistory) {
+                            Text("• Enviar proposta comercial", fontSize = 12.sp, color = indigo600)
+                            Text("• Agendar call de acompanhamento", fontSize = 12.sp, color = indigo600)
+                        } else {
+                            Text("• Qualificação inicial", fontSize = 12.sp, color = indigo600)
+                            Text("• Atribuir segmento", fontSize = 12.sp, color = indigo600)
+                        }
                     }
                     
                     Spacer(modifier = Modifier.height(24.dp))
@@ -87,7 +107,6 @@ fun CustomerDetailsModal(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // CORREÇÃO (Bug 6): Layout de botões fixo em Row (Horizontal)
                 Row(
                     modifier = Modifier.fillMaxWidth(), 
                     horizontalArrangement = Arrangement.End,

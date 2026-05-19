@@ -5,13 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,24 +27,22 @@ import br.com.savedra.challengecrm.ui.theme.*
 import br.com.savedra.challengecrm.ui.view.modals.*
 import br.com.savedra.challengecrm.viewmodel.*
 
-/**
- * Tela Inicial do Cliente (Caixa de Entrada).
- */
 @Composable
 fun ClientHomeScreen(
   navController: NavController,
   authViewModel: AuthViewModel,
+  bannerViewModel: BannerViewModel,
+  campaignViewModel: CampaignViewModel,
+  chatViewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
   onLogoutClick: () -> Unit,
   onEventsCenterClick: () -> Unit,
   onBusinessClubClick: () -> Unit,
-  onSheratonHotelClick: () -> Unit,
-  onChatClick: () -> Unit,
-  bannerViewModel: BannerViewModel,
-  campaignViewModel: CampaignViewModel
+  onSheratonHotelClick: () -> Unit
 ) {
   val currentUser by authViewModel.currentUser.collectAsState()
   val banners by bannerViewModel.filteredBanners.collectAsState()
   val campaigns by campaignViewModel.filteredCampaigns.collectAsState()
+  val unreadMap by chatViewModel.unreadCount.collectAsState()
 
   var selectedBanner by remember { mutableStateOf<Banner?>(null) }
   var selectedCampaign by remember { mutableStateOf<Campaign?>(null) }
@@ -51,6 +53,7 @@ fun ClientHomeScreen(
       if (currentUser != null) {
           bannerViewModel.loadBanners(currentUser?.segment)
           campaignViewModel.loadCampaigns(currentUser?.segment)
+          chatViewModel.loadChatRooms(currentUser?.id ?: "")
       }
   }
 
@@ -73,73 +76,76 @@ fun ClientHomeScreen(
         .fillMaxSize()
         .padding(innerPadding)
         .padding(16.dp)
+        .verticalScroll(rememberScrollState())
     ) {
-      Text(
-        text = "Bem-vindo, ${currentUser?.name ?: "Cliente"}!",
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold,
-        color = slate800
-      )
+      Text(text = "Olá, ${currentUser?.name ?: "Cliente"}!", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = slate800)
       
       Spacer(modifier = Modifier.height(24.dp))
 
-      Text("Destaques", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = slate800)
+      Text("Canal do Segmento (${currentUser?.segment ?: "Geral"})", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = slate800)
       Spacer(modifier = Modifier.height(8.dp))
-      if (banners.isEmpty()) {
-          Card(modifier = Modifier.fillMaxWidth().height(100.dp), colors = CardDefaults.cardColors(containerColor = white)) {
-              Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                  Text("Nenhuma novidade hoje.", color = slate600)
+      val segmentRoom = currentUser?.segment ?: "Todos"
+      val unreadSegment = unreadMap[segmentRoom] ?: 0
+      
+      Card(
+          modifier = Modifier.fillMaxWidth().clickable { 
+              navController.navigate("${AppRoutes.GROUP_CHAT_READONLY}/$segmentRoom")
+          },
+          colors = CardDefaults.cardColors(containerColor = white),
+          elevation = CardDefaults.cardElevation(2.dp)
+      ) {
+          Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+              Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(indigo100), contentAlignment = Alignment.Center) {
+                  Icon(Icons.Default.Campaign, contentDescription = null, tint = indigo500)
               }
-          }
-      } else {
-          LazyColumn(modifier = Modifier.height(150.dp)) {
-              items(banners) { banner ->
-                  Card(
-                      modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).clickable { 
-                          selectedBanner = banner
-                          showBannerDetails = true 
-                      }, 
-                      colors = CardDefaults.cardColors(containerColor = indigo500)
-                  ) {
-                      Text(banner.title ?: "", color = white, modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold)
-                  }
+              Spacer(modifier = Modifier.width(16.dp))
+              Column(modifier = Modifier.weight(1f)) {
+                  Text("Atualizações de ${currentUser?.segment ?: "Geral"}", fontWeight = FontWeight.Bold, color = slate800)
+                  Text("Acompanhe as mensagens dos nossos operadores.", fontSize = 12.sp, color = slate600)
+              }
+              if (unreadSegment > 0) {
+                  Badge(containerColor = Color.Red, contentColor = Color.White) { Text(unreadSegment.toString()) }
               }
           }
       }
 
-      Spacer(modifier = Modifier.height(24.dp))
+      Spacer(modifier = Modifier.height(32.dp))
 
-      Text("Suas Campanhas", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = slate800)
+      Text("Destaques", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = slate800)
       Spacer(modifier = Modifier.height(8.dp))
-      LazyColumn(modifier = Modifier.weight(1f)) {
-        if (campaigns.isEmpty()) {
-          item { Text("Você não possui campanhas ativas.", color = slate600) }
-        }
-        items(campaigns) { campaign ->
-          Card(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { 
-                selectedCampaign = campaign
-                showCampaignDetails = true
-            },
-            colors = CardDefaults.cardColors(containerColor = white),
-            elevation = CardDefaults.cardElevation(2.dp)
-          ) {
+      if (banners.isEmpty()) {
+          Text("Nenhuma novidade hoje.", color = slate400, fontSize = 14.sp)
+      } else {
+          banners.forEach { banner ->
+              Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp).clickable { selectedBanner = banner; showBannerDetails = true }, colors = CardDefaults.cardColors(containerColor = indigo500)) {
+                  Text(banner.title ?: "", color = white, modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold)
+              }
+          }
+      }
+
+      Spacer(modifier = Modifier.height(32.dp))
+
+      Text("Campanhas Ativas", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = slate800)
+      Spacer(modifier = Modifier.height(8.dp))
+      campaigns.forEach { campaign ->
+          Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { selectedCampaign = campaign; showCampaignDetails = true }, colors = CardDefaults.cardColors(containerColor = white), elevation = CardDefaults.cardElevation(2.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
               Text(text = campaign.title ?: "", fontWeight = FontWeight.Bold, color = slate800)
               Text(text = campaign.description ?: "", color = slate600, fontSize = 14.sp)
             }
           }
-        }
       }
       
+      Spacer(modifier = Modifier.height(40.dp))
+
       Button(
-          onClick = { navController.navigate(br.com.savedra.challengecrm.navigation.AppRoutes.OPERATOR_LIST) },
+          onClick = { navController.navigate(AppRoutes.OPERATOR_LIST) },
           modifier = Modifier.fillMaxWidth().height(56.dp),
           colors = ButtonDefaults.buttonColors(containerColor = slate800)
       ) {
           Icon(Icons.Default.Chat, contentDescription = null, tint = white)
           Spacer(Modifier.width(8.dp))
-          Text("FALAR COM ATENDENTE", fontWeight = FontWeight.Bold, color = white)
+          Text("SUPORTE 1:1", fontWeight = FontWeight.Bold, color = white)
       }
     }
   }

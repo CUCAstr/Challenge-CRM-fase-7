@@ -13,6 +13,7 @@ import java.util.Optional;
 public class CampaignService {
 
     private final CampaignRepository campaignRepository;
+    private final AuditService auditService;
 
     public List<Campaign> getAllCampaigns() {
         return campaignRepository.findAll();
@@ -31,10 +32,15 @@ public class CampaignService {
     }
 
     public Campaign saveCampaign(Campaign campaign) {
-        return campaignRepository.save(campaign);
+        Campaign saved = campaignRepository.save(campaign);
+        auditService.log("CREATE_CAMPAIGN", "Campanha criada: " + saved.getTitle());
+        return saved;
     }
 
     public void deleteCampaign(String id) {
-        campaignRepository.deleteById(id);
+        campaignRepository.findById(id).ifPresent(c -> {
+            auditService.log("DELETE_CAMPAIGN", "Campanha excluída: " + c.getTitle());
+            campaignRepository.deleteById(id);
+        });
     }
 }

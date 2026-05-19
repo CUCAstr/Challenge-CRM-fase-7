@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import androidx.lifecycle.viewModelScope
 import android.util.Log
+import android.widget.Toast
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -27,6 +28,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
   private val _messages = MutableStateFlow<List<Message>>(emptyList())
   val messages: StateFlow<List<Message>> = _messages.asStateFlow()
 
+  // Contador de mensagens não lidas por sala (Útil para testes solo)
+  private val _unreadCount = MutableStateFlow<Map<String, Int>>(emptyMap())
+  val unreadCount: StateFlow<Map<String, Int>> = _unreadCount.asStateFlow()
+
   private var currentChatRoomId: String? = null
   private var loadMessagesJob: kotlinx.coroutines.Job? = null
 
@@ -41,52 +46,75 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
   }
 
   /**
-   * Carrega salas de chat do usuário.
+   * Carrega salas de chat do usuário e calcula mensagens não lidas.
    */
   fun loadChatRooms(participantId: String) {
     viewModelScope.launch {
       repository.getChatRooms(participantId).collect { rooms ->
         _chatRooms.value = rooms
+        calculateUnreadGlobal(rooms, participantId)
       }
     }
+  }
+
+  private fun calculateUnreadGlobal(rooms: List<ChatRoom>, currentUserId: String) {
+      val newCounts = mutableMapOf<String, Int>()
+      rooms.forEach { room ->
+          viewModelScope.launch {
+              repository.getMessages(room.id).collect { msgs ->
+                  val unread = msgs.count { it.senderId != currentUserId && it.status != "READ" }
+                  newCounts[room.id] = unread
+                  _unreadCount.value = _unreadCount.value + (room.id to unread)
+              }
+          }
+      }
   }
 
   /**
    * Carrega mensagens entre um operador e um cliente.
    */
-  fun loadMessages(operator: User, user: User) {
+  fun loadMessages(operator: User, user: User, currentSenderId: String) {
     val operatorId = operator.id?.trim() ?: "unknown_op"
     val userId = user.id?.trim() ?: "unknown_user"
     val chatRoomId = repository.getChatRoomId(operatorId, userId)
     
     if (currentChatRoomId == chatRoomId && loadMessagesJob?.isActive == true) {
+        // Forçar marcação de leitura mesmo se já estiver aberto
+        viewModelScope.launch { repository.markAsRead(chatRoomId, currentSenderId) }
         return
     }
 
     Log.d("ChatViewModel", "loadMessages INICIANDO: $chatRoomId")
     
-    // CORREÇÃO: Limpar SEMPRE antes de iniciar nova coleta para evitar vazamento de dados (Bug 4)
     loadMessagesJob?.cancel()
     _messages.value = emptyList()
     currentChatRoomId = chatRoomId
     
     loadMessagesJob = viewModelScope.launch {
       try {
-          // Garante sala no backend
+          // Garante sala e marca como lido
           launch {
             try {
               repository.getOrCreateChatRoom(
                 operatorId, operator.name ?: "Operador",
                 userId, user.name ?: "Cliente"
               )
+              repository.markAsRead(chatRoomId, currentSenderId)
+              // Zera o contador local de não lidas para esta sala
+              _unreadCount.value = _unreadCount.value + (chatRoomId to 0)
             } catch (e: Exception) {
-              Log.e("ChatViewModel", "Erro ao garantir quarto: ${e.message}")
+              Log.e("ChatViewModel", "Erro ao garantir quarto/lido: ${e.message}")
             }
           }
           
           // Coleta mensagens em tempo real
           repository.getMessages(chatRoomId).collect { messageList ->
             if (currentChatRoomId == chatRoomId) {
+                if (messageList.isNotEmpty() && messageList.last().senderId != currentSenderId && _messages.value.size < messageList.size) {
+                    Toast.makeText(getApplication(), "WTC: Nova mensagem recebida!", Toast.LENGTH_SHORT).show()
+                    // Marcar como lido automaticamente se a tela está aberta
+                    repository.markAsRead(chatRoomId, currentSenderId)
+                }
                 _messages.value = messageList
             }
           }
@@ -96,15 +124,18 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
   }
 
+  private fun currentUserRoleIsOperator(): Boolean {
+      return currentChatRoomId?.contains("_") == true
+  }
+
   /**
    * Carrega mensagens de um canal de segmento.
    */
-  fun loadGroupMessages(segment: String) {
+  fun loadGroupMessages(segment: String, currentSenderId: String) {
     val trimmedSegment = segment.trim()
     
-    // Se já estamos monitorando este segmento, não reiniciamos o job
     if (currentChatRoomId == trimmedSegment && loadMessagesJob?.isActive == true) {
-        Log.d("ChatViewModel", "loadGroupMessages: Já monitorando segmento $trimmedSegment")
+        viewModelScope.launch { repository.markAsRead(trimmedSegment, currentSenderId) }
         return
     }
     
@@ -116,14 +147,19 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     
     loadMessagesJob = viewModelScope.launch {
       try {
-          // Monitoramento único e limpo
+          launch {
+              try { 
+                  repository.markAsRead(trimmedSegment, currentSenderId) 
+                  _unreadCount.value = _unreadCount.value + (trimmedSegment to 0)
+              } catch (e: Exception) {}
+          }
           repository.getGroupMessages(trimmedSegment).collect { messageList ->
-            // Filtro de segurança: só aceita se o ID da sala ainda for o mesmo no momento da emissão
             if (currentChatRoomId == trimmedSegment) {
-                Log.d("ChatViewModel", "SEGMENTO $trimmedSegment: ${messageList.size} mensagens recebidas")
+                if (messageList.isNotEmpty() && messageList.last().senderId != currentSenderId && _messages.value.size < messageList.size) {
+                    Toast.makeText(getApplication(), "WTC: Novidade no segmento!", Toast.LENGTH_SHORT).show()
+                    repository.markAsRead(trimmedSegment, currentSenderId)
+                }
                 _messages.value = messageList
-            } else {
-                Log.w("ChatViewModel", "Ignorando emissão de segmento antigo ($trimmedSegment != $currentChatRoomId)")
             }
           }
       } catch (e: Exception) {

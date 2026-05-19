@@ -28,7 +28,7 @@ fun GroupChatReadOnlyScreen(
     onBackClick: () -> Unit
 ) {
     LaunchedEffect(Unit) {
-        viewModel.loadGroupMessages(segment)
+        viewModel.loadGroupMessages(segment, currentSenderId)
     }
 
     val messages by viewModel.messages.collectAsState()
